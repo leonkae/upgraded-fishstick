@@ -16,10 +16,6 @@ const userSchema = new Schema(
       required: [true, "Email is required"],
       unique: [true, "Email already in use"],
     },
-    emailVerifiedOn: {
-      type: Date,
-      required: false,
-    },
     phone: {
       type: String,
       required: [true, "Phone is required"],
