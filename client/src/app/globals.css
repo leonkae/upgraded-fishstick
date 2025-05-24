@@ -10,7 +10,7 @@
 
     /* Primary colors - yellow */
     --primary: oklch(0.8302 0.2 85.22); /* yellow-400 */
-    --primary-text: oklch(0.8302 0.2 85.22); /* yellow-400 */
+    --primary-text: oklch(0.909 0.174 95.32); /* yellow-200 */
 
     /* Grays */
     --gray-900: oklch(0.245 0.0122 264.31);

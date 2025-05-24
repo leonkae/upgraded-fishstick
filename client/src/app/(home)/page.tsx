@@ -1,7 +1,7 @@
-import { Hero } from "@/components/home/hero";
+import { Header } from "../../components/home/header";
 
 const Home = () => {
-  return <Hero />;
+    return <Header />;
 };
 
 export default Home;
