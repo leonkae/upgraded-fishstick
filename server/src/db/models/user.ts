@@ -16,10 +16,6 @@ const userSchema = new Schema(
       required: [true, "Email is required"],
       unique: [true, "Email already in use"],
     },
-    emailVerifiedOn: {
-      type: Date,
-      required: false,
-    },
     phone: {
       type: String,
       required: [true, "Phone is required"],
@@ -33,6 +29,12 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
+    },
+    role: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+      required: [true, "Role is required"],
     },
   },
   {
