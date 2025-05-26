@@ -28,7 +28,7 @@
 
 ### 🔹 Questionnaire Logic
 
-- [ ] Define schema for questions and answers
+- [x] Define schema for questions and answers
 - [ ] Create endpoints to serve quiz content
 - [ ] Build scoring logic engine
 - [ ] Return category (Heaven, Hell, In-Between)
@@ -134,7 +134,6 @@
 
 ### 🔹 Testing
 
-- [ ] Run unit tests on key backend logic
 - [ ] Manually test quiz flow from start to finish
 - [ ] Check layout across devices (mobile, tablet, desktop)
 - [ ] Test payment gateway in sandbox mode

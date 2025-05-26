@@ -1,8 +1,13 @@
 ## CURRENT TASK:
 
-- [ ] Database models
+- [ ] Create endpoints to serve quiz content
 
 ## TODO:
 
 - [ ] Update all references to Thrifters (Emails, Metadata)
 - [ ] Setup and configure DigitalOcean droplet
+- [ ] Build scoring logic engine
+
+## DONE:
+
+- [x] Database models
