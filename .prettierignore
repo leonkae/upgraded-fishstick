@@ -1,0 +1,39 @@
+# Node modules
+node_modules
+client/node_modules
+server/node_modules
+
+# Build output
+client/.next
+client/out
+server/dist
+server/build
+
+# Logs
+*.log
+
+# Environment files
+*.env
+*.env.local
+*.env.*.local
+
+# Public/static assets (you don’t want to format images, fonts, etc.)
+client/public
+client/static
+server/public
+server/static
+
+# Coverage reports
+coverage
+client/coverage
+server/coverage
+
+# Git
+.git
+
+# Tailwind generated files (if you ever output compiled CSS)
+client/tailwind.css
+
+# Cache
+.next
+*.tsbuildinfo
