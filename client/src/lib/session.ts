@@ -24,7 +24,7 @@ export const createUserSession = async (response: Response) => {
   // The cookie name is the first key in the cookieInfo object
   const [cookieName, cookieValue] = Object.entries(cookieInfo)[0] as [
     string,
-    string
+    string,
   ];
 
   // Set the cookie in the browser
