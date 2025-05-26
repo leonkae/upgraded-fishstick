@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "format": "prettier --write \"client/**/*.{js,ts,tsx,json,css,md}\" \"server/**/*.{js,ts,json,md}\"",
-    "check": "prettier --check \"client/**/*.{js,ts,tsx,json,css,md}\" \"server/**/*.{js,ts,json,md}\"",
+    "format:check": "prettier --check \"client/**/*.{js,ts,tsx,json,css,md}\" \"server/**/*.{js,ts,json,md}\"",
     "prepare": "husky"
   },
   "repository": {
@@ -32,5 +32,10 @@
     "server/**/*.{js,ts,json,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ]
 }

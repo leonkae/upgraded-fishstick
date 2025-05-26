@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 .vscode
+
+# Ignore lock files due to the workspace setting
+client/package-lock.json
+server/package-lock.json
