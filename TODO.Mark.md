@@ -1,6 +1,6 @@
 ## CURRENT TASK:
 
-- [ ]
+- [ ] Database models
 
 ## TODO:
 
