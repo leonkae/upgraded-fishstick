@@ -1,0 +1,24 @@
+{
+  "name": "thefutureofman",
+  "version": "1.0.0",
+  "description": "The Future of Man is a web-based quiz application designed to provide users with a fun, introspective experience. Users answer a series of moral and personality-driven questions and receive personalized results that place them in one of three categories: Heaven, Hell, or In-Between. The application includes both a user-facing frontend and a secure admin backend for managing content and analyzing results.",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write \"client/**/*.{js,ts,tsx,json,css,md}\" \"server/**/*.{js,ts,json,md}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markmuthii/the-future-of-man.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/markmuthii/the-future-of-man/issues"
+  },
+  "homepage": "https://github.com/markmuthii/the-future-of-man#readme",
+  "devDependencies": {
+    "prettier": "3.5.3"
+  }
+}
