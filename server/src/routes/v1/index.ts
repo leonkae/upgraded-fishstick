@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { authRouter } from "@/routes/v1/auth";
 import { userRouter } from "@/routes/v1/users";
-import { questionnaireRouter } from "@/routes/v1/questionnaire";
+import { questionnaireRouter } from "@/routes/v1/quiz";
 import { analyticsRouter } from "@/routes/v1/analytics";
 
 const v1Router = Router();
