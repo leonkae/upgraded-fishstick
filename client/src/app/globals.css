@@ -3,82 +3,48 @@
 @plugin "tailwindcss-animate";
 
 :root {
-    /* Background colors */
-    --background-primary: oklch(0.2988 0.2237 306.52); /* purple-900 */
-    --background-secondary: oklch(0.2579 0.1971 306.08); /* purple-600 */
-    --background-tertiary: oklch(0.4417 0.2425 306.03); /* purple-500 */
+  /* Background colors */
+  --background-primary: oklch(0.2988 0.2237 306.52); /* purple-900 */
+  --background-secondary: oklch(0.2579 0.1971 306.08); /* purple-600 */
+  --background-tertiary: oklch(0.4417 0.2425 306.03); /* purple-500 */
+  --background-accent: oklch(1 0 0); /* white */
+  --background-button: oklch(0.791 0.202 79.69); /* yellow-500 */
+  --background-button-hover: oklch(0.68 0.19 79); /* yellow 800 */
 
-    /* Primary colors - yellow */
-    --primary: oklch(0.8302 0.2 85.22); /* yellow-400 */
-    --primary-text: oklch(0.909 0.174 95.32); /* yellow-200 */
+  /* text colors*/
+  --primary-text: oklch(1 0 0); /* white */
+  --secondary-text: oklch(0.245 0.0122 264.31); /* gray-900 */
+  --tertiary-text: oklch(0.705 0.003 251.52); /* gray-300 */
+  --highlight-text: oklch(0.791 0.202 79.69); /* yellow-500 */
+  --button-text: oklch(0.2988 0.2237 306.52); /* purple-900 */
+  --button-text-hover: oklch(0.4417 0.2425 306.03); /* purple-500 */
 
-    /* Grays */
-    --gray-900: oklch(0.245 0.0122 264.31);
-    --gray-700: oklch(0.342 0.0088 256.01);
-    --gray-600: oklch(0.4036 0.0071 252.84);
-    --gray-500: oklch(0.4902 0.0053 255.41);
-    --gray-300: oklch(0.705 0.003 251.52);
-    --gray-200: oklch(0.784 0.0021 248.87);
-    --gray-100: oklch(0.8784 0.0011 249.79);
-    --gray-50: oklch(0.9427 0.0006 251.77);
-
-    /* Blue */
-    --blue-primary: oklch(0.5307 0.2122 255.3);
-    --blue-light: oklch(0.6847 0.1272 253.75);
-    --blue-lighter: oklch(0.8467 0.0638 251.89);
-    --blue-lightest: oklch(0.8943 0.0414 251.3);
-
-    /* Red */
-    --red-primary: oklch(0.502 0.2338 27.47);
-    --red-light: oklch(0.8554 0.1028 28.43);
-    --red-lighter: oklch(0.9054 0.0634 28.52);
-
-    /* White and Black */
-    --white: oklch(1 0 0);
-    --black: oklch(0.245 0.0122 264.31);
-
-    /* Border and ring colors */
-    --border: var(--gray-300);
-    --ring: var(--blue-light);
-
-    /* Radius */
-    --radius: 0.625rem;
+  /* border colors */
+  --ring: oklch(1 0 0); /* white */
+  --ring-secondary: oklch(0.4417 0.2425 306.03); /* purple-500 */
 }
 
 @theme inline {
-    --color-background-primary: var(--background-primary);
-    --color-background-secondary: var(--background-secondary);
-    --color-background-tertiary: var(--background-tertiary);
+  --color-background-primary: var(--background-primary);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+  --color-background-accent: var(--background-accent);
+  --color-background-button: var(--background-button);
+  --color-background-button-hover: var(--background-button-hover);
 
-    --color-primary: var(--primary);
-    --color-primary-text: var(--primary-text);
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+  --color-tertiary-text: var(--tertiary-text);
+  --color-highlight-text: var(--highlight-text);
+  --color-button-text: var(--button-text);
+  --color-button-text-hover: var(--button-text-hover);
 
-    --color-gray-900: var(--gray-900);
-    --color-gray-700: var(--gray-700);
-    --color-gray-600: var(--gray-600);
-    --color-gray-500: var(--gray-500);
-    --color-gray-300: var(--gray-300);
-    --color-gray-200: var(--gray-200);
-    --color-gray-100: var(--gray-100);
-    --color-gray-50: var(--gray-50);
+  --color-ring: var(--ring);
+  --color-ring-secondary: var(--ring-secondary);
+}
 
-    --color-blue-primary: var(--blue-primary);
-    --color-blue-light: var(--blue-light);
-    --color-blue-lighter: var(--blue-lighter);
-    --color-blue-lightest: var(--blue-lightest);
-
-    --color-red-primary: var(--red-primary);
-    --color-red-light: var(--red-light);
-    --color-red-lighter: var(--red-lighter);
-
-    --color-white: var(--white);
-    --color-black: var(--black);
-
-    --color-border: var(--border);
-    --color-ring: var(--ring);
-
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
+@layer base {
+  body {
+    color: var(--primary-text);
+  }
 }
