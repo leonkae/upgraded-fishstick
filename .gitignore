@@ -45,3 +45,6 @@ next-env.d.ts
 # Ignore lock files due to the workspace setting
 client/package-lock.json
 server/package-lock.json
+
+client/.npmrc
+server/.npmrc
