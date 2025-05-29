@@ -1,11 +1,8 @@
+import { createQuiz } from "@/controllers";
 import { Router } from "express";
 
-const questionnaireRouter = Router();
+const quizRouter = Router();
 
-questionnaireRouter.get("/", (req, res) => {
-  res.json({
-    message: "Questionnaire endpoint",
-  });
-});
+quizRouter.post("/", createQuiz);
 
-export { questionnaireRouter };
+export { quizRouter };
