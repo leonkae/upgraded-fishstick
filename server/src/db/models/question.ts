@@ -10,9 +10,10 @@ const questionSchema = new Schema(
       type: Number,
       required: [true, "Order is required"],
     },
-    active: {
-      type: Boolean,
-      default: true,
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
     },
   },
   {
