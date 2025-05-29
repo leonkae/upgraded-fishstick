@@ -2,12 +2,13 @@ import { Request, Response } from "express";
 
 import { Option, Question } from "@/db/models";
 import { withTransaction } from "@/utils/db";
+import { respond } from "@/utils";
 
 export const createQuiz = async (req: Request, res: Response) => {
   // The quiz data will be an array of objects containing the questions and their options
   const { quizData } = req.body;
 
-  const result = await withTransaction(async (session) => {
+  const quiz = await withTransaction(async (session) => {
     const savedQuestions = [];
 
     for (const question of quizData) {
@@ -36,15 +37,22 @@ export const createQuiz = async (req: Request, res: Response) => {
     return savedQuestions;
   });
 
-  res.json({
-    message: "Quiz created successfully",
-    data: result,
-  });
+  respond(
+    res,
+    {
+      message: "Quiz created successfully",
+      quiz,
+    },
+    201
+  );
 };
 
-export const getQuiz = (req: Request, res: Response) => {
-  res.json({
-    message: "Quiz endpoint",
+export const getQuiz = async (req: Request, res: Response) => {
+  const quiz = await Question.find().populate("options", ["label", "score"]);
+
+  respond(res, {
+    message: "Quiz retrieved successfully",
+    quiz,
   });
 };
 
