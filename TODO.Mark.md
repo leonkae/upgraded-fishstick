@@ -7,6 +7,7 @@
 - [ ] Update all references to Thrifters (Emails, Metadata)
 - [ ] Setup and configure DigitalOcean droplet
 - [ ] Build scoring logic engine
+- [ ] Add donations to database schema
 
 ## DONE:
 
