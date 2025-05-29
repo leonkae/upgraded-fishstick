@@ -1,0 +1,124 @@
+{
+  "quizData": [
+    {
+      "text": "What is the capital of France?",
+      "order": 1,
+      "status": "active",
+      "options": [
+        { "label": "Paris", "score": 1 },
+        { "label": "Berlin", "score": 0 },
+        { "label": "Madrid", "score": 0 },
+        { "label": "Rome", "score": 0 },
+        { "label": "London", "score": 0 }
+      ]
+    },
+    {
+      "text": "What is the largest planet in our solar system?",
+      "order": 2,
+      "status": "active",
+      "options": [
+        { "label": "Jupiter", "score": 1 },
+        { "label": "Saturn", "score": 0 },
+        { "label": "Earth", "score": 0 },
+        { "label": "Mars", "score": 0 },
+        { "label": "Neptune", "score": 0 }
+      ]
+    },
+    {
+      "text": "Who wrote the play 'Romeo and Juliet'?",
+      "order": 3,
+      "status": "active",
+      "options": [
+        { "label": "William Shakespeare", "score": 1 },
+        { "label": "Jane Austen", "score": 0 },
+        { "label": "Charles Dickens", "score": 0 },
+        { "label": "George Orwell", "score": 0 },
+        { "label": "Leo Tolstoy", "score": 0 }
+      ]
+    },
+    {
+      "text": "What is the boiling point of water in degrees Celsius?",
+      "order": 4,
+      "status": "active",
+      "options": [
+        { "label": "100", "score": 1 },
+        { "label": "90", "score": 0 },
+        { "label": "120", "score": 0 },
+        { "label": "80", "score": 0 },
+        { "label": "60", "score": 0 }
+      ]
+    },
+    {
+      "text": "Which continent is known as the 'Dark Continent'?",
+      "order": 5,
+      "status": "active",
+      "options": [
+        { "label": "Africa", "score": 1 },
+        { "label": "Asia", "score": 0 },
+        { "label": "Europe", "score": 0 },
+        { "label": "Australia", "score": 0 },
+        { "label": "South America", "score": 0 }
+      ]
+    },
+    {
+      "text": "Who painted the Mona Lisa?",
+      "order": 6,
+      "status": "active",
+      "options": [
+        { "label": "Leonardo da Vinci", "score": 1 },
+        { "label": "Pablo Picasso", "score": 0 },
+        { "label": "Vincent van Gogh", "score": 0 },
+        { "label": "Michelangelo", "score": 0 },
+        { "label": "Claude Monet", "score": 0 }
+      ]
+    },
+    {
+      "text": "What gas do plants absorb from the atmosphere?",
+      "order": 7,
+      "status": "active",
+      "options": [
+        { "label": "Carbon dioxide", "score": 1 },
+        { "label": "Oxygen", "score": 0 },
+        { "label": "Nitrogen", "score": 0 },
+        { "label": "Hydrogen", "score": 0 },
+        { "label": "Helium", "score": 0 }
+      ]
+    },
+    {
+      "text": "What is the main language spoken in Brazil?",
+      "order": 8,
+      "status": "active",
+      "options": [
+        { "label": "Portuguese", "score": 1 },
+        { "label": "Spanish", "score": 0 },
+        { "label": "English", "score": 0 },
+        { "label": "French", "score": 0 },
+        { "label": "Italian", "score": 0 }
+      ]
+    },
+    {
+      "text": "How many continents are there on Earth?",
+      "order": 9,
+      "status": "active",
+      "options": [
+        { "label": "7", "score": 1 },
+        { "label": "5", "score": 0 },
+        { "label": "6", "score": 0 },
+        { "label": "8", "score": 0 },
+        { "label": "4", "score": 0 }
+      ]
+    },
+    {
+      "text": "What is the smallest prime number?",
+      "order": 10,
+      "status": "active",
+      "options": [
+        { "label": "2", "score": 1 },
+        { "label": "1", "score": 0 },
+        { "label": "3", "score": 0 },
+        { "label": "5", "score": 0 },
+        { "label": "0", "score": 0 }
+      ]
+    }
+  ]
+}

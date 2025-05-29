@@ -11,10 +11,6 @@ const optionSchema = new Schema(
       type: String,
       required: [true, "Option label is required"],
     },
-    value: {
-      type: String,
-      required: [true, "Option value is required"],
-    },
     score: {
       type: Number,
       required: [true, "Option score is required"],
