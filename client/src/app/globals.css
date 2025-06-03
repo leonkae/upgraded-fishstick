@@ -4,9 +4,9 @@
 
 :root {
   /* Background colors */
-  --background-primary: oklch(0.2988 0.2237 306.52); /* purple-900 */
-  --background-secondary: oklch(0.2579 0.1971 306.08); /* purple-600 */
-  --background-tertiary: oklch(0.4417 0.2425 306.03); /* purple-500 */
+  --background-primary: oklch(0.409 0.233 296.5); /* purple-950 */
+  --background-secondary: oklch(0.356 0.235 297.4); /* purple-960 */
+  --background-tertiary: oklch(0.528 0.223 297.2); /* purple-900 */
   --background-accent: oklch(1 0 0); /* white */
   --background-button: oklch(0.791 0.202 79.69); /* yellow-500 */
   --background-button-hover: oklch(0.68 0.19 79); /* yellow 800 */
@@ -14,10 +14,15 @@
   /* text colors*/
   --primary-text: oklch(1 0 0); /* white */
   --secondary-text: oklch(0.245 0.0122 264.31); /* gray-900 */
-  --tertiary-text: oklch(0.705 0.003 251.52); /* gray-300 */
+  --tertiary-text: oklch(0.849 0.014 252.8); /* gray-200 */
   --highlight-text: oklch(0.791 0.202 79.69); /* yellow-500 */
   --button-text: oklch(0.2988 0.2237 306.52); /* purple-900 */
   --button-text-hover: oklch(0.4417 0.2425 306.03); /* purple-500 */
+
+  /* card background */
+  --card-blue: oklch(0.598 0.226 259.59); /* blue-900 */
+  --card-purple: oklch(0.529 0.264 296.12); /* purple-900 */
+  --card-red: oklch(0.598 0.257 28.68); /* red-900 */
 
   /* border colors */
   --ring: oklch(1 0 0); /* white */
@@ -38,6 +43,10 @@
   --color-highlight-text: var(--highlight-text);
   --color-button-text: var(--button-text);
   --color-button-text-hover: var(--button-text-hover);
+
+  --color-card-blue: var(--card-blue);
+  --color-card-purple: var(--card-purple);
+  --color-card-red: var(--card-red);
 
   --color-ring: var(--ring);
   --color-ring-secondary: var(--ring-secondary);
