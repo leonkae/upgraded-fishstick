@@ -6,7 +6,7 @@ import { Play, Facebook, Instagram } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section id="hero" className="bg-background-secondary pt-32 pb-20 px-6">
+    <section id="hero" className="bg-background-primary pt-32 pb-20 px-6">
       <div className="container mx-auto flex flex-col md:flex-row items-center gap-12">
         <div className="flex-1">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
