@@ -4,7 +4,7 @@ import { HelpCircle, BarChart3, Share } from "lucide-react";
 
 const HowItWorks = () => {
   return (
-    <section id="how-it-works" className="bg-background-primary py-20 px-6">
+    <section id="how-it-works" className="bg-background-secondary py-20 px-6">
       <div className="container mx-auto text-center">
         <h2 className="text-4xl font-bold  mb-4">How It Works</h2>
         <p className="text-tertiary-text mb-12 max-w-2xl mx-auto">
@@ -12,7 +12,7 @@ const HowItWorks = () => {
           personality traits
         </p>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-background-tertiary p-8 rounded-2xl">
+          <div className="bg-card-purple p-8 rounded-2xl">
             <div className="w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <HelpCircle size={24} />
             </div>
@@ -22,7 +22,7 @@ const HowItWorks = () => {
               one screen at a time.
             </p>
           </div>
-          <div className="bg-background-tertiary p-8 rounded-2xl">
+          <div className="bg-card-purple p-8 rounded-2xl">
             <div className="w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <BarChart3 size={24} />
             </div>
@@ -32,7 +32,7 @@ const HowItWorks = () => {
               destination.
             </p>
           </div>
-          <div className="bg-background-tertiary p-8 rounded-2xl">
+          <div className="bg-card-purple p-8 rounded-2xl">
             <div className="w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <Share size={24} />
             </div>
