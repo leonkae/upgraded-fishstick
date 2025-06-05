@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Header } from "../../components/shared/header";
-import { Footer } from "../../components/shared/footer";
 
 const faqs = [
   {
@@ -44,7 +42,7 @@ const FAQ = () => {
   return (
     <section
       id="faq"
-      className="bg-background-primary pt-24 pb-16 px-4 sm:px-6"
+      className="bg-background-tertiary pt-24 pb-16 px-4 sm:px-6"
     >
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
