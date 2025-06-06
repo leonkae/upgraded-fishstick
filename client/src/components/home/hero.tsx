@@ -72,6 +72,7 @@ const Hero = () => {
               width={500}
               height={300}
               className="w-full h-[300px] object-cover rounded-2xl mb-4"
+              priority
             />
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-2">
