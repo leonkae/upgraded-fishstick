@@ -24,11 +24,11 @@ const Hero = () => {
               About The Future of Man
             </h1>
             <p className="text-tertiary-text text-base sm:text-lg mb-8">
-              We're on a mission to help people understand their moral compass
-              and spiritual path through an engaging, thought-provoking quiz
-              experience. Our unique algorithm analyzes responses to determine
-              if someone's choices align with Heaven, Hell, or somewhere
-              In-Between.
+              We&apos;re on a mission to help people understand their moral
+              compass and spiritual path through an engaging, thought-provoking
+              quiz experience. Our unique algorithm analyzes responses to
+              determine if someone&apos;s choices align with Heaven, Hell, or
+              somewhere In-Between.
             </p>
 
             <div className="bg-background-secondary p-4 sm:p-6 rounded-xl mb-8 space-y-6">
