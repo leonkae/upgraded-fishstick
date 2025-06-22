@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { PropsWithChildren } from "react";
 
 // Configures the layout of the authentication form, including the title, description, and link to the login page.
 const forms = {
@@ -40,7 +39,7 @@ interface AuthFormWrapperProps {
 
 const AuthFormWrapper = ({ form, children }: AuthFormWrapperProps) => {
   return (
-    <div className="container mx-auto max-w-xl p-6">
+    <div className="container mx-auto max-w-xl p-6 bg-background-primary">
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold mb-2">{forms[form].title}</h1>
         <p className="text-muted-foreground">{forms[form].description}</p>
@@ -49,7 +48,10 @@ const AuthFormWrapper = ({ form, children }: AuthFormWrapperProps) => {
       <div className="text-center mt-6">
         <p className="text-sm text-muted-foreground">
           {forms[form]["footer-text"]}{" "}
-          <Link href={forms[form]["footer-link"]} className="text-primary">
+          <Link
+            href={forms[form]["footer-link"]}
+            className="text-highlight-text"
+          >
             {forms[form]["footer-link-text"]}
           </Link>
         </p>
