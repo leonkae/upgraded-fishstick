@@ -100,7 +100,7 @@ const LoginForm = () => {
           />
 
           {/* TODO: Get this working  */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center ">
             <div className="flex items-center space-x-2">
               <input
                 id="remember"
@@ -109,17 +109,20 @@ const LoginForm = () => {
               />
               <label
                 htmlFor="remember"
-                className="text-sm text-muted-foreground cursor-pointer"
+                className="text-sm text-primary-text cursor-pointer"
               >
                 Remember me
               </label>
             </div>
-            <Link href="/auth/forgot-password" className="text-sm text-primary">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-highlight-text hover:text-button-text-hover"
+            >
               Forgot password?
             </Link>
           </div>
 
-          <Button type="submit" className="w-full" disabled={pending}>
+          <Button type="submit" disabled={pending}>
             {pending ? "..." : "Log In"}
           </Button>
         </form>
