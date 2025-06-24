@@ -1,5 +1,5 @@
 const SettingsPage = () => {
-  return <div>SettingsPage</div>;
+  return <div className="bg-pink-300">SettingsPage</div>;
 };
 
 export default SettingsPage;
