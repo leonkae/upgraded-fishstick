@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { useAuth } from "@/store/auth";
 import { getUserSession } from "@/lib/session";
+import { Sidebar } from "../../components/admin/sidebar";
+import { Topbar } from "../../components/admin/topbar";
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, setUser, setAuthError } = useAuth();
@@ -13,11 +15,11 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     // This prevents unnecessary requests when navigating between pages
     if (!user) {
       const getUser = async () => {
-        // setLoading(true);
+        setLoading(true);
         const session = await getUserSession();
         if ("error" in session) {
           setAuthError("You must be logged in to access this page.");
-          // setLoading(false);
+          setLoading(false);
           redirect("/auth/login");
         } else if (session.user) {
           // Set user in store
@@ -38,7 +40,13 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
           <p>Loading...</p>
         </div>
       ) : (
-        children
+        <div className="flex min-h-screen bg-muted">
+          <Sidebar />
+          <div className="flex flex-col flex-1">
+            <Topbar />
+            <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+          </div>
+        </div>
       )}
     </>
   );

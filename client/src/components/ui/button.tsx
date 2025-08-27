@@ -14,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "w-full bg-background-button text-button-text py-3 rounded-lg hover:bg-background-button-hover hover:text-button-text-hover transition-colors flex items-center justify-center gap-2 animate-pulse-hover",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "bg-background-button shadow-xs text-button-text hover:bg-background-button-hover hover:text-button-text-hover transition-colors",
         secondary:
           "hidden md:inline-block bg-background-button text-button-text px-6 py-2 rounded-full font-semibold hover:bg-background-button-hover hover:text-button-text-hover transition-colors cursor-pointer",
         ghost: "hover:bg-accent hover:text-accent-foreground",
