@@ -48,7 +48,7 @@ const LoginForm = () => {
     if ("message" in state && "user" in state) {
       setUser(state.user as User);
       toast.success(state.message, { duration: 8000 });
-      redirect("/account");
+      redirect("/admin/dashboard");
     }
 
     if ("error" in state) {
