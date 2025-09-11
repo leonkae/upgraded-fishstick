@@ -1,5 +1,7 @@
+import { Payments } from "@/components/admin/pages/Payments";
+
 const PaymentsPage = () => {
-  return <div className="bg-pink-300">PaymentsPage</div>;
+  return <Payments />;
 };
 
 export default PaymentsPage;
