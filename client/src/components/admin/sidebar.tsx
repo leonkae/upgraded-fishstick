@@ -6,43 +6,50 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
-  ListChecks,
-  BarChart2,
   CreditCard,
   Settings,
+  HelpCircle,
+  BarChart3,
 } from "lucide-react";
 
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-  { label: "Users", icon: Users, href: "/admin/users" },
-  { label: "Questions", icon: ListChecks, href: "/admin/questions" },
-  { label: "Analytics", icon: BarChart2, href: "/admin/analytics" },
-  { label: "Payments", icon: CreditCard, href: "/admin/payments" },
-  { label: "Settings", icon: Settings, href: "/admin/settings" },
+const navigation = [
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Questions", href: "/admin/questions", icon: HelpCircle },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Payments", href: "/admin/payments", icon: CreditCard },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 min-h-screen bg-background-secondary border-r p-4 hidden md:block">
-      <h2 className="text-xl font-semibold mb-6">⭐ Admin Panel</h2>
-      <nav className="space-y-3">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
+    <aside className="w-64 bg-purple-700 text-white flex flex-col">
+      <div className="p-6">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center">
+            <span className="text-purple-700 font-bold">⚡</span>
+          </div>
+          <span className="font-bold text-lg">Admin Panel</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-4">
+        {navigation.map((item) => {
+          const isActive = pathname === item.href;
           return (
             <Link
-              key={item.href}
+              key={item.name}
               href={item.href}
-              className={cn(
-                "flex items-center gap-5 px-3 py-2 rounded-lg hover:bg-muted transition",
-                active
-                  ? "bg-background-button text-primary font-medium"
-                  : "text-muted-foreground bg-background-tertiary hover:bg-background-primary"
-              )}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+                isActive
+                  ? "bg-purple-800 text-white"
+                  : "text-purple-100 hover:bg-purple-600 hover:text-white"
+              }`}
             >
-              <item.icon className="h-5 w-5" />
-              {item.label}
+              <item.icon size={20} />
+              <span>{item.name}</span>
             </Link>
           );
         })}

@@ -18,9 +18,9 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
         setLoading(true);
         const session = await getUserSession();
         if ("error" in session) {
-          setAuthError("You must be logged in to access this page.");
+          // setAuthError("You must be logged in to access this page.");
           setLoading(false);
-          redirect("/auth/login");
+          // redirect("/auth/login");
         } else if (session.user) {
           // Set user in store
           setUser(session.user);
@@ -42,9 +42,9 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
       ) : (
         <div className="flex min-h-screen bg-muted">
           <Sidebar />
-          <div className="flex flex-col flex-1">
-            <Topbar />
-            <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+          {/* Main content */}
+          <div className="flex-1 flex flex-col">
+            <main className="flex-1 p-8">{children}</main>
           </div>
         </div>
       )}
