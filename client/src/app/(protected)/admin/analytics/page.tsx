@@ -1,5 +1,7 @@
+import { Analytics } from "@/components/admin/Analytics";
+
 const AnalyticsPage = () => {
-  return <div>AnalyticsPage</div>;
+  return <Analytics />;
 };
 
 export default AnalyticsPage;
