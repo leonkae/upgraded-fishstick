@@ -1,5 +1,7 @@
+import Settings from "@/components/admin/pages/Settings";
+
 const SettingsPage = () => {
-  return <div className="bg-pink-300">SettingsPage</div>;
+  return <Settings />;
 };
 
 export default SettingsPage;
