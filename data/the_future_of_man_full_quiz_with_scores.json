@@ -1,0 +1,2115 @@
+{
+  "quizData": [
+    {
+      "text": "There is One Living God who created the heavens and the earth",
+      "order": 1,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 10
+        },
+        {
+          "label": "b) There is no God",
+          "score": 0
+        },
+        {
+          "label": "c) There are many gods",
+          "score": 1
+        },
+        {
+          "label": "d) I don’t believe in the story of creation",
+          "score": 0
+        },
+        {
+          "label": "e) The Universe started with a big bang – a giant explosion",
+          "score": 0
+        },
+        {
+          "label": "f) I don’t know",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "text": "I was prayed for in Church when I was a baby?",
+      "order": 2,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, by a priest who poured water over my head in the name of the Father, Son and Holy Spirit.",
+          "score": 0
+        },
+        {
+          "label": "b) Yes, when I was dedicated to God as a baby",
+          "score": 0
+        },
+        {
+          "label": "c) Not at all",
+          "score": 0
+        },
+        {
+          "label": "d) I do not know",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "When human-beings disobeyed God, they were all condemned to die and be separated from God forever. What do you think happens when someone dies?",
+      "order": 3,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Death is the end of existence for that person and their soul",
+          "score": 0
+        },
+        {
+          "label": "b) Their soul awaits judgment to enter Heaven or Hell if they were Saints or sinners respectively",
+          "score": 0
+        },
+        {
+          "label": "c) Reincarnated: the soul is reborn into a new life based on their deeds",
+          "score": 0
+        },
+        {
+          "label": "d) I don’t know",
+          "score": 0
+        },
+        {
+          "label": "e) I don’t believe in the story of human-beings disobeying God.",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "How often do you feel motivated and excited about life?",
+      "order": 4,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) I am always motivated and excited about life",
+          "score": 0
+        },
+        {
+          "label": "b) Sometimes",
+          "score": 0
+        },
+        {
+          "label": "c) Almost never",
+          "score": 0
+        },
+        {
+          "label": "d) Never at all in all my life",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Heaven and Hell are real",
+      "order": 5,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 10
+        },
+        {
+          "label": "b) None of them exists",
+          "score": 0
+        },
+        {
+          "label": "c) Only Heaven exists, there is no Hell",
+          "score": 0
+        },
+        {
+          "label": "d) Only Hell exists, there is no Heaven",
+          "score": 0
+        },
+        {
+          "label": "e) I don’t know",
+          "score": 20
+        }
+      ]
+    },
+    {
+      "text": "The Bible is the written Word of the Living God [tick one]",
+      "order": 6,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 10
+        },
+        {
+          "label": "b) Not true",
+          "score": 0
+        },
+        {
+          "label": "c) I don’t know",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "text": "Who is Jesus Christ to you?",
+      "order": 7,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) The Christ, Son of the Living God",
+          "score": 10
+        },
+        {
+          "label": "b) One of the prophets sent by God",
+          "score": 5
+        },
+        {
+          "label": "c) A nobody",
+          "score": 0
+        },
+        {
+          "label": "d) An Imposter",
+          "score": 0
+        },
+        {
+          "label": "e) Good teacher/Rabbi",
+          "score": 5
+        },
+        {
+          "label": "f) I have never heard of Him",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "text": "The death of Jesus Christ was the sacrifice that paid the price for the sins of the world in order to reconcile and restore human beings back into the relationship they lost with God",
+      "order": 8,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 10
+        },
+        {
+          "label": "b) This is all false",
+          "score": 0
+        },
+        {
+          "label": "c) I have never been a sinner",
+          "score": 1
+        },
+        {
+          "label": "d) Jesus Christ never resurrected back to life [0]",
+          "score": 0
+        },
+        {
+          "label": "e) I was never in any relationship with God before",
+          "score": 0
+        },
+        {
+          "label": "f) I don’t understand this ",
+          "score": 4
+        },
+        {
+          "label": "g) I am not sure",
+          "score": 4
+        }
+      ]
+    },
+    {
+      "text": "The name of Jesus Christ, is the only name and only Way by which human-beings must obtain salvation and enter Heaven",
+      "order": 9,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 10
+        },
+        {
+          "label": "b) No, Jesus Christ is not the only way to Heaven",
+          "score": 0
+        },
+        {
+          "label": "c) Not applicable",
+          "score": 0
+        },
+        {
+          "label": "d) I have no idea",
+          "score": 2
+        },
+        {
+          "label": "e) Now I know",
+          "score": 4
+        }
+      ]
+    },
+    {
+      "text": "I believe Jesus Christ, as the Messiah Whom God sent to the world to save mankind from sins; He was born by the virgin Mary, He was crucified and died; He resurrected from the tomb and ascended back to the Father in Heaven.",
+      "order": 10,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I do",
+          "score": 10
+        },
+        {
+          "label": "b) Not I don’t",
+          "score": 0
+        },
+        {
+          "label": "c) Jesus Christ was not a Messiah",
+          "score": 0
+        },
+        {
+          "label": "d) Jesus Christ did not resurrect from the tomb",
+          "score": 0
+        },
+        {
+          "label": "e) I don’t know",
+          "score": 2
+        },
+        {
+          "label": "f) Now I know",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "text": "I have faith that God washed away my sin with the Blood of Jesus when I repented by confessing that I am a sinner and asked God to forgive me.",
+      "order": 11,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I do",
+          "score": 10
+        },
+        {
+          "label": "b) My Pastor/Priest asked God to forgive me and I believe I am forgiven",
+          "score": 4
+        },
+        {
+          "label": "c) No I haven’t",
+          "score": 2
+        },
+        {
+          "label": "d) I haven’t repented, I will repent one day but not now",
+          "score": 2
+        },
+        {
+          "label": "e) I have never been a sinner",
+          "score": 0
+        },
+        {
+          "label": "f) I keep sinning even after asking forgiveness",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "text": "Jesus Christ is the Savior and Lord of my Life; I love and obey Him and follow His teachings.",
+      "order": 12,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes",
+          "score": 10
+        },
+        {
+          "label": "b) I try every day to obey Him",
+          "score": 5
+        },
+        {
+          "label": "c) Never, why should I follow Him?",
+          "score": 0
+        },
+        {
+          "label": "d) Not sure",
+          "score": 2
+        },
+        {
+          "label": "e) I would love to but I don’t know how to begin",
+          "score": 4
+        }
+      ]
+    },
+    {
+      "text": "I immediately repent when I realize I have committed sin.",
+      "order": 13,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I do always",
+          "score": 10
+        },
+        {
+          "label": "b) I repent after some time",
+          "score": 8
+        },
+        {
+          "label": "c) Sometimes",
+          "score": 6
+        },
+        {
+          "label": "d) No, I have committed many sins and I have never repented of them",
+          "score": 10
+        },
+        {
+          "label": "e) I didn’t know that I should be doing this",
+          "score": 5
+        },
+        {
+          "label": "f) I never sin",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "text": "I have a personal relationship with Jesus Christ growing through prayer, the Word and the Holy Spirit?",
+      "order": 14,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I believe I do",
+          "score": 10
+        },
+        {
+          "label": "b) No I don’t need that",
+          "score": 0
+        },
+        {
+          "label": "c) Not sure",
+          "score": 1
+        },
+        {
+          "label": "d) I would like to have that personal relationship",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "text": "Regardless of age, gender, nationality, religious, social, cultural and political background and the type of sins committed, anyone can be free from the power and consequences of sin if they ask for forgiveness from God and accept the sacrifice of Jesus Christ made on their behalf.",
+      "order": 15,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) I totally agree",
+          "score": 0
+        },
+        {
+          "label": "b) I disagree",
+          "score": 0
+        },
+        {
+          "label": "c) I am not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "To qualify to be among those on the way to Heaven, one must be born again",
+      "order": 16,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 10
+        },
+        {
+          "label": "b) Not true",
+          "score": 0
+        },
+        {
+          "label": "c) I don’t understand what it means to be born again",
+          "score": 2
+        },
+        {
+          "label": "d) I want to understand what it means to be born again",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "text": "I have confidence that my sins are forgiven by God and I am no longer under condemnation",
+      "order": 17,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True, I do",
+          "score": 0
+        },
+        {
+          "label": "b) No I don't",
+          "score": 0
+        },
+        {
+          "label": "c) I am not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I make every effort to forgive the people I hate and those who offend me",
+      "order": 18,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I do every time",
+          "score": 0
+        },
+        {
+          "label": "b) No, it is not necessary",
+          "score": 0
+        },
+        {
+          "label": "c) It is impossible for me to forgive them",
+          "score": 0
+        },
+        {
+          "label": "d) I am not bitter or hate anyone or hold grudges against anyone",
+          "score": 0
+        },
+        {
+          "label": "e) I am not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I believe in the return of Jesus Christ on earth in a visible form to take with Him both the dead and the living Saints",
+      "order": 19,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I do",
+          "score": 0
+        },
+        {
+          "label": "b) No, I don’t",
+          "score": 0
+        },
+        {
+          "label": "c) I don’t believe in the stories about Jesus Christ",
+          "score": 0
+        },
+        {
+          "label": "d) I am not sure ",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "text": "The Living God created Adam and Eve and everything in the Universe",
+      "order": 20,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) Not true",
+          "score": 0
+        },
+        {
+          "label": "c) Humans evolved from ape-like ancestors",
+          "score": 0
+        },
+        {
+          "label": "d) I have no idea who Adam and Eve are",
+          "score": 0
+        },
+        {
+          "label": "e) I don’t know where the first humans came from",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "When Adam and Eve disobeyed the Living God, they sinned and this resulted in a separation of all the human-race from God",
+      "order": 21,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) False",
+          "score": 0
+        },
+        {
+          "label": "c) This is irrelevant to me",
+          "score": 0
+        },
+        {
+          "label": "d) Now I know",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "No one could save and restore the sinful human-race back to their relationship with the God except the Savior sent by God",
+      "order": 22,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) Not true, mankind can save themselves",
+          "score": 0
+        },
+        {
+          "label": "c) This is irrelevant",
+          "score": 0
+        },
+        {
+          "label": "d) Not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "All religions in the world ultimately point to the same Living God",
+      "order": 23,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) Not true",
+          "score": 0
+        },
+        {
+          "label": "c) There is no Living God",
+          "score": 0
+        },
+        {
+          "label": "d) I am not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Have you felt lonely or rejected or depressed or suicidal in the last six months?",
+      "order": 24,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes",
+          "score": 0
+        },
+        {
+          "label": "b) No at all",
+          "score": 0
+        },
+        {
+          "label": "c) I am feeling rejected, depressed and suicidal every time",
+          "score": 0
+        },
+        {
+          "label": "d) I am not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Would rather spend much time with your friends in Church or Clubbing?",
+      "order": 25,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Church",
+          "score": 0
+        },
+        {
+          "label": "b) Clubbing",
+          "score": 0
+        },
+        {
+          "label": "c) None of them",
+          "score": 0
+        },
+        {
+          "label": "d) Both of them",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I am always awakened in my sleep by nightmares [frightening dreams]",
+      "order": 26,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Often",
+          "score": 0
+        },
+        {
+          "label": "b) Sometimes",
+          "score": 0
+        },
+        {
+          "label": "c) Almost never",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "One can be saved and go to Heaven only by obeying Moses’ Commandments, by living a good life, praying constantly, giving to needy and poor people and being kind to others",
+      "order": 27,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, good works and deeds attract God’s mercy towards one who practices",
+          "score": 0
+        },
+        {
+          "label": "this",
+          "score": 0
+        },
+        {
+          "label": "b) No, I should ask for God’s forgiveness of my sins based on the price that Jesus paid for men to be justified when we believe in Jesus",
+          "score": 0
+        },
+        {
+          "label": "c) I have no interest of going to Heaven",
+          "score": 0
+        },
+        {
+          "label": "d) Yes, I am saved because of my good works to others and living a morally",
+          "score": 0
+        },
+        {
+          "label": "upright life",
+          "score": 0
+        },
+        {
+          "label": "e) Salvation is God's gift of Grace to man following what Christ's suffering,",
+          "score": 0
+        },
+        {
+          "label": "death on the Cross, burial and resurrection to pay my price for my sin",
+          "score": 0
+        },
+        {
+          "label": "f) Man is saved when he brings an offering to God to be forgiven",
+          "score": 0
+        },
+        {
+          "label": "g) I am not sure how sins are forgiven",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I read the Bible for myself and I have personal prayer-time",
+      "order": 28,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) The Bible is not relevant for me",
+          "score": 0
+        },
+        {
+          "label": "c) My Pastor/Priest reads the Bible and prays for me when I am in need",
+          "score": 0
+        },
+        {
+          "label": "d) I go to Church to hear the Bible being read and for prayers too",
+          "score": 0
+        },
+        {
+          "label": "e) I don’t need the Bible and prayers",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "The Living God has a good plan for every human-being?",
+      "order": 29,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) Not true",
+          "score": 0
+        },
+        {
+          "label": "c) This is irrelevant",
+          "score": 0
+        },
+        {
+          "label": "d) I don't know.",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "To be restored back to God, it is not automatic but it is a choice",
+      "order": 30,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True, my choice is important",
+          "score": 0
+        },
+        {
+          "label": "b) True, but I haven't made that choice yet",
+          "score": 0
+        },
+        {
+          "label": "c) No I don't think so",
+          "score": 0
+        },
+        {
+          "label": "d) I don’t know",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Have you ever heard of the Gospel of Jesus Christ?",
+      "order": 31,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes",
+          "score": 0
+        },
+        {
+          "label": "10",
+          "score": 0
+        },
+        {
+          "label": "b) No",
+          "score": 0
+        },
+        {
+          "label": "c) I am not sure",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "The invisible God is able to hear us from Heaven and forgive us when we",
+      "order": 32,
+      "status": "active",
+      "options": [
+        {
+          "label": "confess our sins",
+          "score": 0
+        },
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) No, He is too far in Heaven to hear our voices",
+          "score": 0
+        },
+        {
+          "label": "c) I don’t know",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "If your answer to question 11 above is ‘Yes’, give the year this happened………",
+      "order": 33,
+      "status": "active",
+      "options": [
+        {
+          "label": "[drop down list starting from 1900 and to be updated automatically when we",
+          "score": 0
+        },
+        {
+          "label": "get to 2026, 2027, 2028….]",
+          "score": 0
+        },
+        {
+          "label": "[This is the year you were born again and became committed to obey and follow",
+          "score": 0
+        },
+        {
+          "label": "the Lord Jesus Christ]",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I can tell that I am saved because, unlike before, I can now exercise…………..",
+      "order": 34,
+      "status": "active",
+      "options": [
+        {
+          "label": "[tick those that apply to you]",
+          "score": 0
+        },
+        {
+          "label": "a) Self control over wild thoughts and actions",
+          "score": 0
+        },
+        {
+          "label": "b) Long suffering",
+          "score": 0
+        },
+        {
+          "label": "c) Kindness",
+          "score": 0
+        },
+        {
+          "label": "d) Gentleness",
+          "score": 0
+        },
+        {
+          "label": "e) Goodness",
+          "score": 0
+        },
+        {
+          "label": "f) Faithfulness",
+          "score": 0
+        },
+        {
+          "label": "g) Joy",
+          "score": 0
+        },
+        {
+          "label": "h) Peace",
+          "score": 0
+        },
+        {
+          "label": "i) Love",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I can tell that I am saved. Unlike before, I …………………… [tick those that apply]",
+      "order": 35,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) I hate evil and sinful ways",
+          "score": 0
+        },
+        {
+          "label": "b) I want to spend more time with other believers",
+          "score": 0
+        },
+        {
+          "label": "c) I feel compassion for lost friends who do not know Jesus Christ as the Savior",
+          "score": 0
+        },
+        {
+          "label": "d) I have hunger for the Word of God",
+          "score": 0
+        },
+        {
+          "label": "e) I desire to know God more and more through prayer and the Word",
+          "score": 0
+        },
+        {
+          "label": "f) I am delighted to share my new life experience with others",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "There is Life after death",
+      "order": 36,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "11",
+          "score": 0
+        },
+        {
+          "label": "b) Not true",
+          "score": 0
+        },
+        {
+          "label": "c) Yes, human-beings are reincarnated back to life",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I once accepted Jesus Christ as my Lord and Savior and therefore I will make it",
+      "order": 37,
+      "status": "active",
+      "options": [
+        {
+          "label": "to Heaven no matter what; even if I shrink back and deny Jesus Christ when",
+          "score": 0
+        },
+        {
+          "label": "persecutions are hot, God is so loving He cannot cast me away from Heaven.",
+          "score": 0
+        },
+        {
+          "label": "a) True",
+          "score": 0
+        },
+        {
+          "label": "b) Not true; I must work out my salvation daily with fear and trembling and",
+          "score": 0
+        },
+        {
+          "label": "never deny Jesus Christ or be ashamed of His Gospel in order to be saved",
+          "score": 0
+        },
+        {
+          "label": "c) I must never shrink back or lose my confidence, but I must endure to the",
+          "score": 0
+        },
+        {
+          "label": "end to be saved",
+          "score": 0
+        },
+        {
+          "label": "d) This is not applicable to me",
+          "score": 0
+        },
+        {
+          "label": "e) I don’t know",
+          "score": 0
+        },
+        {
+          "label": "BONUS QUESTIONS",
+          "score": 0
+        },
+        {
+          "label": "You may also answer questions 38 – 45 below. They are not mandatory but they",
+          "score": 0
+        },
+        {
+          "label": "will familiarize you with the focus and content for living a victorious life.",
+          "score": 0
+        },
+        {
+          "label": "Otherwise skip and submit your answers to process your feedback",
+          "score": 0
+        },
+        {
+          "label": "STEWARDSHIP",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I share my faith in Jesus Christ with others freely",
+      "order": 38,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes",
+          "score": 0
+        },
+        {
+          "label": "b) No",
+          "score": 0
+        },
+        {
+          "label": "c) I will begin soon",
+          "score": 0
+        },
+        {
+          "label": "d) I am not sure what to tell others",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "I Love, care and support members of family, sinners, needy people and other",
+      "order": 39,
+      "status": "active",
+      "options": [
+        {
+          "label": "people",
+          "score": 0
+        },
+        {
+          "label": "a) I don't care about them",
+          "score": 0
+        },
+        {
+          "label": "b) Every one should take care of themselves",
+          "score": 0
+        },
+        {
+          "label": "c) I don't care if people go to hell",
+          "score": 0
+        },
+        {
+          "label": "d) I pray for others to be saved",
+          "score": 0
+        },
+        {
+          "label": "PRAYER-LIFE",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "How often do you pray?",
+      "order": 40,
+      "status": "active",
+      "options": [
+        {
+          "label": "12",
+          "score": 0
+        },
+        {
+          "label": "a) Rarely",
+          "score": 0
+        },
+        {
+          "label": "b) Occasionally in times of need",
+          "score": 0
+        },
+        {
+          "label": "c) I pray consistently every day following a routine",
+          "score": 0
+        },
+        {
+          "label": "d) I don’t know how to pray",
+          "score": 0
+        },
+        {
+          "label": "e) I do not see the importance of prayer for my life",
+          "score": 0
+        },
+        {
+          "label": "GROWING IN FAITH",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Bible Study",
+      "order": 41,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) I rarely read the Bible on my own",
+          "score": 0
+        },
+        {
+          "label": "b) I read the Bible occasionally",
+          "score": 0
+        },
+        {
+          "label": "c) I try to read the Bible weekly",
+          "score": 0
+        },
+        {
+          "label": "d) I read the Bible most of the days",
+          "score": 0
+        },
+        {
+          "label": "e) I have a routine program that helps me to study the Bible every day",
+          "score": 0
+        },
+        {
+          "label": "f) I don’t believe in the Bible",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Have you received the baptism of the Holy Spirit?",
+      "order": 42,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Yes, I have been baptized in the Holy Spirit",
+          "score": 0
+        },
+        {
+          "label": "b) Yes, but I haven’t been baptized in the Holy Spirit",
+          "score": 0
+        },
+        {
+          "label": "c) No I don’t",
+          "score": 0
+        },
+        {
+          "label": "d) I haven’t heard of the Holy Spirit",
+          "score": 0
+        },
+        {
+          "label": "INVOLVEMENT IN FAITH COMMUNITY",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "How often do you attend church service?",
+      "order": 43,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Almost weekly",
+          "score": 0
+        },
+        {
+          "label": "b) During special occasions like Easter and Christmas seasons",
+          "score": 0
+        },
+        {
+          "label": "c) I don’t attend Church",
+          "score": 0
+        },
+        {
+          "label": "d) I follow an Online Church and preachers",
+          "score": 0
+        },
+        {
+          "label": "e) Never",
+          "score": 0
+        },
+        {
+          "label": "f) I am actively involved in a Faith Community",
+          "score": 0
+        },
+        {
+          "label": "g) I am a minister of the Gospel [Pastor, Priest, Leader etc]",
+          "score": 0
+        },
+        {
+          "label": "DELIVERANCE NEEDS",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Are there aspects of your wellbeing you’d like to address? [tick all that apply",
+      "order": 44,
+      "status": "active",
+      "options": [
+        {
+          "label": "to you]",
+          "score": 0
+        },
+        {
+          "label": "a) Bitterness",
+          "score": 0
+        },
+        {
+          "label": "b) Hatred",
+          "score": 0
+        },
+        {
+          "label": "c) Un-forgiveness",
+          "score": 0
+        },
+        {
+          "label": "13",
+          "score": 0
+        },
+        {
+          "label": "d) Masturbation,",
+          "score": 0
+        },
+        {
+          "label": "e) drug addiction,",
+          "score": 0
+        },
+        {
+          "label": "f) alcoholism",
+          "score": 0
+        },
+        {
+          "label": "g) Sex in dreams",
+          "score": 0
+        },
+        {
+          "label": "h) Lust and sexual immorality",
+          "score": 0
+        },
+        {
+          "label": "i) Nightmares [frightening dreams]",
+          "score": 0
+        },
+        {
+          "label": "j) Violent anger",
+          "score": 0
+        },
+        {
+          "label": "k) Addicted to Internet and social media",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "text": "Frequently, I feel……...",
+      "order": 45,
+      "status": "active",
+      "options": [
+        {
+          "label": "a) Lonely",
+          "score": 0
+        },
+        {
+          "label": "b) Unwanted",
+          "score": 0
+        },
+        {
+          "label": "c) Hopeless",
+          "score": 0
+        },
+        {
+          "label": "d) Worthless",
+          "score": 0
+        },
+        {
+          "label": "Click here to submit QUESTIONNAIRE",
+          "score": 0
+        },
+        {
+          "label": "I am sure you are eager to know if you are on the NARROW WAY leading to Heaven",
+          "score": 0
+        },
+        {
+          "label": "or the BROAD WAY headed to Hell.",
+          "score": 0
+        },
+        {
+          "label": "Some reactions of people who have already received their feedback. You are next.",
+          "score": 0
+        },
+        {
+          "label": "You can share your reaction too or share with us or your church leader.",
+          "score": 0
+        },
+        {
+          "label": "14",
+          "score": 0
+        },
+        {
+          "label": "Submit any amount of money to help process your personalized Feedback",
+          "score": 0
+        },
+        {
+          "label": "15",
+          "score": 0
+        },
+        {
+          "label": "Currency",
+          "score": 0
+        },
+        {
+          "label": "Minimum amount required for the system to begin to",
+          "score": 0
+        },
+        {
+          "label": "process your personalized feedback",
+          "score": 0
+        },
+        {
+          "label": "U$",
+          "score": 0
+        },
+        {
+          "label": "1",
+          "score": 0
+        },
+        {
+          "label": "Euros",
+          "score": 0
+        },
+        {
+          "label": "1",
+          "score": 0
+        },
+        {
+          "label": "Pound Sterling",
+          "score": 0
+        },
+        {
+          "label": "1",
+          "score": 0
+        },
+        {
+          "label": "Nigerian Naira",
+          "score": 0
+        },
+        {
+          "label": "250",
+          "score": 0
+        },
+        {
+          "label": "Kenya Shillings",
+          "score": 0
+        },
+        {
+          "label": "20",
+          "score": 0
+        },
+        {
+          "label": "Canadian Dollars",
+          "score": 0
+        },
+        {
+          "label": "1",
+          "score": 0
+        },
+        {
+          "label": "Australian Dollars",
+          "score": 0
+        },
+        {
+          "label": "1",
+          "score": 0
+        },
+        {
+          "label": "South African Rands",
+          "score": 0
+        },
+        {
+          "label": "5",
+          "score": 0
+        },
+        {
+          "label": "Indian Rupees",
+          "score": 0
+        },
+        {
+          "label": "15",
+          "score": 0
+        },
+        {
+          "label": "Chinese Yuan",
+          "score": 0
+        },
+        {
+          "label": "5",
+          "score": 0
+        },
+        {
+          "label": "Uganda Shillings",
+          "score": 0
+        },
+        {
+          "label": "400",
+          "score": 0
+        },
+        {
+          "label": "Tanzania Shillings",
+          "score": 0
+        },
+        {
+          "label": "300",
+          "score": 0
+        },
+        {
+          "label": "Russia Rubles",
+          "score": 0
+        },
+        {
+          "label": "20",
+          "score": 0
+        },
+        {
+          "label": "Payment Details",
+          "score": 0
+        },
+        {
+          "label": "PayPal",
+          "score": 0
+        },
+        {
+          "label": "CREDIT OR DEBIT CARD NUMBER…………………………………………………….",
+          "score": 0
+        },
+        {
+          "label": "Expiry Date……………………………………………. CVV/CVC………………………….",
+          "score": 0
+        },
+        {
+          "label": "MPESA",
+          "score": 0
+        },
+        {
+          "label": "Paybill Number ………………………………………….…….",
+          "score": 0
+        },
+        {
+          "label": "Account Number  ………………………………………………",
+          "score": 0
+        },
+        {
+          "label": "AIRTEL",
+          "score": 0
+        },
+        {
+          "label": "16",
+          "score": 0
+        },
+        {
+          "label": "Paybill Number ………………………………………….…….",
+          "score": 0
+        },
+        {
+          "label": "Account Number  ………………………………………………",
+          "score": 0
+        },
+        {
+          "label": "Notes",
+          "score": 0
+        },
+        {
+          "label": "▪",
+          "score": 0
+        },
+        {
+          "label": "After submitting the payment successfully, the respondent will receive an Online ‘pop up’ message showing",
+          "score": 0
+        },
+        {
+          "label": "feedback according to score category [30% and below; between 30-75; 75% and above]",
+          "score": 0
+        },
+        {
+          "label": "▪",
+          "score": 0
+        },
+        {
+          "label": "The system asks the respondent to kindly share the evangelistic Survey questionnaire with atheist 10 other",
+          "score": 0
+        },
+        {
+          "label": "people they know on WhatsApp or by email or social media platforms",
+          "score": 0
+        },
+        {
+          "label": "▪",
+          "score": 0
+        },
+        {
+          "label": "The respondent is also advised to take the interview often to track personal progress",
+          "score": 0
+        },
+        {
+          "label": "▪",
+          "score": 0
+        },
+        {
+          "label": "The system allows the respondent to share personal results on email or WhatsApp for reference as they follow",
+          "score": 0
+        },
+        {
+          "label": "through recommendations",
+          "score": 0
+        },
+        {
+          "label": "▪",
+          "score": 0
+        },
+        {
+          "label": "If the respondent is dissatisfied with results, the system gives provision for respondent to exit or repeat the",
+          "score": 0
+        },
+        {
+          "label": "interview",
+          "score": 0
+        },
+        {
+          "label": "▪",
+          "score": 0
+        },
+        {
+          "label": "The respondent is advised to share personalized feedback with their Pastor/Priest for necessary support",
+          "score": 0
+        },
+        {
+          "label": "Save and continue",
+          "score": 0
+        },
+        {
+          "label": "FEEDBACK",
+          "score": 0
+        },
+        {
+          "label": "▪ For those who score 75% and above",
+          "score": 0
+        },
+        {
+          "label": "Dear [insert name]",
+          "score": 0
+        },
+        {
+          "label": "Your score is: [insert score = addition of marks]%",
+          "score": 0
+        },
+        {
+          "label": "Glory!!!!!!",
+          "score": 0
+        },
+        {
+          "label": "There is every indication that you are on the NARROW WAY headed to Heaven.",
+          "score": 0
+        },
+        {
+          "label": "Therefore, do not cast away your confidence which has a great reward. Endure to",
+          "score": 0
+        },
+        {
+          "label": "the end and you shall surely spend eternity in Heaven. Occupy until Jesus Christ",
+          "score": 0
+        },
+        {
+          "label": "returns.",
+          "score": 0
+        },
+        {
+          "label": "You must therefore continue to:",
+          "score": 0
+        },
+        {
+          "label": "▪ devote more and more time to know God intimately through consistent reading",
+          "score": 0
+        },
+        {
+          "label": "and meditating upon His Word, personal prayer-time and fellowshipping with",
+          "score": 0
+        },
+        {
+          "label": "other believers",
+          "score": 0
+        },
+        {
+          "label": "17",
+          "score": 0
+        },
+        {
+          "label": "▪ share your faith in Christ Jesus and participate in mentoring other disciples",
+          "score": 0
+        },
+        {
+          "label": "▪ be intentional in your church, your family and community in your labor of love",
+          "score": 0
+        },
+        {
+          "label": "with your time, finances and talents",
+          "score": 0
+        },
+        {
+          "label": "▪ patiently stand firm, keep His commands and persevere in every persecution,",
+          "score": 0
+        },
+        {
+          "label": "tribulation and trials.",
+          "score": 0
+        },
+        {
+          "label": "▪ daily pray and ask God to fill you with the Holy Spirit.",
+          "score": 0
+        },
+        {
+          "label": "▪ make every effort to live at peace with all everyone; easily forgive those who",
+          "score": 0
+        },
+        {
+          "label": "offend you, do not be bitter or hold grudges and resentment.",
+          "score": 0
+        },
+        {
+          "label": "FEEDBACK",
+          "score": 0
+        },
+        {
+          "label": "For those who score between 30% - 75%",
+          "score": 0
+        },
+        {
+          "label": "Dear [insert name]",
+          "score": 0
+        },
+        {
+          "label": "Your score is: [insert score = addition of marks]%",
+          "score": 0
+        },
+        {
+          "label": "There is great Hope for you.",
+          "score": 0
+        },
+        {
+          "label": "Your responses DO NOT show clearly whether you are on the NARROW WAY",
+          "score": 0
+        },
+        {
+          "label": "leading to Heaven nor on the BROAD WAY headed to Hell.  However, as long as you",
+          "score": 0
+        },
+        {
+          "label": "are alive, you have time and chance to work diligently and make your call and",
+          "score": 0
+        },
+        {
+          "label": "election sure. In eternity there is no middle ground. You’ve got to be either hot or",
+          "score": 0
+        },
+        {
+          "label": "cold. Otherwise, you will end up outside with the sorcerers, sexually immoral,",
+          "score": 0
+        },
+        {
+          "label": "murderers, idolaters and those who practice and love lies.",
+          "score": 0
+        },
+        {
+          "label": "Therefore, you must:",
+          "score": 0
+        },
+        {
+          "label": "▪ give more earnest heed to the biblical truth you have heard lest you drift away.",
+          "score": 0
+        },
+        {
+          "label": "18",
+          "score": 0
+        },
+        {
+          "label": "▪ not be too comfortable pursuing worldly riches and statuses over and above the",
+          "score": 0
+        },
+        {
+          "label": "eternal kingdom of God.",
+          "score": 0
+        },
+        {
+          "label": "▪ not be complacent, rather press toward the goal for the prize of the upward call",
+          "score": 0
+        },
+        {
+          "label": "of God in Christ Jesus.",
+          "score": 0
+        },
+        {
+          "label": "▪ be faithful and you shall receive a crown of life",
+          "score": 0
+        },
+        {
+          "label": "Encourage yourself to put more emphasis on the following areas:",
+          "score": 0
+        },
+        {
+          "label": "▪ Establish a consistent pattern for Prayer and Bible study.",
+          "score": 0
+        },
+        {
+          "label": "▪ Live in repentance; if you commit sin, confess it without delay and ask God to",
+          "score": 0
+        },
+        {
+          "label": "forgive and restore you",
+          "score": 0
+        },
+        {
+          "label": "▪ Prioritize assembling together with other believers in Church services.",
+          "score": 0
+        },
+        {
+          "label": "▪ Give attention to a Discipleship Program [enroll if you haven’t yet]",
+          "score": 0
+        },
+        {
+          "label": "▪ Pray asking for wisdom from God, before making any key decisions including",
+          "score": 0
+        },
+        {
+          "label": "asking for a Pastor specifically for you.",
+          "score": 0
+        },
+        {
+          "label": "▪ Ask God to help you understand your prophetic destiny/divine purpose for",
+          "score": 0
+        },
+        {
+          "label": "which He continues to keep you alive.",
+          "score": 0
+        },
+        {
+          "label": "▪ Patiently stand firm, keep His commands and persevere in every persecution,",
+          "score": 0
+        },
+        {
+          "label": "tribulation, trial, and hardship to the end and you shall be saved.",
+          "score": 0
+        },
+        {
+          "label": "▪ Be open and share areas of your struggles, unbecoming habits and, attitudes",
+          "score": 0
+        },
+        {
+          "label": "and moods swings with a gospel minister whom you trust and allow them stand",
+          "score": 0
+        },
+        {
+          "label": "with you in prayer and sound counsel for your deliverance",
+          "score": 0
+        },
+        {
+          "label": "▪ Depart from any pastor or Church where you are not taught to develop intimacy",
+          "score": 0
+        },
+        {
+          "label": "with Jesus Christ.",
+          "score": 0
+        },
+        {
+          "label": "▪ Daily pray and ask God to fill you with the Holy Spirit.",
+          "score": 0
+        },
+        {
+          "label": "▪ Make every effort to live at peace with all everyone; easily forgive those who",
+          "score": 0
+        },
+        {
+          "label": "offend you, do not be bitter or hold grudges and resentment.",
+          "score": 0
+        },
+        {
+          "label": "Do you need to repent afresh?",
+          "score": 0
+        },
+        {
+          "label": "If you are that person who desires to live according to the dictates of the Kingdom",
+          "score": 0
+        },
+        {
+          "label": "of God but you always find it difficult to do so, it means the law of sin and death is",
+          "score": 0
+        },
+        {
+          "label": "at work in your life. You will keep conforming to worldly patterns until you begin",
+          "score": 0
+        },
+        {
+          "label": "your journey of transformation by the renewing of your mind with the Word of",
+          "score": 0
+        },
+        {
+          "label": "God. You need the Spirit of Christ to give you power to overcome sin. Similarly, if",
+          "score": 0
+        },
+        {
+          "label": "you once accepted Jesus Christ as Lord and Savior and now you are not sure if you",
+          "score": 0
+        },
+        {
+          "label": "have a relationship with Him anymore, you need to know He is a God of a second",
+          "score": 0
+        },
+        {
+          "label": "chance and a third and fourth and a fifth etc. Do not let pride prevent you from re-",
+          "score": 0
+        },
+        {
+          "label": "19",
+          "score": 0
+        },
+        {
+          "label": "connecting with Jesus Christ. Beware, your wealth or political status can deceive",
+          "score": 0
+        },
+        {
+          "label": "you into thinking that it is shameful for a powerful or prosperous person to submit",
+          "score": 0
+        },
+        {
+          "label": "to the Gospel of Jesus Christ.  Please repeat the words below prayerfully;",
+          "score": 0
+        },
+        {
+          "label": "Dear God,",
+          "score": 0
+        },
+        {
+          "label": "I admit that I am a sinner. Thank you for sending your Son, Jesus Christ to die",
+          "score": 0
+        },
+        {
+          "label": "on the Cross and pay for my sin. I forsake all my sin and I ask for your",
+          "score": 0
+        },
+        {
+          "label": "forgiveness. Let the Blood of Jesus that was shed for the sin of the world",
+          "score": 0
+        },
+        {
+          "label": "cleanse me. I commit my life to Jesus as my Lord and Savior. I forgive everyone",
+          "score": 0
+        },
+        {
+          "label": "who has hurt or offended me in any way. Save me God and help me to be ready",
+          "score": 0
+        },
+        {
+          "label": "to go with Jesus when He comes again. Thank you God for your sacrificial love",
+          "score": 0
+        },
+        {
+          "label": "for me.",
+          "score": 0
+        },
+        {
+          "label": "Thank you God for accepting me as your child.",
+          "score": 0
+        },
+        {
+          "label": "In Jesus Name, Amen.",
+          "score": 0
+        },
+        {
+          "label": "Visit the site below and obtain resources, counsel and support on suitable",
+          "score": 0
+        },
+        {
+          "label": "discipleship programs to help you grow in your faith journey.",
+          "score": 0
+        },
+        {
+          "label": "Get a personal hard copy bible and read daily beginning with the book of john",
+          "score": 0
+        },
+        {
+          "label": "After four - six months re-take this assessment to track your progress.",
+          "score": 0
+        },
+        {
+          "label": "FEEDBACK",
+          "score": 0
+        },
+        {
+          "label": "For those who score 0 - 30%",
+          "score": 0
+        },
+        {
+          "label": "Dear [insert name]",
+          "score": 0
+        },
+        {
+          "label": "Your score is: [insert score = addition of marks]%",
+          "score": 0
+        },
+        {
+          "label": "There is Hope for you.",
+          "score": 0
+        },
+        {
+          "label": "▪ Friend, from your responses there is every indication that you are on the BROAD",
+          "score": 0
+        },
+        {
+          "label": "WAY headed to Hell. But there is hope for your turnaround. You must believe",
+          "score": 0
+        },
+        {
+          "label": "that God Loves you and His thoughts towards you are not of evil but to give you",
+          "score": 0
+        },
+        {
+          "label": "20",
+          "score": 0
+        },
+        {
+          "label": "a peaceful future and a hope. However, you must diligently consider your ways",
+          "score": 0
+        },
+        {
+          "label": "and adjust accordingly so that you can obtain salvation and enter Heaven. You",
+          "score": 0
+        },
+        {
+          "label": "may be feeling so condemned and far away from God because of your dark and",
+          "score": 0
+        },
+        {
+          "label": "terrible sinful past as a murderer, robber, unjust, terrorist, unmerciful, selfish,",
+          "score": 0
+        },
+        {
+          "label": "sexually immoral, bitter, committed abominations, abortions, atheist,",
+          "score": 0
+        },
+        {
+          "label": "blasphemer, sexual pervert, a sorcerer, witch/wizard…… God is so merciful and",
+          "score": 0
+        },
+        {
+          "label": "willing to forgive you.",
+          "score": 0
+        },
+        {
+          "label": "▪ Jesus Christ came to restore back the beautiful relationship man had with God",
+          "score": 0
+        },
+        {
+          "label": "our Creator. He was born by the virgin Mary on earth as a Messiah to save souls",
+          "score": 0
+        },
+        {
+          "label": "of men from sins.  He was crucified and died, buried and resurrected as the",
+          "score": 0
+        },
+        {
+          "label": "sacrifice that He paid the penalty/price for our sins so that we can be reconciled",
+          "score": 0
+        },
+        {
+          "label": "and restored back into the relationship humans lost with God.  Therefore, Jesus",
+          "score": 0
+        },
+        {
+          "label": "Christ is the only name given to men by which we must be saved and enter",
+          "score": 0
+        },
+        {
+          "label": "Heaven.  He is the Way, the Life and Truth.",
+          "score": 0
+        },
+        {
+          "label": "▪ Let no one deceive you that all religions in the world ultimately point to the same",
+          "score": 0
+        },
+        {
+          "label": "Living God. No they don’t. By your faith in Christ Jesus you are justified. You",
+          "score": 0
+        },
+        {
+          "label": "must recognize that you are a sinner that needs God’s forgiveness, acknowledge",
+          "score": 0
+        },
+        {
+          "label": "your sins and confess and forsake the sinful life and turn back to obeying God.",
+          "score": 0
+        },
+        {
+          "label": "Destination of either Heaven or Hell is entirely your choice. It is with your heart",
+          "score": 0
+        },
+        {
+          "label": "that you believe and confess with your mouth to be saved.",
+          "score": 0
+        },
+        {
+          "label": "▪ If you continue living the way you are, you will end up in HELL. You need to",
+          "score": 0
+        },
+        {
+          "label": "change direction today. Repeat along the short prayer below and believe in your",
+          "score": 0
+        },
+        {
+          "label": "heart what you say and you shall be saved.",
+          "score": 0
+        },
+        {
+          "label": "Prayer:",
+          "score": 0
+        },
+        {
+          "label": "Dear God,",
+          "score": 0
+        },
+        {
+          "label": "I admit that I am a sinner. Thank you for sending your Son, Jesus Christ to die",
+          "score": 0
+        },
+        {
+          "label": "on the Cross and pay for my sin. I forsake all my sin and I ask for your",
+          "score": 0
+        },
+        {
+          "label": "forgiveness. Let the Blood of Jesus that was shed for the sin of the world",
+          "score": 0
+        },
+        {
+          "label": "cleanse me. I commit my life to Jesus as my Lord and Savior. I forgive everyone",
+          "score": 0
+        },
+        {
+          "label": "who has hurt or offended me in any way. Save me God and help me to be ready",
+          "score": 0
+        },
+        {
+          "label": "to go with Jesus when He comes again. Thank you God for your sacrificial love",
+          "score": 0
+        },
+        {
+          "label": "for me.",
+          "score": 0
+        },
+        {
+          "label": "Thank you God for accepting me as your child.",
+          "score": 0
+        },
+        {
+          "label": "21",
+          "score": 0
+        },
+        {
+          "label": "In Jesus Name, Amen.",
+          "score": 0
+        },
+        {
+          "label": "If you made the prayer above, you can then;",
+          "score": 0
+        },
+        {
+          "label": "• Get a personal bible and read daily beginning with the book of John",
+          "score": 0
+        },
+        {
+          "label": "• Ask God to direct you to a Pastor who will nurture you and help you to grow",
+          "score": 0
+        },
+        {
+          "label": "in your journey of faith",
+          "score": 0
+        },
+        {
+          "label": "• Visit the site below for resources, counsel and support on suitable discipleship",
+          "score": 0
+        },
+        {
+          "label": "programs to help you grow in your faith journey.",
+          "score": 0
+        },
+        {
+          "label": "Visit the site below and obtain resources, counsel and support on suitable",
+          "score": 0
+        },
+        {
+          "label": "discipleship programs to help you grow in your faith journey.",
+          "score": 0
+        },
+        {
+          "label": "Get a personal hard copy bible and read daily beginning with the book of john",
+          "score": 0
+        },
+        {
+          "label": "After four - six months re-take this assessment to track your progress.",
+          "score": 0
+        }
+      ]
+    }
+  ]
+}
