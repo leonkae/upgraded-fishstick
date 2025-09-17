@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -10,9 +12,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "w-full bg-background-button text-button-text py-3 rounded-lg hover:bg-background-button-hover hover:text-button-text-hover transition-colors flex items-center justify-center gap-2 animate-pulse-hover",
+          "w-fit bg-background-button text-button-text py-3 rounded-lg hover:bg-background-button-hover hover:text-button-text-hover transition-colors flex items-center justify-center gap-2 animate-pulse-hover",
         destructive:
-          "w-full bg-background-button text-button-text py-3 rounded-lg hover:bg-background-button-hover hover:text-button-text-hover transition-colors flex items-center justify-center gap-2 animate-pulse-hover",
+          "w-fit bg-background-button text-button-text py-3 rounded-lg hover:bg-background-button-hover hover:text-button-text-hover transition-colors flex items-center justify-center gap-2 animate-pulse-hover",
         outline:
           "bg-background-button shadow-xs text-button-text hover:bg-background-button-hover hover:text-button-text-hover transition-colors",
         secondary:

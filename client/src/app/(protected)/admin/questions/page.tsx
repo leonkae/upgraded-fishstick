@@ -1,5 +1,7 @@
+import { Questions } from "@/components/admin/pages/Questions";
+
 const QuestionsPage = () => {
-  return <div className="bg-pink-300">QuestionsPage</div>;
+  return <Questions />;
 };
 
 export default QuestionsPage;
