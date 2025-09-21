@@ -40,5 +40,9 @@
   "workspaces": [
     "client",
     "server"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "mongodb": "^6.20.0"
+  }
 }
