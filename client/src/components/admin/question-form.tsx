@@ -8,9 +8,25 @@ import { X, Plus } from "lucide-react";
 import { Question } from "@/components/quiz/QuestionnaireContext";
 import { Textarea } from "@/components/ui/textarea";
 
+interface Option {
+  id: number | string;
+  label: string;
+  score: number;
+}
+
+// interface QuestionFormProps {
+//   question?: Question;
+//   onSave: (question: Question) => void;
+//   onCancel: () => void;
+// }
+
 interface QuestionFormProps {
-  question?: Question;
-  onSave: (question: Omit<Question, "id">) => void;
+  question?: {
+    _id?: string;
+    text: string;
+    options: Option[];
+  };
+  onSave: (question: any) => void;
   onCancel: () => void;
 }
 
@@ -20,19 +36,24 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   onCancel,
 }) => {
   const [text, setText] = useState(question?.text || "");
-  const [options, setOptions] = useState(
-    question?.options || [
-      { id: 1, text: "", value: 10 },
-      { id: 2, text: "", value: 7 },
-      { id: 3, text: "", value: 5 },
-      { id: 4, text: "", value: 2 },
-      { id: 5, text: "", value: 0 },
+  const [options, setOptions] = useState<Option[]>(
+    question?.options?.map((o) => ({
+      ...o,
+      label: o.label,
+      score: o.score,
+      id: o.id,
+    })) || [
+      { id: crypto.randomUUID(), label: "", score: 10 },
+      { id: crypto.randomUUID(), label: "", score: 7 },
+      { id: crypto.randomUUID(), label: "", score: 5 },
+      { id: crypto.randomUUID(), label: "", score: 2 },
+      { id: crypto.randomUUID(), label: "", score: 0 },
     ]
   );
 
   const updateOption = (
     index: number,
-    field: "text" | "value",
+    field: "label" | "score",
     value: string | number
   ) => {
     const newOptions = [...options];
@@ -41,8 +62,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   };
 
   const addOption = () => {
-    const newId = Math.max(...options.map((o) => o.id)) + 1;
-    setOptions([...options, { id: newId, text: "", value: 0 }]);
+    // const newId = Math.max(...options.map((o) => Number(o.id))) + 1;
+    const newId = Date.now();
+    setOptions([...options, { id: newId, label: "", score: 0 }]);
   };
 
   const removeOption = (index: number) => {
@@ -51,10 +73,63 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (text.trim() && options.every((opt) => opt.text.trim())) {
+  //     onSave({ text: text.trim(), options });
+  //   }
+  // };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (text.trim() && options.every((opt) => opt.text.trim())) {
-      onSave({ text: text.trim(), options });
+    if (!text.trim() || options.some((opt) => !opt.label.trim())) return;
+
+    const isEditing = !!question?._id;
+    const url = isEditing
+      ? `http://localhost:3005/api/v1/quiz/${question._id}`
+      : "http://localhost:3005/api/v1/quiz";
+
+    const payload = {
+      text: text.trim(),
+      options: options.map((o) => ({ label: o.label, score: o.score })),
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save question");
+
+      const saved = await res.json();
+      const responseData = saved.question || saved.data?.question || saved.data;
+
+      const normalized = {
+        _id: responseData._id,
+        text: responseData.text,
+        options: (responseData.options || []).map((o: any) => ({
+          id: o._id,
+          label: o.label,
+          score: o.score,
+        })),
+      };
+
+      onSave(normalized);
+
+      if (!isEditing) {
+        setText("");
+        setOptions([
+          { id: crypto.randomUUID(), label: "", score: 10 },
+          { id: crypto.randomUUID(), label: "", score: 7 },
+          { id: crypto.randomUUID(), label: "", score: 5 },
+          { id: crypto.randomUUID(), label: "", score: 2 },
+          { id: crypto.randomUUID(), label: "", score: 0 },
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -86,9 +161,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               {options.map((option, index) => (
                 <div key={option.id} className="flex gap-2 items-center">
                   <Input
-                    value={option.text}
+                    value={option.label}
                     onChange={(e) =>
-                      updateOption(index, "text", e.target.value)
+                      updateOption(index, "label", e.target.value)
                     }
                     placeholder={`Option ${index + 1}`}
                     className="flex-1"
@@ -96,11 +171,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                   />
                   <Input
                     type="number"
-                    value={option.value}
+                    value={option.score}
                     onChange={(e) =>
                       updateOption(
                         index,
-                        "value",
+                        "score",
                         parseInt(e.target.value) || 0
                       )
                     }
