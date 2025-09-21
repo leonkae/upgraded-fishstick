@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,44 +22,87 @@ import {
 import { DraggableQuestion } from "@/components/admin/draggable-question";
 
 const Questions = () => {
-  const {
-    questions,
-    addQuestion,
-    updateQuestion,
-    deleteQuestion,
-    reorderQuestions,
-  } = useQuestionnaire();
-
+  // const {
+  //   questions,
+  //   addQuestion,
+  //   updateQuestion,
+  //   deleteQuestion,
+  //   reorderQuestions,
+  // } = useQuestionnaire();
+  const [loading, setLoading] = useState(true);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
+  // This fetches questions from teh API
+
+  const fetchQuestions = async () => {
+    try {
+      const res = await fetch("http://localhost:3005/api/v1/quiz");
+      const data = await res.json();
+      setQuestions(data?.data?.quiz || []);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuestions();
+  }, []); //hammer prevention added the commmented func works but this makes it reusable
+
+  // useEffect(() => {
+  //   const fetchQuestions = async () => {
+  //     try {
+  //       const res = await fetch("http://localhost:3005/api/v1/quiz"); // later change from local to prod needed
+  //       const data = await res.json();
+  //       setQuestions(data?.data?.quiz || []);
+  //     } catch (error) {
+  //       console.error("Error fetching questions:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchQuestions();
+  // }, []); // prevents hammering on render()
+
   const filteredQuestions = questions.filter((q) =>
     q.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSaveQuestion = (questionData: Omit<Question, "id">) => {
-    if (editingQuestion) {
-      updateQuestion(editingQuestion.id, questionData);
-    } else {
-      addQuestion(questionData);
-    }
-    setShowForm(false);
-    setEditingQuestion(null);
-  };
+  // const handleSaveQuestion = (questionData: Omit<Question, "id">) => {
+  //   if (editingQuestion) {
+  //     updateQuestion(editingQuestion.id, questionData);
+  //   } else {
+  //     addQuestion(questionData);
+  //   }
+  //   setShowForm(false);
+  //   setEditingQuestion(null);
+  // };
+
+  // above is no longer needed because we are no longer relying on state rather we are getting data from database
 
   const handleEditQuestion = (question: Question) => {
     setEditingQuestion(question);
     setShowForm(true);
   };
 
-  const handleDeleteQuestion = (id: number) => {
+  // switch the api url to prod currently in 127
+  const handleDeleteQuestion = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
-      deleteQuestion(id);
+      try {
+        await fetch(`http://localhost:3005/api/v1/quiz/${id}`, {
+          method: "DELETE",
+        });
+        setQuestions((prev) => prev.filter((q) => q.id !== id));
+      } catch (error) {
+        console.error("Error deleting question:", error);
+      }
     }
   };
-
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
@@ -73,17 +116,38 @@ const Questions = () => {
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     if (draggedIndex !== null && draggedIndex !== dropIndex) {
-      reorderQuestions(draggedIndex, dropIndex);
+      const newQuestions = [...questions];
+      const [moved] = newQuestions.splice(draggedIndex, 1);
+      newQuestions.splice(dropIndex, 0, moved);
+      setQuestions(newQuestions);
     }
     setDraggedIndex(null);
   };
+
+  //add question
 
   if (showForm) {
     return (
       <div className="space-y-8">
         <QuestionForm
-          question={editingQuestion || undefined}
-          onSave={handleSaveQuestion}
+          question={
+            editingQuestion
+              ? {
+                  _id: editingQuestion.id.toString(),
+                  text: editingQuestion.text,
+                  options: editingQuestion.options.map((o) => ({
+                    id: o.id,
+                    label: o.text, // map text → label
+                    score: o.value, // map value → score
+                  })),
+                }
+              : undefined
+          }
+          onSave={() => {
+            fetchQuestions();
+            setShowForm(false);
+            setEditingQuestion(null);
+          }}
           onCancel={() => {
             setShowForm(false);
             setEditingQuestion(null);
