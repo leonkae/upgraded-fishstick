@@ -12,6 +12,7 @@ import { errorHandler } from "@/middleware";
 import { NotFoundError } from "@/errors/not-found";
 import { connectToDatabase } from "@/db/config";
 import cookieParser from "cookie-parser";
+import { quizRouter } from "./routes/v1/quiz";
 
 // CONFIGURATION
 connectToDatabase();
