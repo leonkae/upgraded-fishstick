@@ -17,7 +17,17 @@ const QuestionScreen: React.FC = () => {
     nextQuestion,
     previousQuestion,
   } = useQuestionnaire();
+
   const currentQuestion = questions[currentQuestionIndex];
+
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen purple-gradient flex items-center justify-center p-6">
+        <p className="text-white text-lg">Loading questions...</p>
+      </div>
+    );
+  }
+
   const [selectedOption, setSelectedOption] = useState<string>(
     answers[currentQuestion.id] !== undefined
       ? answers[currentQuestion.id].toString()
@@ -25,14 +35,15 @@ const QuestionScreen: React.FC = () => {
   );
   const [direction, setDirection] = useState<"next" | "prev">("next");
 
-  // Update selected option when current question changes
   useEffect(() => {
-    setSelectedOption(
-      answers[currentQuestion.id] !== undefined
-        ? answers[currentQuestion.id].toString()
-        : ""
-    );
-  }, [currentQuestion.id, answers]);
+    if (currentQuestion) {
+      setSelectedOption(
+        answers[currentQuestion.id] !== undefined
+          ? answers[currentQuestion.id].toString()
+          : ""
+      );
+    }
+  }, [currentQuestion, answers]);
 
   const handleOptionSelect = (value: string) => {
     setSelectedOption(value);

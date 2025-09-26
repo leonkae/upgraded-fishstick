@@ -1,100 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 // Define the question type
 export interface Question {
-  id: number;
+  id: string; // we’ll map backend _id to a number (or keep string if you prefer)
   text: string;
   options: {
-    id: number;
+    id: string;
     text: string;
     value: number;
   }[];
 }
-
-// Define initial questions based on the new content
-const questions: Question[] = [
-  {
-    id: 1,
-    text: "How often do you help those in need?",
-    options: [
-      { id: 1, text: "Whenever I can, it's a priority", value: 10 },
-      { id: 2, text: "Often, if it's convenient", value: 7 },
-      { id: 3, text: "Sometimes, when asked directly", value: 5 },
-      { id: 4, text: "Rarely, I have my own problems", value: 2 },
-      { id: 5, text: "Never, everyone should help themselves", value: 0 },
-    ],
-  },
-  {
-    id: 2,
-    text: "How do you respond when someone wrongs you?",
-    options: [
-      {
-        id: 1,
-        text: "I forgive and try to understand their perspective",
-        value: 10,
-      },
-      { id: 2, text: "I forgive but keep my distance", value: 7 },
-      { id: 3, text: "I don't forgive but I don't seek revenge", value: 5 },
-      { id: 4, text: "I hold grudges for a long time", value: 2 },
-      { id: 5, text: "I always find a way to get even", value: 0 },
-    ],
-  },
-  {
-    id: 3,
-    text: "How honest are you in your daily life?",
-    options: [
-      { id: 1, text: "I'm always honest, even when it's difficult", value: 10 },
-      {
-        id: 2,
-        text: "I'm honest in important matters, but might tell white lies",
-        value: 7,
-      },
-      {
-        id: 3,
-        text: "I'm honest with friends and family, but not always with others",
-        value: 5,
-      },
-      { id: 4, text: "I lie when it benefits me", value: 2 },
-      {
-        id: 5,
-        text: "I believe truth is subjective and act accordingly",
-        value: 0,
-      },
-    ],
-  },
-  {
-    id: 4,
-    text: "How do you treat animals?",
-    options: [
-      { id: 1, text: "With great care and respect", value: 10 },
-      {
-        id: 2,
-        text: "Well, though I'm not particularly passionate about them",
-        value: 7,
-      },
-      { id: 3, text: "I'm indifferent to most animals", value: 5 },
-      { id: 4, text: "I don't really care about their wellbeing", value: 2 },
-      {
-        id: 5,
-        text: "I find harming animals entertaining sometimes",
-        value: 0,
-      },
-    ],
-  },
-  {
-    id: 5,
-    text: "When you have power over others, how do you use it?",
-    options: [
-      { id: 1, text: "To help and uplift others", value: 10 },
-      { id: 2, text: "Fairly, with everyone's interests in mind", value: 7 },
-      { id: 3, text: "To maintain order, even if some are unhappy", value: 5 },
-      { id: 4, text: "To benefit myself and those I care about", value: 2 },
-      { id: 5, text: "To control others and get what I want", value: 0 },
-    ],
-  },
-];
 
 // Define user info interface
 interface UserInfo {
@@ -107,17 +30,17 @@ interface UserInfo {
 interface QuestionnaireContextType {
   questions: Question[];
   currentQuestionIndex: number;
-  answers: Record<number, number>;
+  answers: Record<string, number>;
   userInfo: UserInfo;
   setUserInfo: (info: UserInfo) => void;
-  setAnswer: (questionId: number, value: number) => void;
+  setAnswer: (questionId: string, value: number) => void;
   nextQuestion: () => void;
   previousQuestion: () => void;
   currentStep: "welcome" | "question" | "payment" | "result";
   setCurrentStep: (step: "welcome" | "question" | "payment" | "result") => void;
   calculateScore: () => number;
   resetQuestionnaire: () => void;
-  // New admin functions
+  // Admin functions
   addQuestion: (question: Omit<Question, "id">) => void;
   updateQuestion: (id: number, question: Omit<Question, "id">) => void;
   deleteQuestion: (id: number) => void;
@@ -127,7 +50,7 @@ interface QuestionnaireContextType {
 
 // Create context with default values
 const QuestionnaireContext = createContext<QuestionnaireContextType>({
-  questions,
+  questions: [],
   currentQuestionIndex: 0,
   answers: {},
   userInfo: {
@@ -157,9 +80,9 @@ export const useQuestionnaire = () => useContext(QuestionnaireContext);
 export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [questionsState, setQuestionsState] = useState<Question[]>(questions);
+  const [questionsState, setQuestionsState] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentStep, setCurrentStep] = useState<
     "welcome" | "question" | "payment" | "result"
   >("welcome");
@@ -169,7 +92,47 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     phone: "",
   });
 
-  const setAnswer = (questionId: number, value: number) => {
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const res = await fetch("http://localhost:3005/api/v1/quiz");
+        const data = await res.json();
+
+        console.log("Fetched quiz data:", data);
+
+        let questionsArray: any[] = [];
+
+        if (data.success && Array.isArray(data.quiz)) {
+          questionsArray = data.quiz;
+        } else if (Array.isArray(data)) {
+          questionsArray = data;
+        } else if (data.data && Array.isArray(data.data.quiz)) {
+          questionsArray = data.data.quiz;
+        }
+
+        if (questionsArray.length > 0) {
+          const mapped = questionsArray.map((q: any) => ({
+            id: q._id,
+            text: q.text,
+            options: q.options.map((opt: any) => ({
+              id: opt._id,
+              text: opt.label,
+              value: opt.score,
+            })),
+          }));
+          setQuestionsState(mapped);
+        } else {
+          console.error("No questions found in response:", data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch questions:", error);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
+  const setAnswer = (questionId: string, value: number) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
@@ -190,7 +153,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const calculateScore = () => {
-    const totalPossibleScore = questionsState.length * 10;
+    const totalPossibleScore = questionsState.length * 10; // assuming max value=10
     const userScore = Object.values(answers).reduce(
       (acc, curr) => acc + curr,
       0
@@ -209,21 +172,31 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
-  // Admin functions
+  // Admin functions (still local-only for now)
   const addQuestion = (question: Omit<Question, "id">) => {
-    const newId = Math.max(...questionsState.map((q) => q.id)) + 1;
-    const newQuestion = { ...question, id: newId };
+    const newId =
+      questionsState.length > 0
+        ? Math.max(...questionsState.map((q) => Number(q.id) || 0)) + 1
+        : 1;
+    const newQuestion = { ...question, id: newId.toString() };
     setQuestionsState([...questionsState, newQuestion]);
   };
 
   const updateQuestion = (id: number, question: Omit<Question, "id">) => {
     setQuestionsState((prev) =>
-      prev.map((q) => (q.id === id ? { ...question, id } : q))
+      prev.map((q) =>
+        q.id === id.toString() ? { ...question, id: id.toString() } : q
+      )
     );
   };
 
   const deleteQuestion = (id: number) => {
-    setQuestionsState((prev) => prev.filter((q) => q.id !== id));
+    setQuestionsState((prev) => prev.filter((q) => q.id !== id.toString()));
+    setAnswers((prev) => {
+      const newAnswers = { ...prev };
+      delete newAnswers[id.toString()];
+      return newAnswers;
+    });
   };
 
   const reorderQuestions = (fromIndex: number, toIndex: number) => {
