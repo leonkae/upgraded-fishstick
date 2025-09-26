@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const responseSchema = new Schema(
   {
@@ -22,6 +22,10 @@ const responseSchema = new Schema(
       ref: "Result",
       required: [true, "Result ID is required"],
     },
+    totalScore: {
+      type: Number,
+      required: [true, "Total score is required"],
+    },
     score: {
       type: Number,
       required: [true, "Score is required"],
@@ -29,3 +33,7 @@ const responseSchema = new Schema(
   },
   { timestamps: true }
 );
+
+const ResponseModel = model("Response", responseSchema);
+
+export { ResponseModel };
