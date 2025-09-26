@@ -9,37 +9,67 @@ import { motion } from "framer-motion";
 import { CreditCard, CheckCircle, User, Mail, Phone } from "lucide-react";
 
 const PaymentScreen: React.FC = () => {
-  const { setCurrentStep, setUserInfo } = useQuestionnaire();
+  const { setCurrentStep, setUserInfo, userInfo, answers, questions } =
+    useQuestionnaire();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(userInfo.name || "");
+  const [email, setEmail] = useState(userInfo.email || "");
+  const [phone, setPhone] = useState(userInfo.phone || "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Save user information
-    setUserInfo({
-      name,
-      email,
-      phone,
-    });
+    // Save user info to context
+    setUserInfo({ name, email, phone });
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsCompleted(true);
+    // Prepare payload
+    const payload = {
+      userInfo: { name, email, phone },
+      responses: Object.entries(answers).map(([questionId, value]) => {
+        const question = questions.find((q) => q.id === questionId);
+        const option = question?.options.find((opt) => opt.value === value);
+        return {
+          questionId,
+          optionId: option?.id,
+          questionText: question?.text,
+          selectedOption: option?.text,
+          score: value,
+        };
+      }),
+    };
 
-      // Show results after brief delay
+    try {
+      const res = await fetch("http://localhost:3005/api/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to save submission");
+      }
+
+      // Simulate payment + success flow
       setTimeout(() => {
-        setCurrentStep("result");
-      }, 1500);
-    }, 2000);
+        setIsProcessing(false);
+        setIsCompleted(true);
+
+        setTimeout(() => {
+          setCurrentStep("result");
+        }, 1500);
+      }, 2000);
+    } catch (error) {
+      console.error("Error saving submission:", error);
+      setIsProcessing(false);
+      alert("Something went wrong while saving your answers.");
+    }
   };
 
   if (isCompleted) {
