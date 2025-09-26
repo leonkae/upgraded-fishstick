@@ -22,13 +22,6 @@ import {
 import { DraggableQuestion } from "@/components/admin/draggable-question";
 
 const Questions = () => {
-  // const {
-  //   questions,
-  //   addQuestion,
-  //   updateQuestion,
-  //   deleteQuestion,
-  //   reorderQuestions,
-  // } = useQuestionnaire();
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -54,36 +47,9 @@ const Questions = () => {
     fetchQuestions();
   }, []); //hammer prevention added the commmented func works but this makes it reusable
 
-  // useEffect(() => {
-  //   const fetchQuestions = async () => {
-  //     try {
-  //       const res = await fetch("http://localhost:3005/api/v1/quiz"); // later change from local to prod needed
-  //       const data = await res.json();
-  //       setQuestions(data?.data?.quiz || []);
-  //     } catch (error) {
-  //       console.error("Error fetching questions:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchQuestions();
-  // }, []); // prevents hammering on render()
-
   const filteredQuestions = questions.filter((q) =>
     q.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // const handleSaveQuestion = (questionData: Omit<Question, "id">) => {
-  //   if (editingQuestion) {
-  //     updateQuestion(editingQuestion.id, questionData);
-  //   } else {
-  //     addQuestion(questionData);
-  //   }
-  //   setShowForm(false);
-  //   setEditingQuestion(null);
-  // };
-
-  // above is no longer needed because we are no longer relying on state rather we are getting data from database
 
   const handleEditQuestion = (question: Question) => {
     setEditingQuestion(question);
@@ -97,7 +63,7 @@ const Questions = () => {
         await fetch(`http://localhost:3005/api/v1/quiz/${id}`, {
           method: "DELETE",
         });
-        setQuestions((prev) => prev.filter((q) => q.id !== id));
+        setQuestions((prev) => prev.filter((q) => Number(q.id) !== id));
       } catch (error) {
         console.error("Error deleting question:", error);
       }
