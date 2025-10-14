@@ -11,10 +11,21 @@ const QuestionnaireStepper = () => {
 
   return (
     <div className="min-h-screen">
-      {currentStep === "welcome" && <WelcomeScreen />}
-      {currentStep === "question" && <QuestionScreen />}
-      {currentStep === "payment" && <PaymentScreen />}
-      {currentStep === "result" && <ResultScreen />}
+      <div style={{ display: currentStep === "welcome" ? "block" : "none" }}>
+        <WelcomeScreen />
+      </div>
+
+      <div style={{ display: currentStep === "question" ? "block" : "none" }}>
+        <QuestionScreen />
+      </div>
+
+      <div style={{ display: currentStep === "payment" ? "block" : "none" }}>
+        <PaymentScreen />
+      </div>
+
+      <div style={{ display: currentStep === "result" ? "block" : "none" }}>
+        <ResultScreen />
+      </div>
     </div>
   );
 };

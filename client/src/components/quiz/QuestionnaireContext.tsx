@@ -1,4 +1,9 @@
 "use client";
+import {
+  saveQuizProgress,
+  loadQuizProgress,
+  clearQuizProgress,
+} from "@/utils/localQuizStorage";
 
 import React, {
   createContext,
@@ -10,7 +15,7 @@ import React, {
 
 // Define the question type
 export interface Question {
-  id: string; // we’ll map backend _id to a number (or keep string if you prefer)
+  id: string;
   text: string;
   options: {
     id: string;
@@ -30,6 +35,7 @@ interface UserInfo {
 interface QuestionnaireContextType {
   questions: Question[];
   currentQuestionIndex: number;
+  setCurrentQuestionIndex: (index: number) => void;
   answers: Record<string, number>;
   userInfo: UserInfo;
   setUserInfo: (info: UserInfo) => void;
@@ -40,7 +46,6 @@ interface QuestionnaireContextType {
   setCurrentStep: (step: "welcome" | "question" | "payment" | "result") => void;
   calculateScore: () => number;
   resetQuestionnaire: () => void;
-  // Admin functions
   addQuestion: (question: Omit<Question, "id">) => void;
   updateQuestion: (id: number, question: Omit<Question, "id">) => void;
   deleteQuestion: (id: number) => void;
@@ -48,35 +53,12 @@ interface QuestionnaireContextType {
   setQuestions: (questions: Question[]) => void;
 }
 
-// Create context with default values
-const QuestionnaireContext = createContext<QuestionnaireContextType>({
-  questions: [],
-  currentQuestionIndex: 0,
-  answers: {},
-  userInfo: {
-    name: "",
-    email: "",
-    phone: "",
-  },
-  setUserInfo: () => {},
-  setAnswer: () => {},
-  nextQuestion: () => {},
-  previousQuestion: () => {},
-  currentStep: "welcome",
-  setCurrentStep: () => {},
-  calculateScore: () => 0,
-  resetQuestionnaire: () => {},
-  addQuestion: () => {},
-  updateQuestion: () => {},
-  deleteQuestion: () => {},
-  reorderQuestions: () => {},
-  setQuestions: () => {},
-});
+const QuestionnaireContext = createContext<QuestionnaireContextType>(
+  {} as QuestionnaireContextType
+);
 
-// Hook for using context
 export const useQuestionnaire = () => useContext(QuestionnaireContext);
 
-// Provider component
 export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -86,12 +68,58 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   const [currentStep, setCurrentStep] = useState<
     "welcome" | "question" | "payment" | "result"
   >("welcome");
+
+  useEffect(() => {
+    const saved = loadQuizProgress();
+    if (saved) {
+      if (
+        (saved.currentQuestionIndex && saved.currentQuestionIndex > 0) ||
+        Object.keys(saved.answers || {}).length > 0
+      ) {
+        setCurrentStep("question");
+      } else {
+        setCurrentStep(saved.currentStep || "welcome");
+      }
+    }
+  }, []);
+
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: "",
     email: "",
     phone: "",
   });
 
+  // 🔹 Load progress from localStorage on mount
+  useEffect(() => {
+    const saved = loadQuizProgress();
+    if (saved) {
+      setAnswers(saved.answers || {});
+      setCurrentQuestionIndex(saved.currentQuestionIndex || 0);
+      setUserInfo(saved.userInfo || { name: "", email: "", phone: "" });
+
+      // 👈 Force skip WelcomeScreen if there’s progress
+      if (
+        (saved.currentQuestionIndex && saved.currentQuestionIndex > 0) ||
+        Object.keys(saved.answers || {}).length > 0
+      ) {
+        setCurrentStep("question");
+      } else {
+        setCurrentStep(saved.currentStep || "welcome");
+      }
+    }
+  }, []);
+
+  // 🔹 Persist progress whenever it changes
+  useEffect(() => {
+    saveQuizProgress({
+      answers,
+      currentQuestionIndex,
+      currentStep,
+      userInfo,
+    });
+  }, [answers, currentQuestionIndex, currentStep, userInfo]);
+
+  // Fetch quiz questions from backend
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -165,14 +193,11 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     setAnswers({});
     setCurrentQuestionIndex(0);
     setCurrentStep("welcome");
-    setUserInfo({
-      name: "",
-      email: "",
-      phone: "",
-    });
+    setUserInfo({ name: "", email: "", phone: "" });
+    clearQuizProgress();
   };
 
-  // Admin functions (still local-only for now)
+  // Admin functions
   const addQuestion = (question: Omit<Question, "id">) => {
     const newId =
       questionsState.length > 0
@@ -217,6 +242,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         questions: questionsState,
         currentQuestionIndex,
+        setCurrentQuestionIndex,
         answers,
         userInfo,
         setUserInfo,

@@ -20,16 +20,9 @@ const QuestionScreen: React.FC = () => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  if (!currentQuestion) {
-    return (
-      <div className="min-h-screen purple-gradient flex items-center justify-center p-6">
-        <p className="text-white text-lg">Loading questions...</p>
-      </div>
-    );
-  }
-
+  // ✅ Hooks declared at the top, no conditionals
   const [selectedOption, setSelectedOption] = useState<string>(
-    answers[currentQuestion.id] !== undefined
+    currentQuestion && answers[currentQuestion.id] !== undefined
       ? answers[currentQuestion.id].toString()
       : ""
   );
@@ -63,6 +56,15 @@ const QuestionScreen: React.FC = () => {
   // Calculate progress percentage
   const progressPercentage =
     ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  // ✅ Early return AFTER hooks
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen purple-gradient flex items-center justify-center p-6">
+        <p className="text-white text-lg">Loading questions...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen purple-gradient flex items-center justify-center p-6">

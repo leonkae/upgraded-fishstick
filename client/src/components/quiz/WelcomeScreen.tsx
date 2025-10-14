@@ -2,12 +2,15 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-
 import { Button } from "@/components/ui/button";
 import { useQuestionnaire } from "@/components/quiz/QuestionnaireContext";
 
 const WelcomeScreen: React.FC = () => {
   const { setCurrentStep } = useQuestionnaire();
+
+  const handleBegin = () => {
+    setCurrentStep("question");
+  };
 
   return (
     <div className="min-h-screen purple-gradient flex items-center justify-center p-6">
@@ -35,7 +38,7 @@ const WelcomeScreen: React.FC = () => {
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button
             className="bg-purple-700 hover:bg-purple-800 text-white font-medium text-lg px-8 py-3 rounded-full"
-            onClick={() => setCurrentStep("question")}
+            onClick={handleBegin}
           >
             Begin Your Journey
           </Button>
