@@ -1,3 +1,5 @@
+// QuestionnaireContext.tsx
+
 "use client";
 import {
   saveQuizProgress,
@@ -20,7 +22,7 @@ export interface Question {
   options: {
     id: string;
     text: string;
-    value: number;
+    value: number; // The score
   }[];
 }
 
@@ -31,21 +33,42 @@ interface UserInfo {
   phone: string;
 }
 
+// NEW: Answers now store the selected Option ID (string)
+// Record<Question ID, Option ID>
+type AnswersRecord = Record<string, string>;
+
+// Define the type for a single response object the server expects
+interface ServerResponse {
+  questionId: string;
+  questionText: string;
+  score: number; // Must be a number!
+  optionId: string; // Must be present
+  selectedOption: string; // Must be present
+}
+
+// Define the full payload type the server expects
+interface ServerPayload {
+  userInfo: UserInfo;
+  responses: ServerResponse[];
+}
+
 // Define context type
 interface QuestionnaireContextType {
   questions: Question[];
   currentQuestionIndex: number;
   setCurrentQuestionIndex: (index: number) => void;
-  answers: Record<string, number>;
+  answers: AnswersRecord;
   userInfo: UserInfo;
   setUserInfo: (info: UserInfo) => void;
-  setAnswer: (questionId: string, value: number) => void;
+  setAnswer: (questionId: string, optionId: string) => void;
   nextQuestion: () => void;
   previousQuestion: () => void;
   currentStep: "welcome" | "question" | "payment" | "result";
   setCurrentStep: (step: "welcome" | "question" | "payment" | "result") => void;
   calculateScore: () => number;
   resetQuestionnaire: () => void;
+  // ⭐ NEW function to expose the correctly formatted data for the API
+  getSubmissionPayload: () => ServerPayload;
   addQuestion: (question: Omit<Question, "id">) => void;
   updateQuestion: (id: number, question: Omit<Question, "id">) => void;
   deleteQuestion: (id: number) => void;
@@ -64,11 +87,12 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [questionsState, setQuestionsState] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<AnswersRecord>({});
   const [currentStep, setCurrentStep] = useState<
     "welcome" | "question" | "payment" | "result"
   >("welcome");
 
+  // Load progress and set step (FIRST useEffect - unchanged)
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
@@ -89,15 +113,21 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     phone: "",
   });
 
-  // 🔹 Load progress from localStorage on mount
+  // Load progress and set answers/index/userInfo (SECOND useEffect - unchanged)
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
-      setAnswers(saved.answers || {});
+      if (saved.answers) {
+        const normalizedAnswers: AnswersRecord = {};
+        Object.entries(saved.answers).forEach(([qId, opt]) => {
+          normalizedAnswers[qId] = String(opt);
+        });
+        setAnswers(normalizedAnswers);
+      }
+
       setCurrentQuestionIndex(saved.currentQuestionIndex || 0);
       setUserInfo(saved.userInfo || { name: "", email: "", phone: "" });
 
-      // 👈 Force skip WelcomeScreen if there’s progress
       if (
         (saved.currentQuestionIndex && saved.currentQuestionIndex > 0) ||
         Object.keys(saved.answers || {}).length > 0
@@ -109,19 +139,37 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  // 🔹 Persist progress whenever it changes
+  // Persist progress to localStorage (THIRD useEffect - unchanged, handles local storage legacy format)
   useEffect(() => {
+    const answersForSaving: Record<string, number> = {};
+
+    if (questionsState.length > 0) {
+      Object.entries(answers).forEach(([questionId, optionId]) => {
+        const question = questionsState.find((q) => q.id === questionId);
+        if (question) {
+          const selectedOption = question.options.find(
+            (o) => o.id === optionId
+          );
+          if (selectedOption) {
+            answersForSaving[questionId] = selectedOption.value;
+          }
+        }
+      });
+    }
+
     saveQuizProgress({
-      answers,
+      answers: answersForSaving,
       currentQuestionIndex,
       currentStep,
       userInfo,
     });
-  }, [answers, currentQuestionIndex, currentStep, userInfo]);
+  }, [answers, currentQuestionIndex, currentStep, userInfo, questionsState]);
 
-  // Fetch quiz questions from backend
+  // Fetch quiz questions from backend (unchanged)
   useEffect(() => {
     const fetchQuestions = async () => {
+      // ... (API fetch logic is unchanged)
+
       try {
         const res = await fetch("http://localhost:3005/api/v1/quiz");
         const data = await res.json();
@@ -160,10 +208,68 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     fetchQuestions();
   }, []);
 
-  const setAnswer = (questionId: string, value: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  // setAnswer (stores Option ID string - CORRECT)
+  const setAnswer = (questionId: string, optionId: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
+  // calculateScore (derives score from Option ID string - CORRECT)
+  const calculateScore = () => {
+    // ... (logic is correct and unchanged)
+    const totalPossibleScore = questionsState.length * 10;
+    let userScore = 0;
+
+    Object.entries(answers).forEach(([questionId, optionId]) => {
+      const question = questionsState.find((q) => q.id === questionId);
+      if (question) {
+        const selectedOption = question.options.find((o) => o.id === optionId);
+        if (selectedOption) {
+          userScore += selectedOption.value;
+        }
+      }
+    });
+
+    return (userScore / totalPossibleScore) * 100;
+  };
+
+  const getSubmissionPayload = (): ServerPayload => {
+    const responsesPayload: ServerResponse[] = [];
+
+    Object.entries(answers).forEach(([questionId, optionId]) => {
+      const question = questionsState.find((q) => q.id === questionId);
+
+      if (!question) {
+        console.warn(
+          `Skipping submission for Question ID ${questionId}: not found in state.`
+        );
+        return;
+      }
+
+      const selectedOption = question.options.find((o) => o.id === optionId);
+
+      if (!selectedOption) {
+        console.warn(
+          `Skipping submission for Question ID ${questionId}: Option ID ${optionId} not found.`
+        );
+        return;
+      }
+
+      responsesPayload.push({
+        questionId: question.id,
+        questionText: question.text,
+        optionId: selectedOption.id, // Required: Option ID (string)
+        selectedOption: selectedOption.text, // Required: Option Text (string)
+        score: selectedOption.value, // Required: Score (number) - FIXES the Cast to Number error
+      });
+    });
+
+    return {
+      userInfo: userInfo,
+      responses: responsesPayload,
+    };
+  };
+
+  // ... (rest of context functions are correct and unchanged)
   const nextQuestion = () => {
     if (currentQuestionIndex < questionsState.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -178,15 +284,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     } else {
       setCurrentStep("welcome");
     }
-  };
-
-  const calculateScore = () => {
-    const totalPossibleScore = questionsState.length * 10; // assuming max value=10
-    const userScore = Object.values(answers).reduce(
-      (acc, curr) => acc + curr,
-      0
-    );
-    return (userScore / totalPossibleScore) * 100;
   };
 
   const resetQuestionnaire = () => {
@@ -253,6 +350,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
         setCurrentStep,
         calculateScore,
         resetQuestionnaire,
+        getSubmissionPayload, // ⭐ EXPOSE THE NEW FUNCTION
         addQuestion,
         updateQuestion,
         deleteQuestion,
