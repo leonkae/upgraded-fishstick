@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { useQuestionnaire } from "./QuestionnaireContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,9 @@ import { motion } from "framer-motion";
 import { CreditCard, CheckCircle, User, Mail, Phone } from "lucide-react";
 
 const PaymentScreen: React.FC = () => {
-  const { setCurrentStep, setUserInfo, userInfo, answers, questions } =
+  const { setCurrentStep, setUserInfo, userInfo, getSubmissionPayload } =
     useQuestionnaire();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
@@ -24,10 +26,11 @@ const PaymentScreen: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Save user info to context
+    // Save user info to context (This is still correct)
     setUserInfo({ name, email, phone });
 
-    // Prepare payload
+    // REMOVED: The manual, incorrect payload creation logic.
+    /*
     const payload = {
       userInfo: { name, email, phone },
       responses: Object.entries(answers).map(([questionId, value]) => {
@@ -38,10 +41,14 @@ const PaymentScreen: React.FC = () => {
           optionId: option?.id,
           questionText: question?.text,
           selectedOption: option?.text,
-          score: value,
+          score: value, // This was the error: sending Option ID string or Option score number, but missing context for other required fields.
         };
       }),
     };
+    */
+
+    // NEW: Use the pre-validated payload generator from the context
+    const payload = getSubmissionPayload();
 
     try {
       const res = await fetch("http://localhost:3005/api/v1/responses", {
@@ -49,10 +56,13 @@ const PaymentScreen: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload), // Send the correctly formatted payload
       });
 
       if (!res.ok) {
+        // Log the server error response for debugging
+        const errorData = await res.json();
+        console.error("Server error response:", errorData);
         throw new Error("Failed to save submission");
       }
 
