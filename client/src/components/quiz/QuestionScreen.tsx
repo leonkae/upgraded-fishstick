@@ -1,3 +1,5 @@
+// QuestionScreen.tsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,35 +14,32 @@ const QuestionScreen: React.FC = () => {
   const {
     questions,
     currentQuestionIndex,
-    answers,
-    setAnswer,
+    answers, // answers now stores the Option ID (string)
+    setAnswer, // setAnswer now accepts the Option ID (string)
     nextQuestion,
     previousQuestion,
   } = useQuestionnaire();
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  // ✅ Hooks declared at the top, no conditionals
+  // Initialize selectedOption with the stored option ID for the current question
   const [selectedOption, setSelectedOption] = useState<string>(
-    currentQuestion && answers[currentQuestion.id] !== undefined
-      ? answers[currentQuestion.id].toString()
-      : ""
+    currentQuestion ? answers[currentQuestion.id] || "" : ""
   );
   const [direction, setDirection] = useState<"next" | "prev">("next");
 
+  // Effect to sync state when question changes
   useEffect(() => {
     if (currentQuestion) {
-      setSelectedOption(
-        answers[currentQuestion.id] !== undefined
-          ? answers[currentQuestion.id].toString()
-          : ""
-      );
+      const savedOptionId = answers[currentQuestion.id];
+      setSelectedOption(savedOptionId || "");
     }
   }, [currentQuestion, answers]);
 
-  const handleOptionSelect = (value: string) => {
-    setSelectedOption(value);
-    setAnswer(currentQuestion.id, parseInt(value));
+  const handleOptionSelect = (optionId: string) => {
+    setSelectedOption(optionId);
+
+    setAnswer(currentQuestion.id, optionId);
   };
 
   const handleNext = () => {
@@ -57,7 +56,6 @@ const QuestionScreen: React.FC = () => {
   const progressPercentage =
     ((currentQuestionIndex + 1) / questions.length) * 100;
 
-  // ✅ Early return AFTER hooks
   if (!currentQuestion) {
     return (
       <div className="min-h-screen purple-gradient flex items-center justify-center p-6">
@@ -116,6 +114,7 @@ const QuestionScreen: React.FC = () => {
 
             {/* Options */}
             <RadioGroup
+              // The value is the selected option's ID
               value={selectedOption}
               onValueChange={handleOptionSelect}
               className="space-y-4 mb-8"
@@ -126,7 +125,8 @@ const QuestionScreen: React.FC = () => {
                   className="flex items-center space-x-3 p-4 rounded-lg border hover:bg-gray-50 cursor-pointer"
                 >
                   <RadioGroupItem
-                    value={option.value.toString()}
+                    // RadioGroupItem value is the option's ID
+                    value={option.id}
                     id={`option-${option.id}`}
                   />
                   <Label
