@@ -22,7 +22,7 @@ const QuestionScreen: React.FC = () => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  // Initialize selectedOption with the stored option ID for the current question
+  // Initialize selectedOption with the stored option ID for the current questioconsst
   const [selectedOption, setSelectedOption] = useState<string>(
     currentQuestion ? answers[currentQuestion.id] || "" : ""
   );
