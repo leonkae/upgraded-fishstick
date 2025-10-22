@@ -5,20 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X, Plus } from "lucide-react";
-import { Question } from "@/components/quiz/QuestionnaireContext";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Option {
   id: number | string;
-  label: string;
+  text: string;
   score: number;
 }
-
-// interface QuestionFormProps {
-//   question?: Question;
-//   onSave: (question: Question) => void;
-//   onCancel: () => void;
-// }
 
 interface QuestionFormProps {
   question?: {
@@ -35,25 +28,34 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   onSave,
   onCancel,
 }) => {
+  // Initialize question text from prop (edit mode) or empty string (create mode)
   const [text, setText] = useState(question?.text || "");
+
+  // Initialize options from prop (edit mode) or default options (create mode)
   const [options, setOptions] = useState<Option[]>(
-    question?.options?.map((o) => ({
-      ...o,
-      label: o.label,
-      score: o.score,
-      id: o.id,
-    })) || [
-      { id: crypto.randomUUID(), label: "", score: 10 },
-      { id: crypto.randomUUID(), label: "", score: 7 },
-      { id: crypto.randomUUID(), label: "", score: 5 },
-      { id: crypto.randomUUID(), label: "", score: 2 },
-      { id: crypto.randomUUID(), label: "", score: 0 },
+    question?.options?.map((o) => {
+      // Log if o.text is undefined for debugging
+      if (o.text === undefined) {
+        console.warn(`Option with id ${o.id} has undefined text`, o);
+      }
+      return {
+        id: o.id || crypto.randomUUID(),
+        text: o.text ?? "", // Fallback to empty string if text is undefined
+        score: o.score ?? 0, // Fallback for score as well
+      };
+    }) || [
+      { id: crypto.randomUUID(), text: "", score: 10 },
+      { id: crypto.randomUUID(), text: "", score: 7 },
+      { id: crypto.randomUUID(), text: "", score: 5 },
+      { id: crypto.randomUUID(), text: "", score: 2 },
+      { id: crypto.randomUUID(), text: "", score: 0 },
     ]
   );
 
+  // Update a specific option's text or score
   const updateOption = (
     index: number,
-    field: "label" | "score",
+    field: "text" | "score",
     value: string | number
   ) => {
     const newOptions = [...options];
@@ -61,28 +63,23 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     setOptions(newOptions);
   };
 
+  // Add a new empty option
   const addOption = () => {
-    // const newId = Math.max(...options.map((o) => Number(o.id))) + 1;
-    const newId = Date.now();
-    setOptions([...options, { id: newId, label: "", score: 0 }]);
+    setOptions([...options, { id: crypto.randomUUID(), text: "", score: 0 }]);
   };
 
+  // Remove an option if more than 2 exist
   const removeOption = (index: number) => {
     if (options.length > 2) {
       setOptions(options.filter((_, i) => i !== index));
     }
   };
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (text.trim() && options.every((opt) => opt.text.trim())) {
-  //     onSave({ text: text.trim(), options });
-  //   }
-  // };
-
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim() || options.some((opt) => !opt.label.trim())) return;
+    // Validate: ensure question text and all option texts are non-empty
+    if (!text.trim() || options.some((opt) => !opt.text.trim())) return;
 
     const isEditing = !!question?._id;
     const url = isEditing
@@ -91,7 +88,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
     const payload = {
       text: text.trim(),
-      options: options.map((o) => ({ label: o.label, score: o.score })),
+      options: options.map((o) => ({ text: o.text.trim(), score: o.score })),
     };
 
     try {
@@ -106,30 +103,32 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       const saved = await res.json();
       const responseData = saved.question || saved.data?.question || saved.data;
 
+      // Normalize response to match local Question structure
       const normalized = {
         _id: responseData._id,
         text: responseData.text,
         options: (responseData.options || []).map((o: any) => ({
-          id: o._id,
-          label: o.label,
-          score: o.score,
+          id: o._id || crypto.randomUUID(),
+          text: o.text ?? "", // Fallback to empty string
+          score: o.score ?? 0,
         })),
       };
 
       onSave(normalized);
 
+      // Reset form only in creation mode
       if (!isEditing) {
         setText("");
         setOptions([
-          { id: crypto.randomUUID(), label: "", score: 10 },
-          { id: crypto.randomUUID(), label: "", score: 7 },
-          { id: crypto.randomUUID(), label: "", score: 5 },
-          { id: crypto.randomUUID(), label: "", score: 2 },
-          { id: crypto.randomUUID(), label: "", score: 0 },
+          { id: crypto.randomUUID(), text: "", score: 10 },
+          { id: crypto.randomUUID(), text: "", score: 7 },
+          { id: crypto.randomUUID(), text: "", score: 5 },
+          { id: crypto.randomUUID(), text: "", score: 2 },
+          { id: crypto.randomUUID(), text: "", score: 0 },
         ]);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error saving question:", err);
     }
   };
 
@@ -161,11 +160,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               {options.map((option, index) => (
                 <div key={option.id} className="flex gap-2 items-center">
                   <Input
-                    value={option.label}
+                    value={option.text}
                     onChange={(e) =>
-                      updateOption(index, "label", e.target.value)
+                      updateOption(index, "text", e.target.value)
                     }
-                    placeholder={`Option ${index + 1}`}
+                    placeholder={question ? "" : `Option ${index + 1}`}
                     className="flex-1"
                     required
                   />
