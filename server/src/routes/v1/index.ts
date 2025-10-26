@@ -6,6 +6,7 @@ import { analyticsRouter } from "@/routes/v1/analytics";
 import { quizRouter } from "@/routes/v1/quiz";
 import { responseRouter } from "@/routes/v1/response";
 import { statsRouter } from "@/routes/v1/stats";
+import { settingsRouter } from "@/routes/v1/settings";
 
 const v1Router = Router();
 
@@ -21,5 +22,6 @@ v1Router.use("/quiz", quizRouter);
 v1Router.use("/analytics", analyticsRouter);
 v1Router.use("/responses", responseRouter);
 v1Router.use("/stats", statsRouter);
+v1Router.use("/settings", settingsRouter);
 
 export { v1Router };
