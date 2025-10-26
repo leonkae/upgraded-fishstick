@@ -42,51 +42,139 @@ const Users = () => {
       try {
         const res = await fetch("http://localhost:3005/api/v1/stats");
         const json = await res.json();
-
         const data = json.data;
-        const recentActivity = data.recentActivity || [];
+        const recentActivity = (data.recentActivity || []).map((r: any) => ({
+          ...r,
+          time: new Date(r.time),
+        }));
 
-        // Handle current stats
-        const current = {
-          totalUsers: data.totalUsers || 0,
-          activeUsers: data.activeUsers || 0,
-          premiumUsers:
-            recentActivity.filter((u: any) => u.result >= 20).length || 0,
-          newToday: data.newToday || 0,
+        // Helpers for ranges
+        const startOfDay = (d: Date) => {
+          const x = new Date(d);
+          x.setHours(0, 0, 0, 0);
+          return x;
+        };
+        const daysAgo = (d: Date, days: number) => {
+          const x = new Date(d);
+          x.setDate(x.getDate() - days);
+          return x;
         };
 
-        // Handle past stats (fallback to same numbers if not provided)
-        const past = data.lastWeek || {
-          totalUsers: current.totalUsers,
-          activeUsers: current.activeUsers,
-          premiumUsers: current.premiumUsers,
-          newToday: current.newToday,
+        const inRange = (t: Date, start: Date, end: Date) =>
+          t >= start && t < end;
+
+        const uniqueEmailsInRange = (arr: any[], start: Date, end: Date) => {
+          const set = new Set<string>();
+          for (const a of arr) {
+            if (inRange(a.time, start, end)) set.add(a.email);
+          }
+          return set.size;
         };
 
-        // Calculate percentage changes
-        const calcChange = (now: number, before: number) => {
-          if (before === 0) return now > 0 ? 100 : 0;
-          return ((now - before) / before) * 100;
+        const countEntriesInRange = (arr: any[], start: Date, end: Date) =>
+          arr.reduce((c, a) => (inRange(a.time, start, end) ? c + 1 : c), 0);
+
+        const countHeavenInRange = (arr: any[], start: Date, end: Date) =>
+          arr.reduce(
+            (c, a) =>
+              inRange(a.time, start, end) && a.result >= 20 ? c + 1 : c,
+            0
+          );
+
+        const now = new Date();
+        const todayStart = startOfDay(now);
+        const yesterdayStart = startOfDay(daysAgo(now, 1));
+
+        // Last 7 days: start = startOfDay(now - 6) (so last 7 full days including today)
+        const last7Start = startOfDay(daysAgo(now, 6));
+        const prev7Start = startOfDay(daysAgo(now, 13));
+        const prev7End = last7Start; // previous 7-day window is [prev7Start, last7Start)
+
+        // CURRENT stats (use server-provided for totals where relevant)
+        const currentTotalUsers = data.totalUsers ?? 0;
+        const currentActiveUsers = data.activeUsers ?? 0;
+        const currentNewToday = data.newToday ?? 0;
+        // premiumUsers: count Heaven (result >=20) in recentActivity (you previously used this)
+        const currentPremium = countHeavenInRange(
+          recentActivity,
+          last7Start,
+          now
+        );
+
+        // DERIVED numbers using recentActivity to compute changes
+        const newUsersLast7 = uniqueEmailsInRange(
+          recentActivity,
+          last7Start,
+          now
+        );
+        const newUsersPrev7 = uniqueEmailsInRange(
+          recentActivity,
+          prev7Start,
+          prev7End
+        );
+
+        const activeLast7 = uniqueEmailsInRange(
+          recentActivity,
+          last7Start,
+          now
+        );
+        const activePrev7 = uniqueEmailsInRange(
+          recentActivity,
+          prev7Start,
+          prev7End
+        );
+
+        const premiumLast7 = countHeavenInRange(
+          recentActivity,
+          last7Start,
+          now
+        );
+        const premiumPrev7 = countHeavenInRange(
+          recentActivity,
+          prev7Start,
+          prev7End
+        );
+
+        const newTodayCount = countEntriesInRange(
+          recentActivity,
+          todayStart,
+          now
+        );
+        const newYesterdayCount = countEntriesInRange(
+          recentActivity,
+          yesterdayStart,
+          todayStart
+        );
+
+        // percent change helper
+        const pctChange = (nowVal: number, prevVal: number) => {
+          if (prevVal === 0) return nowVal === 0 ? 0 : 100;
+          return ((nowVal - prevVal) / prevVal) * 100;
         };
 
-        const delta = {
-          totalUsers: calcChange(current.totalUsers, past.totalUsers),
-          activeUsers: calcChange(current.activeUsers, past.activeUsers),
-          premiumUsers: calcChange(current.premiumUsers, past.premiumUsers),
-          newToday: calcChange(current.newToday, past.newToday),
-        };
+        // Set stats (prefer server totals where provided)
+        setStats({
+          totalUsers: currentTotalUsers,
+          activeUsers: currentActiveUsers,
+          premiumUsers: currentPremium,
+          newToday: currentNewToday,
+        });
 
-        setStats(current);
-        setChanges(delta);
+        // Calculate changes using derived numbers (more meaningful than comparing totals)
+        setChanges({
+          totalUsers: pctChange(newUsersLast7, newUsersPrev7),
+          activeUsers: pctChange(activeLast7, activePrev7),
+          premiumUsers: pctChange(premiumLast7, premiumPrev7),
+          newToday: pctChange(newTodayCount, newYesterdayCount),
+        });
 
-        // Normalize user data
-        const formattedUsers = recentActivity.map((u: any) => ({
+        // Table data
+        const formattedUsers = (data.recentActivity || []).map((u: any) => ({
           name: u.name,
           email: u.email,
           result: u.result,
           time: u.time,
         }));
-
         setUsers(formattedUsers);
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -96,14 +184,14 @@ const Users = () => {
     fetchData();
   }, []);
 
-  // Heaven/Hell/In-between calculation
+  // Heaven/Hell/In-between calculation (kept same)
   const calculateResult = (score: number) => {
     if (score >= 20) return "Heaven";
     if (score >= 10) return "In-Between";
     return "Hell";
   };
 
-  // Determine active/inactive
+  // Determine active/inactive based on last activity (within 7 days)
   const isActive = (time: string) => {
     const now = new Date();
     const last = new Date(time);
@@ -116,25 +204,29 @@ const Users = () => {
       title: "Total Users",
       value: stats.totalUsers.toLocaleString(),
       change: changes.totalUsers,
-      period: "this week",
+      period: "last 7 days",
+      icon: UsersIcon,
     },
     {
       title: "Active Users",
       value: stats.activeUsers.toLocaleString(),
       change: changes.activeUsers,
-      period: "this week",
+      period: "last 7 days",
+      icon: UsersIcon,
     },
     {
       title: "Premium Users",
       value: stats.premiumUsers.toLocaleString(),
       change: changes.premiumUsers,
-      period: "this week",
+      period: "last 7 days",
+      icon: UsersIcon,
     },
     {
       title: "New Today",
       value: stats.newToday.toLocaleString(),
       change: changes.newToday,
       period: "today",
+      icon: UsersIcon,
     },
   ];
 
@@ -147,8 +239,7 @@ const Users = () => {
           <p className="text-gray-600 mt-2">Monitor and manage user accounts</p>
         </div>
         <Button className="bg-purple-700 hover:bg-purple-800 w-fit">
-          <Plus className="w-4 h-4 mr-2" />
-          Add User
+          <Plus className="w-4 h-4 mr-2" /> Add User
         </Button>
       </div>
 
@@ -168,14 +259,12 @@ const Users = () => {
                 <CardTitle className="text-sm font-medium text-gray-600">
                   {stat.title}
                 </CardTitle>
-                <UsersIcon className="h-4 w-4 text-purple-600" />
+                <stat.icon className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <p
-                  className={`text-xs mt-1 ${
-                    isPositive ? "text-green-600" : "text-red-600"
-                  }`}
+                  className={`text-xs mt-1 ${isPositive ? "text-green-600" : "text-red-600"}`}
                 >
                   {isPositive ? "+" : ""}
                   {stat.change.toFixed(1)}% {stat.period}
