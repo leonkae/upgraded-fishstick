@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X, Plus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface Option {
   id: number | string;
   text: string;
   score: number;
+  _id?: string;
 }
 
 interface QuestionFormProps {
@@ -28,31 +30,61 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   onSave,
   onCancel,
 }) => {
-  // Initialize question text from prop (edit mode) or empty string (create mode)
-  const [text, setText] = useState(question?.text || "");
+  useEffect(() => {
+    console.log("QuestionForm: Incoming question prop:", question);
+    if (question) {
+      console.log("QuestionForm: Incoming question options:", question.options);
+      setText(question.text || "");
+      const mappedOptions =
+        (question.options as any[])?.map((o) => {
+          const option = {
+            id: o.id || o._id || crypto.randomUUID(),
+            text: o.text ?? "", // Rely on text, as it should be mapped from API's label
+            score: o.score ?? 0,
+          };
+          console.log("QuestionForm: Mapped option:", option);
+          return option;
+        }) || [];
+      setOptions(mappedOptions);
+    } else {
+      const defaultOptions = [
+        { id: crypto.randomUUID(), text: "", score: 10 },
+        { id: crypto.randomUUID(), text: "", score: 7 },
+        { id: crypto.randomUUID(), text: "", score: 5 },
+        { id: crypto.randomUUID(), text: "", score: 2 },
+        { id: crypto.randomUUID(), text: "", score: 0 },
+      ];
+      console.log("QuestionForm: Default options:", defaultOptions);
+      setText("");
+      setOptions(defaultOptions);
+    }
+  }, [question]);
 
-  // Initialize options from prop (edit mode) or default options (create mode)
+  const [text, setText] = useState(question?.text || "");
   const [options, setOptions] = useState<Option[]>(
-    question?.options?.map((o) => {
-      // Log if o.text is undefined for debugging
-      if (o.text === undefined) {
-        console.warn(`Option with id ${o.id} has undefined text`, o);
-      }
-      return {
-        id: o.id || crypto.randomUUID(),
-        text: o.text ?? "", // Fallback to empty string if text is undefined
-        score: o.score ?? 0, // Fallback for score as well
-      };
-    }) || [
-      { id: crypto.randomUUID(), text: "", score: 10 },
-      { id: crypto.randomUUID(), text: "", score: 7 },
-      { id: crypto.randomUUID(), text: "", score: 5 },
-      { id: crypto.randomUUID(), text: "", score: 2 },
-      { id: crypto.randomUUID(), text: "", score: 0 },
-    ]
+    question?.options && question.options.length > 0
+      ? question.options.map((o) => {
+          const option = {
+            id: o.id || crypto.randomUUID(),
+            text: o.text ?? "", // Rely on text
+            score: o.score ?? 0,
+          };
+          console.log("QuestionForm: Initial state mapped option:", option);
+          return option;
+        })
+      : [
+          { id: crypto.randomUUID(), text: "", score: 10 },
+          { id: crypto.randomUUID(), text: "", score: 7 },
+          { id: crypto.randomUUID(), text: "", score: 5 },
+          { id: crypto.randomUUID(), text: "", score: 2 },
+          { id: crypto.randomUUID(), text: "", score: 0 },
+        ]
   );
 
-  // Update a specific option's text or score
+  useEffect(() => {
+    console.log("QuestionForm: Options state after setOptions:", options);
+  }, [options]);
+
   const updateOption = (
     index: number,
     field: "text" | "score",
@@ -63,22 +95,25 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     setOptions(newOptions);
   };
 
-  // Add a new empty option
   const addOption = () => {
-    setOptions([...options, { id: crypto.randomUUID(), text: "", score: 0 }]);
+    const newOption = { id: crypto.randomUUID(), text: "", score: 0 };
+    console.log("QuestionForm: Adding new option:", newOption);
+    setOptions([...options, newOption]);
   };
 
-  // Remove an option if more than 2 exist
   const removeOption = (index: number) => {
     if (options.length > 2) {
+      console.log(
+        "QuestionForm: Removing option at index:",
+        index,
+        options[index]
+      );
       setOptions(options.filter((_, i) => i !== index));
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate: ensure question text and all option texts are non-empty
     if (!text.trim() || options.some((opt) => !opt.text.trim())) return;
 
     const isEditing = !!question?._id;
@@ -88,8 +123,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
     const payload = {
       text: text.trim(),
-      options: options.map((o) => ({ text: o.text.trim(), score: o.score })),
+      options: options.map((o) => ({ label: o.text.trim(), score: o.score })), // API expects label
     };
+    console.log("QuestionForm: Submitting payload:", payload);
 
     try {
       const res = await fetch(url, {
@@ -102,33 +138,41 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
       const saved = await res.json();
       const responseData = saved.question || saved.data?.question || saved.data;
+      console.log("QuestionForm: API response:", responseData);
 
-      // Normalize response to match local Question structure
       const normalized = {
         _id: responseData._id,
         text: responseData.text,
-        options: (responseData.options || []).map((o: any) => ({
-          id: o._id || crypto.randomUUID(),
-          text: o.text ?? "", // Fallback to empty string
-          score: o.score ?? 0,
-        })),
+        options: (responseData.options || []).map((o: any) => {
+          const option = {
+            id: o._id || crypto.randomUUID(),
+            text: o.label ?? o.text ?? "", // Handle both label and text
+            score: o.score ?? 0,
+          };
+          console.log("QuestionForm: Normalized response option:", option);
+          return option;
+        }),
       };
 
       onSave(normalized);
 
-      // Reset form only in creation mode
       if (!isEditing) {
         setText("");
-        setOptions([
+        const defaultOptions = [
           { id: crypto.randomUUID(), text: "", score: 10 },
           { id: crypto.randomUUID(), text: "", score: 7 },
           { id: crypto.randomUUID(), text: "", score: 5 },
           { id: crypto.randomUUID(), text: "", score: 2 },
           { id: crypto.randomUUID(), text: "", score: 0 },
-        ]);
+        ];
+        console.log(
+          "QuestionForm: Resetting to default options:",
+          defaultOptions
+        );
+        setOptions(defaultOptions);
       }
     } catch (err) {
-      console.error("Error saving question:", err);
+      console.error("QuestionForm: Error saving question:", err);
     }
   };
 
@@ -157,44 +201,53 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               Answer Options
             </label>
             <div className="space-y-3">
-              {options.map((option, index) => (
-                <div key={option.id} className="flex gap-2 items-center">
-                  <Input
-                    value={option.text}
-                    onChange={(e) =>
-                      updateOption(index, "text", e.target.value)
-                    }
-                    placeholder={question ? "" : `Option ${index + 1}`}
-                    className="flex-1"
-                    required
-                  />
-                  <Input
-                    type="number"
-                    value={option.score}
-                    onChange={(e) =>
-                      updateOption(
-                        index,
-                        "score",
-                        parseInt(e.target.value) || 0
-                      )
-                    }
-                    placeholder="Score"
-                    className="w-20"
-                    min="0"
-                    max="10"
-                  />
-                  {options.length > 2 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeOption(index)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+              {options.map((option, index) => {
+                // Debug: Log option before rendering
+                console.log("QuestionForm: Rendering option:", {
+                  index,
+                  option,
+                });
+                return (
+                  <div key={option.id} className="flex gap-2 items-center">
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        value={option.text}
+                        onChange={(e) =>
+                          updateOption(index, "text", e.target.value)
+                        }
+                        placeholder={`Enter option ${index + 1}`}
+                        className="flex-1"
+                        required
+                      />
+                    </div>
+                    <Input
+                      type="number"
+                      value={option.score}
+                      onChange={(e) =>
+                        updateOption(
+                          index,
+                          "score",
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                      placeholder="Score"
+                      className="w-20"
+                      min="0"
+                      max="10"
+                    />
+                    {options.length > 2 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeOption(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <Button
               type="button"
