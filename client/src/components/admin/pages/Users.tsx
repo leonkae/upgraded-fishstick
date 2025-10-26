@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,53 +15,126 @@ import {
 } from "@/components/ui/table";
 import { Users as UsersIcon, Search, Plus, MoreHorizontal } from "lucide-react";
 
+interface User {
+  name: string;
+  email: string;
+  result: number;
+  time: string;
+}
+
 const Users = () => {
-  const stats = [
+  const [users, setUsers] = useState<User[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    premiumUsers: 0,
+    newToday: 0,
+  });
+  const [changes, setChanges] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    premiumUsers: 0,
+    newToday: 0,
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:3005/api/v1/stats");
+        const json = await res.json();
+
+        const data = json.data;
+        const recentActivity = data.recentActivity || [];
+
+        // Handle current stats
+        const current = {
+          totalUsers: data.totalUsers || 0,
+          activeUsers: data.activeUsers || 0,
+          premiumUsers:
+            recentActivity.filter((u: any) => u.result >= 20).length || 0,
+          newToday: data.newToday || 0,
+        };
+
+        // Handle past stats (fallback to same numbers if not provided)
+        const past = data.lastWeek || {
+          totalUsers: current.totalUsers,
+          activeUsers: current.activeUsers,
+          premiumUsers: current.premiumUsers,
+          newToday: current.newToday,
+        };
+
+        // Calculate percentage changes
+        const calcChange = (now: number, before: number) => {
+          if (before === 0) return now > 0 ? 100 : 0;
+          return ((now - before) / before) * 100;
+        };
+
+        const delta = {
+          totalUsers: calcChange(current.totalUsers, past.totalUsers),
+          activeUsers: calcChange(current.activeUsers, past.activeUsers),
+          premiumUsers: calcChange(current.premiumUsers, past.premiumUsers),
+          newToday: calcChange(current.newToday, past.newToday),
+        };
+
+        setStats(current);
+        setChanges(delta);
+
+        // Normalize user data
+        const formattedUsers = recentActivity.map((u: any) => ({
+          name: u.name,
+          email: u.email,
+          result: u.result,
+          time: u.time,
+        }));
+
+        setUsers(formattedUsers);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Heaven/Hell/In-between calculation
+  const calculateResult = (score: number) => {
+    if (score >= 20) return "Heaven";
+    if (score >= 10) return "In-Between";
+    return "Hell";
+  };
+
+  // Determine active/inactive
+  const isActive = (time: string) => {
+    const now = new Date();
+    const last = new Date(time);
+    const diffDays = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays <= 7;
+  };
+
+  const statCards = [
     {
       title: "Total Users",
-      value: "10,482",
-      change: "+12% this week",
-      icon: UsersIcon,
+      value: stats.totalUsers.toLocaleString(),
+      change: changes.totalUsers,
+      period: "this week",
     },
     {
       title: "Active Users",
-      value: "8,245",
-      change: "+8% this week",
-      icon: UsersIcon,
+      value: stats.activeUsers.toLocaleString(),
+      change: changes.activeUsers,
+      period: "this week",
     },
     {
       title: "Premium Users",
-      value: "1,234",
-      change: "+5% this week",
-      icon: UsersIcon,
-    },
-    { title: "New Today", value: "128", change: "+15% today", icon: UsersIcon },
-  ];
-
-  const users = [
-    {
-      name: "Sarah Johnson",
-      email: "sarah.j@example.com",
-      status: "Active",
-      result: "Heaven",
-      joined: "May 1, 2025",
-      avatar: "👩‍💼",
+      value: stats.premiumUsers.toLocaleString(),
+      change: changes.premiumUsers,
+      period: "this week",
     },
     {
-      name: "Michael Chen",
-      email: "m.chen@example.com",
-      status: "Pending",
-      result: "In-Between",
-      joined: "May 1, 2025",
-      avatar: "👨‍💻",
-    },
-    {
-      name: "David Wilson",
-      email: "d.wilson@example.com",
-      status: "Inactive",
-      result: "Hell",
-      joined: "May 1, 2025",
-      avatar: "👨‍🎓",
+      title: "New Today",
+      value: stats.newToday.toLocaleString(),
+      change: changes.newToday,
+      period: "today",
     },
   ];
 
@@ -87,20 +160,30 @@ const Users = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-green-600 mt-1">{stat.change}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {statCards.map((stat, index) => {
+          const isPositive = stat.change >= 0;
+          return (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  {stat.title}
+                </CardTitle>
+                <UsersIcon className="h-4 w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p
+                  className={`text-xs mt-1 ${
+                    isPositive ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {isPositive ? "+" : ""}
+                  {stat.change.toFixed(1)}% {stat.period}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Users Table */}
@@ -115,6 +198,7 @@ const Users = () => {
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Quiz Score</TableHead>
                 <TableHead>Quiz Result</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead>Actions</TableHead>
@@ -126,7 +210,7 @@ const Users = () => {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                        {user.avatar}
+                        👤
                       </div>
                       <span className="font-medium">{user.name}</span>
                     </div>
@@ -134,19 +218,16 @@ const Users = () => {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        user.status === "Active"
-                          ? "default"
-                          : user.status === "Pending"
-                            ? "secondary"
-                            : "destructive"
-                      }
+                      variant={isActive(user.time) ? "default" : "destructive"}
                     >
-                      {user.status}
+                      {isActive(user.time) ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell>{user.result}</TableCell>
-                  <TableCell>{user.joined}</TableCell>
+                  <TableCell>{calculateResult(user.result)}</TableCell>
+                  <TableCell>
+                    {new Date(user.time).toLocaleDateString()}
+                  </TableCell>
                   <TableCell>
                     <Button variant="ghost" size="sm">
                       <MoreHorizontal className="w-4 h-4" />
@@ -160,7 +241,7 @@ const Users = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing 1 to 3 of 100 entries
+              Showing {users.length} entries
             </p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
