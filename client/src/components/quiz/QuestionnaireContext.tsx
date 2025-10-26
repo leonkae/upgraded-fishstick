@@ -67,7 +67,7 @@ interface QuestionnaireContextType {
   setCurrentStep: (step: "welcome" | "question" | "payment" | "result") => void;
   calculateScore: () => number;
   resetQuestionnaire: () => void;
-  // ⭐ NEW function to expose the correctly formatted data for the API
+
   getSubmissionPayload: () => ServerPayload;
   addQuestion: (question: Omit<Question, "id">) => void;
   updateQuestion: (id: number, question: Omit<Question, "id">) => void;
@@ -350,7 +350,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
         setCurrentStep,
         calculateScore,
         resetQuestionnaire,
-        getSubmissionPayload, // ⭐ EXPOSE THE NEW FUNCTION
+        getSubmissionPayload,
         addQuestion,
         updateQuestion,
         deleteQuestion,
