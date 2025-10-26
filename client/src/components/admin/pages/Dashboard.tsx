@@ -32,7 +32,7 @@ const Dashboard = () => {
 
         if (data.success) {
           setStats(data.data);
-          setRecentActivities(data.data.recentActivity || []); // ✅ fixed key name
+          setRecentActivities(data.data.recentActivity || []);
         }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);

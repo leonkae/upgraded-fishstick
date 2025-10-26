@@ -92,7 +92,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     "welcome" | "question" | "payment" | "result"
   >("welcome");
 
-  // Load progress and set step (FIRST useEffect - unchanged)
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
@@ -113,7 +112,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     phone: "",
   });
 
-  // Load progress and set answers/index/userInfo (SECOND useEffect - unchanged)
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
@@ -139,7 +137,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  // Persist progress to localStorage (THIRD useEffect - unchanged, handles local storage legacy format)
   useEffect(() => {
     const answersForSaving: Record<string, number> = {};
 
@@ -165,11 +162,8 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     });
   }, [answers, currentQuestionIndex, currentStep, userInfo, questionsState]);
 
-  // Fetch quiz questions from backend (unchanged)
   useEffect(() => {
     const fetchQuestions = async () => {
-      // ... (API fetch logic is unchanged)
-
       try {
         const res = await fetch("http://localhost:3005/api/v1/quiz");
         const data = await res.json();
@@ -257,9 +251,9 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
       responsesPayload.push({
         questionId: question.id,
         questionText: question.text,
-        optionId: selectedOption.id, // Required: Option ID (string)
-        selectedOption: selectedOption.text, // Required: Option Text (string)
-        score: selectedOption.value, // Required: Score (number) - FIXES the Cast to Number error
+        optionId: selectedOption.id,
+        selectedOption: selectedOption.text,
+        score: selectedOption.value,
       });
     });
 
@@ -269,7 +263,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     };
   };
 
-  // ... (rest of context functions are correct and unchanged)
   const nextQuestion = () => {
     if (currentQuestionIndex < questionsState.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -294,7 +287,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     clearQuizProgress();
   };
 
-  // Admin functions
   const addQuestion = (question: Omit<Question, "id">) => {
     const newId =
       questionsState.length > 0

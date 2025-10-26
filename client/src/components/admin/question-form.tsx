@@ -39,7 +39,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         (question.options as any[])?.map((o) => {
           const option = {
             id: o.id || o._id || crypto.randomUUID(),
-            text: o.text ?? "", // Rely on text, as it should be mapped from API's label
+            text: o.text ?? "",
             score: o.score ?? 0,
           };
           console.log("QuestionForm: Mapped option:", option);
@@ -123,7 +123,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
     const payload = {
       text: text.trim(),
-      options: options.map((o) => ({ label: o.text.trim(), score: o.score })), // API expects label
+      options: options.map((o) => ({ label: o.text.trim(), score: o.score })),
     };
     console.log("QuestionForm: Submitting payload:", payload);
 

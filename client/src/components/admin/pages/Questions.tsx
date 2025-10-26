@@ -103,8 +103,8 @@ const Questions = () => {
                   text: editingQuestion.text,
                   options: editingQuestion.options.map((o) => ({
                     id: o.id,
-                    label: o.text, // map text → label
-                    score: o.value, // map value → score
+                    text: o.text,
+                    score: o.value,
                   })),
                 }
               : undefined

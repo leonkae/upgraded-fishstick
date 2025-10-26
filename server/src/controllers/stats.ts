@@ -43,7 +43,7 @@ export const getStats = async (req: Request, res: Response) => {
         activeUsers,
         // premiumUsers,
         newToday,
-        recentActivity, // or merged if combining
+        recentActivity,
       },
     });
   } catch (err) {
