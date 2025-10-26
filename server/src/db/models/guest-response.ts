@@ -13,6 +13,8 @@ interface IGuestResponse extends Document {
     selectedOption: string;
     score: number;
   }[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const guestResponseSchema = new Schema<IGuestResponse>(
