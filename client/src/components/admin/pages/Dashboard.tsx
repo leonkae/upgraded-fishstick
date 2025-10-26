@@ -7,8 +7,8 @@ import { Users, TrendingUp, Star, UserPlus } from "lucide-react";
 interface StatData {
   totalUsers: number;
   activeUsers: number;
-  premiumUsers?: number;
   newToday: number;
+  recentActivity: Activity[];
 }
 
 interface Activity {
@@ -21,7 +21,6 @@ interface Activity {
 
 const Dashboard = () => {
   const [stats, setStats] = useState<StatData | null>(null);
-  const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +31,6 @@ const Dashboard = () => {
 
         if (data.success) {
           setStats(data.data);
-          setRecentActivities(data.data.recentActivity || []);
         }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
@@ -43,6 +41,22 @@ const Dashboard = () => {
 
     fetchStats();
   }, []);
+
+  // Helper to interpret quiz result
+  const getResultLabel = (score: number): string => {
+    if (score >= 20) return "Heaven";
+    if (score >= 10) return "In-Between";
+    return "Hell";
+  };
+
+  // Derive premium user count from recentActivity
+  const getPremiumCount = (): number => {
+    return (
+      stats?.recentActivity.filter(
+        (activity) => getResultLabel(activity.result) === "Heaven"
+      ).length || 0
+    );
+  };
 
   if (loading) {
     return (
@@ -74,10 +88,10 @@ const Dashboard = () => {
       color: "text-green-600",
     },
     {
-      title: "Premium Users",
-      value: stats.premiumUsers?.toLocaleString() || "0",
+      title: "Premium Users (Heaven)",
+      value: getPremiumCount().toLocaleString(),
       icon: Star,
-      color: "text-purple-600",
+      color: "text-yellow-600",
     },
     {
       title: "New Today",
@@ -118,11 +132,11 @@ const Dashboard = () => {
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          {recentActivities.length === 0 ? (
+          {stats.recentActivity.length === 0 ? (
             <p className="text-gray-500 text-sm">No recent activity yet.</p>
           ) : (
             <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
+              {stats.recentActivity.map((activity, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
@@ -133,7 +147,7 @@ const Dashboard = () => {
                       {activity.name} — {activity.email}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Result: {activity.result}
+                      Result: {getResultLabel(activity.result)}
                     </p>
                   </div>
                   <span className="text-sm text-gray-500">
