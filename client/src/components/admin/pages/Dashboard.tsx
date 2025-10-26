@@ -1,43 +1,95 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, HelpCircle, BarChart3, TrendingUp } from "lucide-react";
+import { Users, TrendingUp, Star, UserPlus } from "lucide-react";
+
+interface StatData {
+  totalUsers: number;
+  activeUsers: number;
+  premiumUsers?: number;
+  newToday: number;
+}
+
+interface Activity {
+  type: string;
+  name: string;
+  email: string;
+  time: string;
+  result: number;
+}
 
 const Dashboard = () => {
-  const stats = [
+  const [stats, setStats] = useState<StatData | null>(null);
+  const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:3005/api/v1/stats");
+        const data = await res.json();
+
+        if (data.success) {
+          setStats(data.data);
+          setRecentActivities(data.data.recentActivity || []); // ✅ fixed key name
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh] text-gray-600">
+        Loading dashboard...
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex justify-center items-center h-[60vh] text-red-600">
+        Failed to load data.
+      </div>
+    );
+  }
+
+  const statCards = [
     {
       title: "Total Users",
-      value: "10,482",
-      change: "+12% this week",
+      value: stats.totalUsers.toLocaleString(),
       icon: Users,
       color: "text-blue-600",
     },
     {
-      title: "Active Users",
-      value: "8,245",
-      change: "+8% this week",
+      title: "Active Users (7d)",
+      value: stats.activeUsers.toLocaleString(),
       icon: TrendingUp,
       color: "text-green-600",
     },
     {
       title: "Premium Users",
-      value: "1,234",
-      change: "+5% this week",
-      icon: Users,
+      value: stats.premiumUsers?.toLocaleString() || "0",
+      icon: Star,
       color: "text-purple-600",
     },
     {
       title: "New Today",
-      value: "128",
-      change: "+15% today",
-      icon: Users,
+      value: stats.newToday.toLocaleString(),
+      icon: UserPlus,
       color: "text-orange-600",
     },
   ];
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-2">Welcome to your admin dashboard</p>
@@ -45,7 +97,7 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">
@@ -55,7 +107,6 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-green-600 mt-1">{stat.change}</p>
             </CardContent>
           </Card>
         ))}
@@ -67,29 +118,31 @@ const Dashboard = () => {
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">New user registered</p>
-                <p className="text-sm text-gray-600">sarah.j@example.com</p>
-              </div>
-              <span className="text-sm text-gray-500">2 minutes ago</span>
+          {recentActivities.length === 0 ? (
+            <p className="text-gray-500 text-sm">No recent activity yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {recentActivities.map((activity, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium">{activity.type}</p>
+                    <p className="text-sm text-gray-600">
+                      {activity.name} — {activity.email}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Result: {activity.result}
+                    </p>
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {new Date(activity.time).toLocaleString()}
+                  </span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">Quiz completed</p>
-                <p className="text-sm text-gray-600">Result: Heaven</p>
-              </div>
-              <span className="text-sm text-gray-500">5 minutes ago</span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">Payment received</p>
-                <p className="text-sm text-gray-600">$10.00 donation</p>
-              </div>
-              <span className="text-sm text-gray-500">10 minutes ago</span>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
