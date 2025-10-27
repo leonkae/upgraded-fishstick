@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { useQuestionnaire } from "./QuestionnaireContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,33 +21,25 @@ const PaymentScreen: React.FC = () => {
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
 
+  // Sync local state with context userInfo if it changes externally
+  useEffect(() => {
+    setName(userInfo.name || "");
+    setEmail(userInfo.email || "");
+    setPhone(userInfo.phone || "");
+  }, [userInfo]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Save user info to context (This is still correct)
+    // Update userInfo in context with current form values
     setUserInfo({ name, email, phone });
 
-    // REMOVED: The manual, incorrect payload creation logic.
-    /*
+    // Create payload with form values directly to avoid context sync issues
     const payload = {
-      userInfo: { name, email, phone },
-      responses: Object.entries(answers).map(([questionId, value]) => {
-        const question = questions.find((q) => q.id === questionId);
-        const option = question?.options.find((opt) => opt.value === value);
-        return {
-          questionId,
-          optionId: option?.id,
-          questionText: question?.text,
-          selectedOption: option?.text,
-          score: value, // This was the error: sending Option ID string or Option score number, but missing context for other required fields.
-        };
-      }),
+      ...getSubmissionPayload(),
+      userInfo: { name, email, phone }, // Override userInfo with local state
     };
-    */
-
-    // NEW: Use the pre-validated payload generator from the context
-    const payload = getSubmissionPayload();
 
     try {
       const res = await fetch("http://localhost:3005/api/v1/responses", {
@@ -56,17 +47,15 @@ const PaymentScreen: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload), // Send the correctly formatted payload
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        // Log the server error response for debugging
         const errorData = await res.json();
         console.error("Server error response:", errorData);
         throw new Error("Failed to save submission");
       }
 
-      // Simulate payment + success flow
       setTimeout(() => {
         setIsProcessing(false);
         setIsCompleted(true);
