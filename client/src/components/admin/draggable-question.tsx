@@ -11,7 +11,7 @@ interface DraggableQuestionProps {
   question: Question;
   index: number;
   onEdit: (question: Question) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => Promise<void>; // Change to string and Promise<void>
   onDragStart: (e: React.DragEvent, index: number) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, dropIndex: number) => void;
@@ -65,7 +65,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDelete(parseInt(question.id))}
+            onClick={async () => await onDelete(question.id)}
           >
             <Trash2 className="w-4 h-4 text-red-600" />
           </Button>
