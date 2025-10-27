@@ -36,12 +36,18 @@ const Users = () => {
     premiumUsers: 0,
     newToday: 0,
   });
+  const [page, setPage] = useState(1);
+  const limit = 5;
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:3005/api/v1/stats");
+        const res = await fetch(
+          `http://localhost:3005/api/v1/stats?page=${page}&limit=${limit}`
+        );
         const json = await res.json();
+        if (!json.success) throw new Error(json.message || "API error");
         const data = json.data;
         const recentActivity = (data.recentActivity || []).map((r: any) => ({
           ...r,
@@ -88,20 +94,19 @@ const Users = () => {
         // Last 7 days: start = startOfDay(now - 6) (so last 7 full days including today)
         const last7Start = startOfDay(daysAgo(now, 6));
         const prev7Start = startOfDay(daysAgo(now, 13));
-        const prev7End = last7Start; // previous 7-day window is [prev7Start, last7Start)
+        const prev7End = last7Start;
 
-        // CURRENT stats (use server-provided for totals where relevant)
+        // CURRENT stats
         const currentTotalUsers = data.totalUsers ?? 0;
         const currentActiveUsers = data.activeUsers ?? 0;
         const currentNewToday = data.newToday ?? 0;
-        // premiumUsers: count Heaven (result >=20) in recentActivity (you previously used this)
         const currentPremium = countHeavenInRange(
           recentActivity,
           last7Start,
           now
         );
 
-        // DERIVED numbers using recentActivity to compute changes
+        // DERIVED numbers for changes
         const newUsersLast7 = uniqueEmailsInRange(
           recentActivity,
           last7Start,
@@ -112,7 +117,6 @@ const Users = () => {
           prev7Start,
           prev7End
         );
-
         const activeLast7 = uniqueEmailsInRange(
           recentActivity,
           last7Start,
@@ -123,7 +127,6 @@ const Users = () => {
           prev7Start,
           prev7End
         );
-
         const premiumLast7 = countHeavenInRange(
           recentActivity,
           last7Start,
@@ -134,7 +137,6 @@ const Users = () => {
           prev7Start,
           prev7End
         );
-
         const newTodayCount = countEntriesInRange(
           recentActivity,
           todayStart,
@@ -146,13 +148,13 @@ const Users = () => {
           todayStart
         );
 
-        // percent change helper
+        // Percent change helper
         const pctChange = (nowVal: number, prevVal: number) => {
           if (prevVal === 0) return nowVal === 0 ? 0 : 100;
           return ((nowVal - prevVal) / prevVal) * 100;
         };
 
-        // Set stats (prefer server totals where provided)
+        // Set stats
         setStats({
           totalUsers: currentTotalUsers,
           activeUsers: currentActiveUsers,
@@ -160,7 +162,7 @@ const Users = () => {
           newToday: currentNewToday,
         });
 
-        // Calculate changes using derived numbers (more meaningful than comparing totals)
+        // Set changes
         setChanges({
           totalUsers: pctChange(newUsersLast7, newUsersPrev7),
           activeUsers: pctChange(activeLast7, activePrev7),
@@ -176,15 +178,18 @@ const Users = () => {
           time: u.time,
         }));
         setUsers(formattedUsers);
+
+        // Calculate total pages using totalCount from API
+        setTotalPages(Math.ceil((data.totalCount || 1) / limit));
       } catch (err) {
         console.error("Error fetching stats:", err);
       }
     };
 
     fetchData();
-  }, []);
+  }, [page]);
 
-  // Heaven/Hell/In-between calculation (kept same)
+  // Heaven/Hell/In-between calculation
   const calculateResult = (score: number) => {
     if (score >= 20) return "Heaven";
     if (score >= 10) return "In-Between";
@@ -330,26 +335,37 @@ const Users = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {users.length} entries
+              Showing {users.length} of {stats.totalUsers} entries
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                Previous
-              </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-purple-700 text-white"
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                disabled={page === 1}
               >
-                1
+                Previous
               </Button>
-              <Button variant="outline" size="sm">
-                2
-              </Button>
-              <Button variant="outline" size="sm">
-                3
-              </Button>
-              <Button variant="outline" size="sm">
+              {Array.from(
+                { length: Math.min(totalPages, 3) },
+                (_, i) => i + 1
+              ).map((num) => (
+                <Button
+                  key={num}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(num)}
+                  className={page === num ? "bg-purple-700 text-white" : ""}
+                >
+                  {num}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((prev) => prev + 1)}
+                disabled={page === totalPages}
+              >
                 Next
               </Button>
             </div>
