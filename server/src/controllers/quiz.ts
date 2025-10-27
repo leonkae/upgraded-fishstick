@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { isValidObjectId } from "mongoose";
 
 import { Question, Option } from "@/db/models";
 import { withTransaction } from "@/utils/db";
@@ -104,7 +105,34 @@ export const updateQuiz = async (req: Request, res: Response) => {
 
 export const deleteQuiz = async (req: Request, res: Response) => {
   const { id } = req.params;
-  await Option.deleteMany({ question: id });
-  await Question.findByIdAndDelete(id);
-  res.status(204).end();
+
+  // Validate ObjectId
+  if (!isValidObjectId(id)) {
+    return respond(res, { message: "Invalid question ID" }, 400);
+  }
+
+  try {
+    const deleted = await withTransaction(async (session) => {
+      // Check if question exists
+      const question = await Question.findById(id).session(session);
+      if (!question) {
+        throw new Error("Question not found");
+      }
+
+      // Delete associated options and question
+      await Option.deleteMany({ question: id }, { session });
+      await Question.findByIdAndDelete(id, { session });
+
+      return true;
+    });
+
+    if (deleted) {
+      return res.status(204).end(); // Success, no content
+    }
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to delete question";
+    return respond(res, { message: errorMessage }, 400);
+  }
 };
