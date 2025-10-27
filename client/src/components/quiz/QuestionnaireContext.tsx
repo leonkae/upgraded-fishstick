@@ -70,8 +70,8 @@ interface QuestionnaireContextType {
 
   getSubmissionPayload: () => ServerPayload;
   addQuestion: (question: Omit<Question, "id">) => void;
-  updateQuestion: (id: number, question: Omit<Question, "id">) => void;
-  deleteQuestion: (id: number) => void;
+  updateQuestion: (id: string, question: Omit<Question, "id">) => void;
+  deleteQuestion: (id: string) => void;
   reorderQuestions: (fromIndex: number, toIndex: number) => void;
   setQuestions: (questions: Question[]) => void;
 }
@@ -290,25 +290,26 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   const addQuestion = (question: Omit<Question, "id">) => {
     const newId =
       questionsState.length > 0
-        ? Math.max(...questionsState.map((q) => Number(q.id) || 0)) + 1
-        : 1;
-    const newQuestion = { ...question, id: newId.toString() };
+        ? (
+            Math.max(...questionsState.map((q) => Number(q.id) || 0)) + 1
+          ).toString()
+        : "1";
+    const newQuestion = { ...question, id: newId };
     setQuestionsState([...questionsState, newQuestion]);
   };
 
-  const updateQuestion = (id: number, question: Omit<Question, "id">) => {
+  const updateQuestion = (id: string, question: Omit<Question, "id">) => {
     setQuestionsState((prev) =>
-      prev.map((q) =>
-        q.id === id.toString() ? { ...question, id: id.toString() } : q
-      )
+      prev.map((q) => (q.id === id ? { ...question, id: id } : q))
     );
   };
 
-  const deleteQuestion = (id: number) => {
-    setQuestionsState((prev) => prev.filter((q) => q.id !== id.toString()));
+  const deleteQuestion = (id: string) => {
+    // Change from number to string
+    setQuestionsState((prev) => prev.filter((q) => q.id !== id));
     setAnswers((prev) => {
       const newAnswers = { ...prev };
-      delete newAnswers[id.toString()];
+      delete newAnswers[id];
       return newAnswers;
     });
   };
