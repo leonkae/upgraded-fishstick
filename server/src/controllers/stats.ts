@@ -5,6 +5,15 @@ import { GuestResponseModel } from "@/db/models/guest-response";
 
 export const getStats = async (req: Request, res: Response) => {
   try {
+    // Extract page and limit from query parameters, with defaults
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // Get total count of records for pagination
+    const totalCount = await GuestResponseModel.countDocuments({});
+
+    // Calculate stats
     const totalUsers = await GuestResponseModel.distinct("userInfo.email").then(
       (arr) => arr.length
     );
@@ -23,9 +32,11 @@ export const getStats = async (req: Request, res: Response) => {
       createdAt: { $gte: today },
     });
 
+    // Fetch paginated recent quiz data
     const recentQuiz = await GuestResponseModel.find({})
       .sort({ createdAt: -1 })
-      .limit(5)
+      .skip(skip)
+      .limit(limit)
       .lean();
 
     const recentActivity = recentQuiz.map((item) => ({
@@ -44,6 +55,7 @@ export const getStats = async (req: Request, res: Response) => {
         // premiumUsers,
         newToday,
         recentActivity,
+        totalCount, // Include total count for frontend pagination
       },
     });
   } catch (err) {
