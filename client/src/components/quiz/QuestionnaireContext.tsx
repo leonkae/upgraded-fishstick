@@ -1,5 +1,4 @@
 // QuestionnaireContext.tsx
-
 "use client";
 import {
   saveQuizProgress,
@@ -52,6 +51,23 @@ interface ServerPayload {
   responses: ServerResponse[];
 }
 
+// Final result shape the backend returns (loosely typed)
+interface FinalResult {
+  _id?: string;
+  userInfo?: UserInfo;
+  responses?: Array<{
+    questionId: string;
+    optionId: string;
+    questionText?: string;
+    selectedOption?: string;
+    score?: number;
+    _id?: string;
+  }>;
+  createdAt?: string;
+  updatedAt?: string;
+  [k: string]: any;
+}
+
 // Define context type
 interface QuestionnaireContextType {
   questions: Question[];
@@ -74,6 +90,10 @@ interface QuestionnaireContextType {
   deleteQuestion: (id: string) => void;
   reorderQuestions: (fromIndex: number, toIndex: number) => void;
   setQuestions: (questions: Question[]) => void;
+
+  // NEW: finalResult and helper to fetch it
+  finalResult: FinalResult | null;
+  fetchFinalResult: (responseId?: string) => Promise<FinalResult | null>;
 }
 
 const QuestionnaireContext = createContext<QuestionnaireContextType>(
@@ -92,52 +112,59 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     "welcome" | "question" | "payment" | "result"
   >("welcome");
 
-  useEffect(() => {
-    const saved = loadQuizProgress();
-    if (saved) {
-      if (
-        (saved.currentQuestionIndex && saved.currentQuestionIndex > 0) ||
-        Object.keys(saved.answers || {}).length > 0
-      ) {
-        setCurrentStep("question");
-      } else {
-        setCurrentStep(saved.currentStep || "welcome");
-      }
-    }
-  }, []);
-
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: "",
     email: "",
     phone: "",
   });
 
+  // finalResult holds the authoritative server copy of the saved submission
+  const [finalResult, setFinalResult] = useState<FinalResult | null>(null);
+
+  // SINGLE initialization effect: load saved quiz progress (no duplicate effects)
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
-      if (saved.answers) {
-        const normalizedAnswers: AnswersRecord = {};
-        Object.entries(saved.answers).forEach(([qId, opt]) => {
-          normalizedAnswers[qId] = String(opt);
+      // answers stored in saved are numeric scores (legacy). We expect Option IDs in memory,
+      // but we can only restore what we have. If saved.answers are numeric, we can't map back to option IDs here.
+      // We still set currentQuestionIndex and userInfo, and restore currentStep (if present).
+      // NOTE: saved.answers may be legacy numeric form; we do best-effort.
+      if (saved.answers && typeof saved.answers === "object") {
+        // If saved.answers values are numbers (legacy) we can't map to option ids.
+        // So we only set answers if they look like optionId strings.
+        const entries = Object.entries(saved.answers);
+        const normalized: AnswersRecord = {};
+        let foundStringIds = false;
+        entries.forEach(([qId, val]) => {
+          if (typeof val === "string") {
+            normalized[qId] = val;
+            foundStringIds = true;
+          }
         });
-        setAnswers(normalizedAnswers);
+        if (foundStringIds) {
+          setAnswers(normalized);
+        }
       }
 
-      setCurrentQuestionIndex(saved.currentQuestionIndex || 0);
-      setUserInfo(saved.userInfo || { name: "", email: "", phone: "" });
-
-      if (
-        (saved.currentQuestionIndex && saved.currentQuestionIndex > 0) ||
-        Object.keys(saved.answers || {}).length > 0
-      ) {
-        setCurrentStep("question");
-      } else {
-        setCurrentStep(saved.currentStep || "welcome");
+      if (typeof saved.currentQuestionIndex === "number") {
+        setCurrentQuestionIndex(saved.currentQuestionIndex);
       }
+
+      if (saved.userInfo) {
+        setUserInfo(saved.userInfo);
+      }
+
+      // Respect saved.currentStep if present. Do not guess user's current step from presence of answers.
+      setCurrentStep(saved.currentStep || "welcome");
     }
   }, []);
 
+  // Persist progress whenever relevant state changes
   useEffect(() => {
+    // Convert answers to a savable form: note we persist Option ID strings if present.
+    // Some older saved forms might have numeric answers (scores); we don't convert those here.
+    // The frontend local save used by your app expects numeric values for saved.answers in some places,
+    // but we will persist option-value mapping (numbers) as before for backward compatibility.
     const answersForSaving: Record<string, number> = {};
 
     if (questionsState.length > 0) {
@@ -162,6 +189,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     });
   }, [answers, currentQuestionIndex, currentStep, userInfo, questionsState]);
 
+  // Fetch quiz questions on mount
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -202,15 +230,22 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     fetchQuestions();
   }, []);
 
-  // setAnswer (stores Option ID string - CORRECT)
+  // setAnswer (stores Option ID string)
   const setAnswer = (questionId: string, optionId: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
-  // calculateScore (derives score from Option ID string - CORRECT)
+  // calculateScore (derives score from Option ID string)
   const calculateScore = () => {
-    // ... (logic is correct and unchanged)
-    const totalPossibleScore = questionsState.length * 10;
+    const totalPossibleScore = questionsState.reduce((acc, q) => {
+      // assume each question's max option value is 10 if not present
+      const maxOption = q.options.reduce(
+        (m, o) => (o.value > m ? o.value : m),
+        0
+      );
+      return acc + (maxOption || 10);
+    }, 0);
+
     let userScore = 0;
 
     Object.entries(answers).forEach(([questionId, optionId]) => {
@@ -223,6 +258,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
       }
     });
 
+    if (totalPossibleScore === 0) return 0;
     return (userScore / totalPossibleScore) * 100;
   };
 
@@ -284,6 +320,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     setCurrentQuestionIndex(0);
     setCurrentStep("welcome");
     setUserInfo({ name: "", email: "", phone: "" });
+    setFinalResult(null);
     clearQuizProgress();
   };
 
@@ -305,7 +342,6 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const deleteQuestion = (id: string) => {
-    // Change from number to string
     setQuestionsState((prev) => prev.filter((q) => q.id !== id));
     setAnswers((prev) => {
       const newAnswers = { ...prev };
@@ -325,6 +361,61 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
 
   const setQuestions = (newQuestions: Question[]) => {
     setQuestionsState(newQuestions);
+  };
+
+  // Fetch final result by response id (or fallback to list endpoint)
+  const fetchFinalResult = async (
+    responseId?: string
+  ): Promise<FinalResult | null> => {
+    try {
+      if (responseId) {
+        // try single response endpoint
+        const singleRes = await fetch(
+          `http://localhost:3005/api/v1/responses/${encodeURIComponent(responseId)}`
+        );
+        if (singleRes.ok) {
+          const parsed = await singleRes.json();
+          // many backends wrap in { success: true, data: ... }
+          const candidate = parsed?.data || parsed;
+          setFinalResult(candidate);
+          return candidate;
+        }
+      }
+
+      // fallback: fetch responses list and try to find by id or take the latest
+      const listRes = await fetch("http://localhost:3005/api/v1/responses");
+      if (!listRes.ok) {
+        console.error("Failed to fetch responses list");
+        return null;
+      }
+      const listJson = await listRes.json();
+      // your backend returns shape: { success: true, data: { message: '', data: [ ... ] } }
+      const arr =
+        listJson?.data?.data && Array.isArray(listJson.data.data)
+          ? listJson.data.data
+          : Array.isArray(listJson)
+            ? listJson
+            : listJson?.data && Array.isArray(listJson.data)
+              ? listJson.data
+              : [];
+
+      let found = null;
+      if (responseId) {
+        found = arr.find((r: any) => r._id === responseId);
+      }
+      if (!found) {
+        // take first entry (most recent) if any
+        found = arr[0] || null;
+      }
+      if (found) {
+        setFinalResult(found);
+        return found;
+      }
+      return null;
+    } catch (err) {
+      console.error("Error fetching final result:", err);
+      return null;
+    }
   };
 
   return (
@@ -349,6 +440,8 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
         deleteQuestion,
         reorderQuestions,
         setQuestions,
+        finalResult,
+        fetchFinalResult,
       }}
     >
       {children}
