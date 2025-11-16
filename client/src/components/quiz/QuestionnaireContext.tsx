@@ -125,13 +125,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
-      // answers stored in saved are numeric scores (legacy). We expect Option IDs in memory,
-      // but we can only restore what we have. If saved.answers are numeric, we can't map back to option IDs here.
-      // We still set currentQuestionIndex and userInfo, and restore currentStep (if present).
-      // NOTE: saved.answers may be legacy numeric form; we do best-effort.
       if (saved.answers && typeof saved.answers === "object") {
-        // If saved.answers values are numbers (legacy) we can't map to option ids.
-        // So we only set answers if they look like optionId strings.
         const entries = Object.entries(saved.answers);
         const normalized: AnswersRecord = {};
         let foundStringIds = false;
@@ -153,18 +147,11 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
       if (saved.userInfo) {
         setUserInfo(saved.userInfo);
       }
-
-      // Respect saved.currentStep if present. Do not guess user's current step from presence of answers.
       setCurrentStep(saved.currentStep || "welcome");
     }
   }, []);
 
-  // Persist progress whenever relevant state changes
   useEffect(() => {
-    // Convert answers to a savable form: note we persist Option ID strings if present.
-    // Some older saved forms might have numeric answers (scores); we don't convert those here.
-    // The frontend local save used by your app expects numeric values for saved.answers in some places,
-    // but we will persist option-value mapping (numbers) as before for backward compatibility.
     const answersForSaving: Record<string, number> = {};
 
     if (questionsState.length > 0) {
