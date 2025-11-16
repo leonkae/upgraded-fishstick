@@ -8,8 +8,6 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { CreditCard, CheckCircle, User, Mail, Phone } from "lucide-react";
 
-const PAYMENT_AMOUNT = 100000;
-
 const PaymentScreen: React.FC = () => {
   const {
     setCurrentStep,
@@ -27,12 +25,41 @@ const PaymentScreen: React.FC = () => {
   const [name, setName] = useState(userInfo.name || "");
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
+  const [paymentAmount, setPaymentAmount] = useState(0); // Changed: Default to 0 to avoid hard-coded fallback
 
   useEffect(() => {
     setName(userInfo.name || "");
     setEmail(userInfo.email || "");
     setPhone(userInfo.phone || "");
   }, [userInfo]);
+
+  // New: Fetch dynamic quiz price from settings
+  useEffect(() => {
+    const fetchPaymentAmount = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:3005/api/v1/settings?_=" + Date.now(),
+          {
+            cache: "no-store",
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          }
+        );
+        const data = await res.json();
+        if (data?.success && data?.data?.quiz?.quizPrice) {
+          setPaymentAmount(data.data.quiz.quizPrice);
+        } else {
+          console.warn("No quizPrice found in settings, using 0");
+        }
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+      }
+    };
+    fetchPaymentAmount();
+  }, []);
 
   const getQueryParam = (key: string) => {
     if (typeof window === "undefined") return null;
@@ -156,7 +183,7 @@ const PaymentScreen: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            amount: PAYMENT_AMOUNT,
+            amount: paymentAmount, // New: Use dynamic amount
             email,
             metadata,
           }),
@@ -286,9 +313,12 @@ const PaymentScreen: React.FC = () => {
             <Button
               type="submit"
               className="w-full mt-6 bg-heaven-accent hover:bg-yellow-500 text-black"
-              disabled={isProcessing}
+              disabled={isProcessing || paymentAmount === 0}
             >
-              {isProcessing ? "Processing..." : "Submit & Pay (KES 1,000.00)"}
+              {isProcessing
+                ? "Processing..."
+                : `Submit & Pay (KES ${(paymentAmount / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`}{" "}
+              {/* New: Dynamic display */}
             </Button>
           </div>
         </form>

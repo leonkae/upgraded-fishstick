@@ -18,6 +18,7 @@ const Settings = () => {
     timeLimit: 10,
     randomize: true,
     showResults: true,
+    quizPrice: 0, // Changed: Default to 0 to avoid hard-coded fallback
     stripeKey: "",
     minDonation: 1,
     suggestedAmounts: "5, 10, 20",
@@ -39,7 +40,16 @@ const Settings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get("http://localhost:3005/api/v1/settings");
+        const res = await axios.get(
+          "http://localhost:3005/api/v1/settings?_=" + Date.now(),
+          {
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          }
+        );
         console.log("Backend response:", res.data.data); // Debug log
         if (res.data?.success && res.data?.data) {
           const { general, quiz, payment, notifications } = res.data.data;
@@ -52,6 +62,7 @@ const Settings = () => {
             timeLimit: quiz?.timeLimit ?? prev.timeLimit,
             randomize: quiz?.randomize ?? prev.randomize,
             showResults: quiz?.showResults ?? prev.showResults,
+            quizPrice: quiz?.quizPrice ?? prev.quizPrice, // New: Fetch quiz price
             stripeKey: payment?.stripeKey ?? prev.stripeKey,
             minDonation: payment?.minDonation ?? prev.minDonation,
             suggestedAmounts: Array.isArray(payment?.suggestedAmounts)
@@ -111,7 +122,9 @@ const Settings = () => {
             ? suggestedAmountsArray
             : [5, 10, 20];
       } else if (
-        ["questionsCount", "timeLimit", "minDonation"].includes(editedField)
+        ["questionsCount", "timeLimit", "minDonation", "quizPrice"].includes(
+          editedField
+        ) // New: Include quizPrice for numeric conversion
       ) {
         fieldValue = Number(fieldValue);
       }
@@ -125,7 +138,14 @@ const Settings = () => {
           },
         };
       } else if (
-        ["questionsCount", "timeLimit", "randomize", "showResults"].includes(
+        [
+          "questionsCount",
+          "timeLimit",
+          "randomize",
+          "showResults",
+          "quizPrice",
+        ].includes(
+          // New: Include quizPrice in quiz fields
           editedField
         )
       ) {
@@ -283,6 +303,12 @@ const Settings = () => {
               {
                 key: "timeLimit",
                 label: "Time Limit (minutes)",
+                type: "number",
+              },
+              {
+                // New: Quiz price field
+                key: "quizPrice",
+                label: "Quiz Price (in cents, e.g., 100000 for KES 1,000.00)",
                 type: "number",
               },
             ].map(({ key, label, type }) => (

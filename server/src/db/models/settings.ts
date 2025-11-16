@@ -11,6 +11,7 @@ export interface ISetting extends Document {
     timeLimit: number;
     randomize: boolean;
     showResults: boolean;
+    quizPrice: number;
   };
   payment: {
     stripeKey: string;
@@ -41,6 +42,7 @@ const SettingSchema = new Schema<ISetting>(
       timeLimit: { type: Number, default: 10 },
       randomize: { type: Boolean, default: true },
       showResults: { type: Boolean, default: true },
+      quizPrice: { type: Number, default: 0 },
     },
     payment: {
       stripeKey: { type: String, default: "" },
