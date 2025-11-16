@@ -7,6 +7,15 @@ const router = express.Router();
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET!;
 const PAYSTACK_BASE_URL = "https://api.paystack.co";
 
+// temporary in-memory store (replace with DB later)
+const paidUsers: Array<{
+  email: string;
+  amount: number;
+  reference: string;
+  metadata?: any;
+  timestamp: string;
+}> = [];
+
 const getFetch = async () => (await import("node-fetch")).default;
 
 router.post("/initialize", async (req: Request, res: Response) => {
@@ -33,7 +42,6 @@ router.post("/initialize", async (req: Request, res: Response) => {
           amount,
           currency: "KES",
           metadata,
-          // routes/v1/payment.ts
           callback_url: `${process.env.FRONTEND_URL}/quiz?step=verify`,
         }),
       }
@@ -42,7 +50,6 @@ router.post("/initialize", async (req: Request, res: Response) => {
     const data: any = await response.json();
 
     if (!data.status) {
-      console.error("Paystack init failed:", data);
       res.status(400).json({ message: "Paystack init failed", data });
       return;
     }
@@ -117,18 +124,104 @@ router.post(
     let event;
     try {
       event = JSON.parse(req.body.toString());
-    } catch (err) {
+    } catch {
       res.status(400).send("Invalid JSON");
       return;
     }
 
     if (event.event === "charge.success") {
-      const ref = event.data.reference;
-      console.log("Payment confirmed via webhook:", ref);
+      const payment = {
+        email: event.data.customer.email,
+        amount: event.data.amount,
+        reference: event.data.reference,
+        metadata: event.data.metadata,
+        timestamp: event.data.paid_at || new Date().toISOString(),
+      };
+
+      paidUsers.push(payment);
+
+      console.log("Webhook payment saved:", payment);
     }
 
     res.status(200).send("OK");
   }
 );
+
+router.get("/history", async (req: Request, res: Response): Promise<void> => {
+  try {
+    const fetch = await getFetch();
+
+    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction`, {
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: any = await response.json();
+
+    if (!data.status) {
+      res.status(400).json({ message: "Fetching history failed", data });
+      return;
+    }
+
+    const historyPayments = data.data.map((txn: any) => ({
+      email: txn.customer?.email,
+      amount: txn.amount,
+      reference: txn.reference,
+      metadata: txn.metadata,
+      timestamp: txn.paid_at,
+    }));
+
+    res.json({
+      total: historyPayments.length,
+      payments: historyPayments,
+    });
+  } catch (err) {
+    console.error("History fetch error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/all", async (req: Request, res: Response) => {
+  try {
+    const fetch = await getFetch();
+
+    // fetch historical transactions
+    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction`, {
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: any = await response.json();
+
+    const historyPayments = data.status
+      ? data.data.map((txn: any) => ({
+          email: txn.customer?.email,
+          amount: txn.amount,
+          reference: txn.reference,
+          metadata: txn.metadata,
+          timestamp: txn.paid_at,
+        }))
+      : [];
+
+    // merge + dedupe by reference
+    const all = [...historyPayments, ...paidUsers];
+
+    const deduped = Array.from(
+      new Map(all.map((p) => [p.reference, p])).values()
+    );
+
+    res.json({
+      total: deduped.length,
+      payments: deduped,
+    });
+  } catch (err) {
+    console.error("ALL payments error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 export const paymentRouter = router;
