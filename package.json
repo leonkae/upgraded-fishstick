@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/markmuthii/the-future-of-man#readme",
   "devDependencies": {
+    "@types/node-fetch": "^2.6.13",
     "concurrently": "^9.1.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
@@ -43,9 +44,13 @@
     "server"
   ],
   "dependencies": {
+    "@paystack/inline-js": "^2.22.7",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.2",
-    "mongodb": "^6.20.0"
+    "mongodb": "^6.20.0",
+    "node-fetch": "^3.3.2",
+    "paystack": "^2.0.1",
+    "react-paystack": "^6.0.0"
   }
 }
