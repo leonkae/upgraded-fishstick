@@ -1,4 +1,3 @@
-// PaymentScreen.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -9,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { CreditCard, CheckCircle, User, Mail, Phone } from "lucide-react";
 
-const PAYMENT_AMOUNT = 100000; // adjust as needed
+const PAYMENT_AMOUNT = 100000;
 
 const PaymentScreen: React.FC = () => {
   const {
@@ -41,7 +40,6 @@ const PaymentScreen: React.FC = () => {
     return urlSearch.get(key);
   };
 
-  // When Paystack redirects back with reference, verify and fetch final result
   useEffect(() => {
     const verifyReference = async (ref: string) => {
       try {
@@ -60,23 +58,19 @@ const PaymentScreen: React.FC = () => {
         }
 
         const verificationData = await verifyRes.json();
-        // At this point payment verified on backend.
-        // Fetch the saved response id from localStorage (we saved it before redirect).
         const lastResponseId =
           (typeof window !== "undefined" &&
             localStorage.getItem("last_response_id")) ||
           null;
 
-        // Fetch final result from server (by id if available)
         await fetchFinalResult(lastResponseId || undefined);
 
         setIsProcessing(false);
         setIsCompleted(true);
 
-        // Move to result screen after a short UI delay
         setTimeout(() => {
           setCurrentStep("result");
-          // optionally remove query params to clean URL
+
           try {
             const url = new URL(window.location.href);
             url.search = "";
@@ -101,7 +95,6 @@ const PaymentScreen: React.FC = () => {
     if (ref && (stepParam === "verify" || stepParam === null)) {
       verifyReference(ref);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchFinalResult, setCurrentStep]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,7 +109,6 @@ const PaymentScreen: React.FC = () => {
     };
 
     try {
-      // 1) Save responses
       const res = await fetch("http://localhost:3005/api/v1/responses", {
         method: "POST",
         headers: {
@@ -131,7 +123,6 @@ const PaymentScreen: React.FC = () => {
         throw new Error("Failed to save submission");
       }
 
-      // Capture saved response id robustly
       let savedResponse: any = null;
       try {
         savedResponse = await res.json();
@@ -139,7 +130,6 @@ const PaymentScreen: React.FC = () => {
         // ignore if no json
       }
 
-      // try multiple shapes: savedResponse.data._id, savedResponse._id, savedResponse.id
       const savedResponseId =
         savedResponse?.data?._id ||
         savedResponse?._id ||
@@ -154,7 +144,6 @@ const PaymentScreen: React.FC = () => {
         }
       }
 
-      // 2) Initialize Paystack transaction
       const metadata = {
         response_id: savedResponseId,
       };
@@ -191,7 +180,7 @@ const PaymentScreen: React.FC = () => {
         } catch {
           // ignore
         }
-        // redirect to Paystack authorization page
+
         window.location.href = initData.authorization_url;
         return;
       } else {
