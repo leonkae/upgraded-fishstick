@@ -1,3 +1,4 @@
+// PaymentScreen.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,9 +9,16 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { CreditCard, CheckCircle, User, Mail, Phone } from "lucide-react";
 
+const PAYMENT_AMOUNT = 100000; // adjust as needed
+
 const PaymentScreen: React.FC = () => {
-  const { setCurrentStep, setUserInfo, userInfo, getSubmissionPayload } =
-    useQuestionnaire();
+  const {
+    setCurrentStep,
+    setUserInfo,
+    userInfo,
+    getSubmissionPayload,
+    fetchFinalResult,
+  } = useQuestionnaire();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -21,27 +29,94 @@ const PaymentScreen: React.FC = () => {
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
 
-  // Sync local state with context userInfo if it changes externally
   useEffect(() => {
     setName(userInfo.name || "");
     setEmail(userInfo.email || "");
     setPhone(userInfo.phone || "");
   }, [userInfo]);
 
+  const getQueryParam = (key: string) => {
+    if (typeof window === "undefined") return null;
+    const urlSearch = new URLSearchParams(window.location.search);
+    return urlSearch.get(key);
+  };
+
+  // When Paystack redirects back with reference, verify and fetch final result
+  useEffect(() => {
+    const verifyReference = async (ref: string) => {
+      try {
+        setIsProcessing(true);
+        const verifyRes = await fetch(
+          `http://localhost:3005/api/v1/payment/verify/${encodeURIComponent(ref)}`,
+          { method: "GET" }
+        );
+
+        if (!verifyRes.ok) {
+          const err = await verifyRes.json().catch(() => ({}));
+          console.error("Payment verification failed:", err);
+          setIsProcessing(false);
+          alert("Payment verification failed. Please contact support.");
+          return;
+        }
+
+        const verificationData = await verifyRes.json();
+        // At this point payment verified on backend.
+        // Fetch the saved response id from localStorage (we saved it before redirect).
+        const lastResponseId =
+          (typeof window !== "undefined" &&
+            localStorage.getItem("last_response_id")) ||
+          null;
+
+        // Fetch final result from server (by id if available)
+        await fetchFinalResult(lastResponseId || undefined);
+
+        setIsProcessing(false);
+        setIsCompleted(true);
+
+        // Move to result screen after a short UI delay
+        setTimeout(() => {
+          setCurrentStep("result");
+          // optionally remove query params to clean URL
+          try {
+            const url = new URL(window.location.href);
+            url.search = "";
+            window.history.replaceState({}, "", url.toString());
+          } catch (e) {
+            // ignore
+          }
+        }, 1000);
+      } catch (err) {
+        console.error("Error verifying payment:", err);
+        setIsProcessing(false);
+        alert("Error verifying payment. Please try again or contact support.");
+      }
+    };
+
+    const stepParam = getQueryParam("step");
+    const ref =
+      getQueryParam("reference") ||
+      getQueryParam("trxref") ||
+      getQueryParam("ref");
+
+    if (ref && (stepParam === "verify" || stepParam === null)) {
+      verifyReference(ref);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchFinalResult, setCurrentStep]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Update userInfo in context with current form values
     setUserInfo({ name, email, phone });
 
-    // Create payload with form values directly to avoid context sync issues
     const payload = {
       ...getSubmissionPayload(),
-      userInfo: { name, email, phone }, // Override userInfo with local state
+      userInfo: { name, email, phone },
     };
 
     try {
+      // 1) Save responses
       const res = await fetch("http://localhost:3005/api/v1/responses", {
         method: "POST",
         headers: {
@@ -51,23 +126,84 @@ const PaymentScreen: React.FC = () => {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         console.error("Server error response:", errorData);
         throw new Error("Failed to save submission");
       }
 
-      setTimeout(() => {
-        setIsProcessing(false);
-        setIsCompleted(true);
+      // Capture saved response id robustly
+      let savedResponse: any = null;
+      try {
+        savedResponse = await res.json();
+      } catch {
+        // ignore if no json
+      }
 
-        setTimeout(() => {
-          setCurrentStep("result");
-        }, 1500);
-      }, 2000);
+      // try multiple shapes: savedResponse.data._id, savedResponse._id, savedResponse.id
+      const savedResponseId =
+        savedResponse?.data?._id ||
+        savedResponse?._id ||
+        savedResponse?.id ||
+        null;
+
+      if (savedResponseId) {
+        try {
+          localStorage.setItem("last_response_id", savedResponseId);
+        } catch {
+          // ignore storage errors
+        }
+      }
+
+      // 2) Initialize Paystack transaction
+      const metadata = {
+        response_id: savedResponseId,
+      };
+
+      const initRes = await fetch(
+        "http://localhost:3005/api/v1/payment/initialize",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: PAYMENT_AMOUNT,
+            email,
+            metadata,
+          }),
+        }
+      );
+
+      if (!initRes.ok) {
+        const errData = await initRes.json().catch(() => ({}));
+        console.error("Paystack initialize failed:", errData);
+        throw new Error("Paystack initialization failed");
+      }
+
+      const initData = await initRes.json();
+
+      if (initData && initData.authorization_url) {
+        try {
+          localStorage.setItem(
+            "pending_paystack_reference",
+            initData.reference || initData?.data?.reference || ""
+          );
+        } catch {
+          // ignore
+        }
+        // redirect to Paystack authorization page
+        window.location.href = initData.authorization_url;
+        return;
+      } else {
+        console.error("Unexpected initialize response:", initData);
+        throw new Error("Unexpected initialize response");
+      }
     } catch (error) {
-      console.error("Error saving submission:", error);
+      console.error("Error during submission/payment init:", error);
       setIsProcessing(false);
-      alert("Something went wrong while saving your answers.");
+      alert(
+        "Something went wrong while saving your answers or initializing payment."
+      );
     }
   };
 
@@ -83,10 +219,10 @@ const PaymentScreen: React.FC = () => {
             <CheckCircle size={80} className="text-green-500" />
           </div>
           <h2 className="text-2xl font-bold mb-4 font-serif">
-            Information Submitted!
+            Payment Confirmed!
           </h2>
           <p className="text-gray-700 mb-6">
-            Your assessment has been processed. Preparing your results...
+            Your payment was successful. Preparing your results...
           </p>
         </motion.div>
       </div>
@@ -103,7 +239,7 @@ const PaymentScreen: React.FC = () => {
         <div className="flex items-center justify-center mb-6">
           <CreditCard size={28} className="text-heaven-accent mr-2" />
           <h2 className="text-2xl font-bold font-serif">
-            Submit Your Information
+            Submit Your Information & Pay
           </h2>
         </div>
 
@@ -111,7 +247,8 @@ const PaymentScreen: React.FC = () => {
           Please provide your details to receive your personalized assessment
           results.
           <span className="block mt-2 text-sm italic">
-            (This is a simulation - no actual payment will be processed)
+            (You will be redirected to Paystack to complete payment. This is a
+            simulation - no card is charged during dev if Paystack is in test.)
           </span>
         </p>
 
@@ -157,46 +294,12 @@ const PaymentScreen: React.FC = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
-                placeholder="1234 5678 9012 3456"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  value={expiry}
-                  onChange={(e) => setExpiry(e.target.value)}
-                  placeholder="MM/YY"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="cvc">CVC</Label>
-                <Input
-                  id="cvc"
-                  value={cvc}
-                  onChange={(e) => setCvc(e.target.value)}
-                  placeholder="123"
-                  required
-                />
-              </div>
-            </div>
-
             <Button
               type="submit"
               className="w-full mt-6 bg-heaven-accent hover:bg-yellow-500 text-black"
               disabled={isProcessing}
             >
-              {isProcessing ? "Processing..." : "Submit Information ($0.00)"}
+              {isProcessing ? "Processing..." : "Submit & Pay (KES 1,000.00)"}
             </Button>
           </div>
         </form>
