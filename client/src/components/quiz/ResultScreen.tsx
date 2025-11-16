@@ -1,14 +1,72 @@
+// ResultScreen.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useQuestionnaire } from "./QuestionnaireContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Share2, ArrowRight, RefreshCw } from "lucide-react";
 
 const ResultScreen: React.FC = () => {
-  const { calculateScore, resetQuestionnaire, userInfo } = useQuestionnaire();
-  const score = calculateScore();
+  const {
+    finalResult, // server-sourced result (provided by the patched context)
+    questions,
+    calculateScore, // fallback local calc
+    resetQuestionnaire,
+    userInfo,
+  } = useQuestionnaire();
+
+  // score is a percentage 0..100
+  const [score, setScore] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // compute score when we have finalResult or when questions are ready for fallback
+    const compute = () => {
+      // Prefer server finalResult (authoritative)
+      if (finalResult && Array.isArray(finalResult.responses)) {
+        // Earned score:
+        const earned = finalResult.responses.reduce(
+          (acc: number, r: any) => acc + (Number(r.score) || 0),
+          0
+        );
+
+        // Compute max possible by summing highest option per question from loaded questions.
+        // If questions not loaded, fall back to assuming 10 max per question (legacy behavior).
+        const maxPossible =
+          questions && questions.length > 0
+            ? questions.reduce((acc, q) => {
+                const maxOpt = q.options.reduce(
+                  (m, o) => (o.value > m ? o.value : m),
+                  0
+                );
+                return acc + (maxOpt || 10);
+              }, 0)
+            : (finalResult.responses.length || 0) * 10;
+
+        const pct = maxPossible > 0 ? (earned / maxPossible) * 100 : 0;
+        setScore(pct);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to local calculation (existing behavior)
+      const pct = calculateScore();
+      setScore(pct);
+      setLoading(false);
+    };
+
+    compute();
+    // Recompute whenever finalResult or questions change
+  }, [finalResult, questions, calculateScore]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-lg">Loading results...</div>
+      </div>
+    );
+  }
 
   // Determine score range for feedback
   const getScoreRange = () => {
@@ -331,7 +389,7 @@ const ResultScreen: React.FC = () => {
         <div className={`p-8 ${getBgClass()}`}>
           <div className="text-center mb-6">
             <h2 className="text-xl font-medium mb-2">
-              Dear {userInfo.name || "Friend"}
+              Dear {finalResult?.userInfo?.name || userInfo.name || "Friend"}
             </h2>
             <div
               className={`inline-block text-xl font-medium px-4 py-2 rounded-full ${getScoreBgClass()}`}
