@@ -22,6 +22,7 @@ const PaymentScreen: React.FC = () => {
     userInfo,
     getSubmissionPayload,
     fetchFinalResult,
+    resetQuestionnaire, // ← Added this
   } = useQuestionnaire();
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,8 +35,17 @@ const PaymentScreen: React.FC = () => {
   const [phone, setPhone] = useState(userInfo.phone || "");
   const [donationAmount, setDonationAmount] = useState<number>(0); // 0 = skip
 
-  // Keep dynamic suggested amount fetch (now used as suggestion only)
+  // Suggestion fetch (optional - still here but not forced)
   const [suggestedAmount, setSuggestedAmount] = useState(0);
+
+  // Detect if user came from results page
+  const getQueryParam = (key: string) => {
+    if (typeof window === "undefined") return null;
+    const urlSearch = new URLSearchParams(window.location.search);
+    return urlSearch.get(key);
+  };
+
+  const cameFromResults = getQueryParam("from") === "results";
 
   useEffect(() => {
     setName(userInfo.name || "");
@@ -60,7 +70,6 @@ const PaymentScreen: React.FC = () => {
         const data = await res.json();
         if (data?.success && data?.data?.quiz?.quizPrice) {
           setSuggestedAmount(data.data.quiz.quizPrice);
-          // We no longer force it — just suggest
         } else {
           console.warn("No quizPrice found in settings");
         }
@@ -70,12 +79,6 @@ const PaymentScreen: React.FC = () => {
     };
     fetchPaymentAmount();
   }, []);
-
-  const getQueryParam = (key: string) => {
-    if (typeof window === "undefined") return null;
-    const urlSearch = new URLSearchParams(window.location.search);
-    return urlSearch.get(key);
-  };
 
   useEffect(() => {
     const verifyReference = async (ref: string) => {
@@ -146,7 +149,6 @@ const PaymentScreen: React.FC = () => {
     };
 
     try {
-      // Always save the response first (so results are available even if skipping donation)
       const res = await fetch("http://localhost:3005/api/v1/responses", {
         method: "POST",
         headers: {
@@ -182,7 +184,6 @@ const PaymentScreen: React.FC = () => {
         }
       }
 
-      // If user entered a positive donation amount → proceed to payment
       if (donationAmount > 0) {
         const metadata = {
           response_id: savedResponseId,
@@ -196,7 +197,7 @@ const PaymentScreen: React.FC = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              amount: donationAmount * 100, // convert to kobo/cents
+              amount: donationAmount * 100,
               email,
               metadata,
             }),
@@ -206,7 +207,6 @@ const PaymentScreen: React.FC = () => {
         if (!initRes.ok) {
           const errData = await initRes.json().catch(() => ({}));
           console.error("Paystack initialize failed:", errData);
-          // We don't throw — allow proceeding to results anyway
         } else {
           const initData = await initRes.json();
 
@@ -221,20 +221,42 @@ const PaymentScreen: React.FC = () => {
             }
 
             window.location.href = initData.authorization_url;
-            return; // redirect to Paystack — don't continue to results yet
+            return;
           }
         }
       }
 
-      // If no donation or payment init skipped/failed → go directly to results
+      // Clean up query param
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("from");
+        window.history.replaceState({}, "", url.toString());
+      } catch {}
+
       setIsProcessing(false);
-      setCurrentStep("result");
+
+      // ────────────────────────────────────────────────
+      // Decide next step
+      // ────────────────────────────────────────────────
+      if (cameFromResults && donationAmount <= 0) {
+        // Retake requested (from results + no donation) → reset and start from welcome
+        resetQuestionnaire(); // This sets currentStep = "welcome"
+      } else {
+        // Normal flow or after donation → show results
+        setCurrentStep("result");
+      }
     } catch (error) {
       console.error("Error during submission:", error);
       setIsProcessing(false);
-      // Even on error, try to let user see results
-      setCurrentStep("result");
-      alert("We saved your answers. You can now view your results.");
+
+      // Fallback: still try to retake or show results
+      if (cameFromResults && donationAmount <= 0) {
+        resetQuestionnaire();
+      } else {
+        setCurrentStep("result");
+      }
+
+      alert("Something went wrong, but you can still retake or view results.");
     }
   };
 
@@ -276,8 +298,8 @@ const PaymentScreen: React.FC = () => {
           Please provide your details to receive your personalized assessment
           results.
           <span className="block mt-2 text-sm italic">
-            Donation is optional — you can proceed directly to results.
-            (Paystack test mode in development — no real charge)
+            Donation is optional — you can proceed directly. (Paystack test mode
+            in development — no real charge)
           </span>
         </p>
 
@@ -323,7 +345,6 @@ const PaymentScreen: React.FC = () => {
               />
             </div>
 
-            {/* Donation amount field */}
             <div className="pt-4">
               <Label htmlFor="donation" className="flex items-center gap-2">
                 <Heart size={16} /> Support This Ministry (Optional)
@@ -336,7 +357,7 @@ const PaymentScreen: React.FC = () => {
                   const val = Number(e.target.value);
                   setDonationAmount(isNaN(val) || val < 0 ? 0 : val);
                 }}
-                placeholder={"Enter amount or leave blank"}
+                placeholder="Enter amount or leave blank"
                 min={0}
               />
               <p className="text-xs text-gray-500 mt-1 text-center">
@@ -352,9 +373,13 @@ const PaymentScreen: React.FC = () => {
               >
                 {isProcessing
                   ? "Processing..."
-                  : donationAmount > 0
-                    ? `Donate KES ${donationAmount.toLocaleString()} & View Results`
-                    : "Proceed to Results"}
+                  : cameFromResults
+                    ? donationAmount > 0
+                      ? `Donate KES ${donationAmount.toLocaleString()} & Retake Quiz`
+                      : "Retake Quiz"
+                    : donationAmount > 0
+                      ? `Donate KES ${donationAmount.toLocaleString()} & View Results`
+                      : "Proceed to Results"}
               </Button>
             </div>
           </div>

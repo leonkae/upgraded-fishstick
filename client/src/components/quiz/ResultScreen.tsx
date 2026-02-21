@@ -1,38 +1,32 @@
-// ResultScreen.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useQuestionnaire } from "./QuestionnaireContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Share2, ArrowRight, RefreshCw } from "lucide-react";
+import { Share2, ArrowRight, RefreshCw, Heart } from "lucide-react";
 
 const ResultScreen: React.FC = () => {
   const {
-    finalResult, // server-sourced result (provided by the patched context)
+    finalResult,
     questions,
-    calculateScore, // fallback local calc
+    calculateScore,
     resetQuestionnaire,
     userInfo,
+    setCurrentStep, // ← ensure this is exposed in your QuestionnaireContext
   } = useQuestionnaire();
 
-  // score is a percentage 0..100
   const [score, setScore] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // compute score when we have finalResult or when questions are ready for fallback
     const compute = () => {
-      // Prefer server finalResult (authoritative)
       if (finalResult && Array.isArray(finalResult.responses)) {
-        // Earned score:
         const earned = finalResult.responses.reduce(
           (acc: number, r: any) => acc + (Number(r.score) || 0),
           0
         );
 
-        // Compute max possible by summing highest option per question from loaded questions.
-        // If questions not loaded, fall back to assuming 10 max per question (legacy behavior).
         const maxPossible =
           questions && questions.length > 0
             ? questions.reduce((acc, q) => {
@@ -50,14 +44,12 @@ const ResultScreen: React.FC = () => {
         return;
       }
 
-      // Fallback to local calculation (existing behavior)
       const pct = calculateScore();
       setScore(pct);
       setLoading(false);
     };
 
     compute();
-    // Recompute whenever finalResult or questions change
   }, [finalResult, questions, calculateScore]);
 
   if (loading) {
@@ -68,7 +60,6 @@ const ResultScreen: React.FC = () => {
     );
   }
 
-  // Determine score range for feedback
   const getScoreRange = () => {
     if (score >= 75) return "high";
     if (score >= 30) return "medium";
@@ -76,7 +67,6 @@ const ResultScreen: React.FC = () => {
   };
 
   const scoreRange = getScoreRange();
-  const isGoingToHeaven = scoreRange === "high";
 
   const renderFeedback = () => {
     if (scoreRange === "high") {
@@ -365,15 +355,43 @@ const ResultScreen: React.FC = () => {
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: "My Heaven or Hell Results",
-        text: `I scored ${score.toFixed(0)}% on the Heaven or Hell questionnaire! Take the quiz to discover your fate.`,
-        url: window.location.href,
-      });
+    const shareData = {
+      title: "My Heaven or Hell Assessment Result",
+      text: `I just took the Heaven or Hell questionnaire and scored ${score.toFixed(0)}%! 😇🙏\n\nFind out where your path is leading — take the quiz yourself!`,
+      url: window.location.href,
+    };
+
+    if (navigator.canShare?.(shareData) || navigator.share) {
+      navigator
+        .share(shareData)
+        .then(() => console.log("Shared successfully"))
+        .catch((err) => console.log("Share canceled or failed", err));
     } else {
-      alert("Sharing is not supported on your browser");
+      // Fallback: copy link to clipboard
+      navigator.clipboard
+        .writeText(window.location.href)
+        .then(() => {
+          alert(
+            "Link copied to clipboard! Paste it anywhere to share your result."
+          );
+        })
+        .catch(() => {
+          alert(
+            "Couldn't copy link. Please copy this URL manually:\n" +
+              window.location.href
+          );
+        });
     }
+  };
+
+  const handleDonate = () => {
+    // Add ?from=results so PaymentScreen knows the origin
+    const url = new URL(window.location.href);
+    url.searchParams.set("from", "results");
+    window.history.replaceState({}, "", url.toString());
+
+    setCurrentStep("payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -406,7 +424,7 @@ const ResultScreen: React.FC = () => {
 
           {renderFeedback()}
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
             <Button
               onClick={resetQuestionnaire}
               variant="outline"
@@ -427,7 +445,20 @@ const ResultScreen: React.FC = () => {
             >
               <Share2 size={16} /> Share Result
             </Button>
+
+            <Button
+              onClick={handleDonate}
+              className={`flex items-center gap-2 ${getButtonClass()} w-fit border-2 border-current/30 hover:border-current/50`}
+            >
+              <Heart size={16} /> Support This Ministry
+            </Button>
           </div>
+
+          <p className="text-center text-sm mt-8 opacity-80 text-gray-600">
+            This assessment is offered freely as a ministry tool.
+            <br />
+            If it has blessed you, your support helps us reach more souls.
+          </p>
         </div>
       </motion.div>
     </div>
