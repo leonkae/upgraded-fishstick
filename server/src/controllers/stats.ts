@@ -29,22 +29,23 @@ export const getStats = async (req: Request, res: Response) => {
       createdAt: { $gte: today },
     });
 
-    // Fetch paginated recent quiz data — EXPLICITLY select ageRange
+    // Fetch paginated recent quiz data — now also include wantsDiscipleship
     const recentQuiz = await GuestResponseModel.find({})
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select(
-        "userInfo.name userInfo.email userInfo.ageRange createdAt responses.score"
-      ) // ← added ageRange + score
+        "userInfo.name userInfo.email userInfo.ageRange userInfo.wantsDiscipleship createdAt responses.score"
+      )
       .lean();
 
-    // Format for frontend (now includes ageRange)
+    // Format for frontend — now includes wantsDiscipleship
     const recentActivity = recentQuiz.map((item) => ({
       type: "Quiz completed",
       name: item.userInfo?.name || "Guest",
       email: item.userInfo?.email || "—",
-      ageRange: item.userInfo?.ageRange || "—", // ← FIXED: now included!
+      ageRange: item.userInfo?.ageRange || "—",
+      wantsDiscipleship: item.userInfo?.wantsDiscipleship ?? null, // ← added
       result:
         item.responses?.reduce(
           (sum: number, r: any) => sum + (r.score || 0),
@@ -79,7 +80,7 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
       `attachment; filename="users-export-${new Date().toISOString().split("T")[0]}.csv"`
     );
 
-    // Define CSV columns
+    // Define CSV columns — added Discipleship Group
     const columns = [
       { key: "name", header: "Name" },
       { key: "email", header: "Email" },
@@ -88,20 +89,20 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
       { key: "latestResult", header: "Latest Result" },
       { key: "lastQuizDate", header: "Last Quiz Date" },
       { key: "quizCount", header: "Number of Quizzes" },
+      { key: "discipleship", header: "Discipleship Group Interest" }, // ← NEW
     ];
 
     // Create streaming CSV writer
     const stringifier = stringify({
       header: true,
       columns,
-      quoted: true, // quote all fields for safety
+      quoted: true,
       quoted_string: true,
       cast: {
         string: (value) => value ?? "—",
       },
     });
 
-    // Pipe CSV directly to response (low memory usage)
     stringifier.pipe(res);
 
     // Aggregate: one row per unique email, with latest data
@@ -111,6 +112,7 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
           _id: "$userInfo.email",
           name: { $last: "$userInfo.name" },
           ageRange: { $last: "$userInfo.ageRange" },
+          wantsDiscipleship: { $last: "$userInfo.wantsDiscipleship" }, // ← added
           latestCreatedAt: { $max: "$createdAt" },
           latestResponses: { $last: "$responses" },
           quizCount: { $sum: 1 },
@@ -122,6 +124,7 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
           email: "$_id",
           name: { $ifNull: ["$name", "Guest"] },
           ageRange: { $ifNull: ["$ageRange", "—"] },
+          wantsDiscipleship: 1, // ← pass through
           latestScore: {
             $reduce: {
               input: "$latestResponses",
@@ -133,10 +136,10 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
           quizCount: 1,
         },
       },
-      { $sort: { lastQuizDate: -1 } }, // newest first
+      { $sort: { lastQuizDate: -1 } },
     ]);
 
-    // Write rows
+    // Write rows — now including discipleship interest
     for (const user of aggregation) {
       const result =
         user.latestScore >= 20
@@ -144,6 +147,13 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
           : user.latestScore >= 10
             ? "In-Between"
             : "Hell";
+
+      const discipleshipText =
+        user.wantsDiscipleship === true
+          ? "Yes"
+          : user.wantsDiscipleship === false
+            ? "No"
+            : "—";
 
       stringifier.write({
         name: user.name,
@@ -153,10 +163,10 @@ export const exportUsersCsv = async (req: Request, res: Response) => {
         latestResult: result,
         lastQuizDate: user.lastQuizDate.toISOString().split("T")[0],
         quizCount: user.quizCount,
+        discipleship: discipleshipText, // ← added
       });
     }
 
-    // End stream
     stringifier.end();
   } catch (err: any) {
     console.error("CSV export error:", err);

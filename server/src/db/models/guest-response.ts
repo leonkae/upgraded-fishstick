@@ -6,6 +6,7 @@ interface IGuestResponse extends Document {
     email: string;
     phone: string;
     ageRange?: string;
+    wantsDiscipleship?: boolean | null;
   };
   responses: {
     questionId: string;
@@ -39,6 +40,7 @@ const guestResponseSchema = new Schema<IGuestResponse>(
         ],
         default: "",
       },
+      wantsDiscipleship: { type: Boolean, required: false, default: null },
     },
     responses: [
       {

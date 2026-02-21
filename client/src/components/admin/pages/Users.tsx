@@ -28,6 +28,7 @@ interface User {
   result: number;
   time: string; // ISO string from backend
   ageRange?: string;
+  wantsDiscipleship?: boolean | null; // ← added this field
 }
 
 const Users = () => {
@@ -37,7 +38,7 @@ const Users = () => {
     activeUsers: 0,
     premiumUsers: 0,
     newToday: 0,
-    retakeDue: 0, // we'll approximate this from recentActivity
+    retakeDue: 0,
   });
   const [changes, setChanges] = useState({
     totalUsers: 0,
@@ -126,8 +127,6 @@ const Users = () => {
           now
         );
 
-        // Approximate retake due count from recent activity only
-        // NOTE: This is NOT accurate — real count requires last quiz per user from DB
         const MS_PER_DAY = 1000 * 60 * 60 * 24;
         const RETAKE_DAYS = 91;
         const retakeDueCount = recentActivity.filter((a: any) => {
@@ -187,7 +186,6 @@ const Users = () => {
           todayStart
         );
 
-        // Set stats & changes
         setStats({
           totalUsers: currentTotalUsers,
           activeUsers: currentActiveUsers,
@@ -201,16 +199,17 @@ const Users = () => {
           activeUsers: pctChange(activeLast7, activePrev7),
           premiumUsers: pctChange(premiumLast7, premiumPrev7),
           newToday: pctChange(newTodayCount, newYesterdayCount),
-          retakeDue: 0, // cannot accurately compute change without historical data
+          retakeDue: 0,
         });
 
-        // Table data
+        // Table data – now mapping wantsDiscipleship too
         const formattedUsers = recentActivity.map((u: any) => ({
           name: u.name,
           email: u.email,
           result: u.result,
           time: u.time instanceof Date ? u.time.toISOString() : u.time,
           ageRange: u.ageRange,
+          wantsDiscipleship: u.wantsDiscipleship, // ← added this line
         }));
         setUsers(formattedUsers);
 
@@ -393,13 +392,12 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <Input placeholder="Search users..." className="pl-10" />
-      </div>
-
-      <div>
+      {/* Search + Export */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="relative max-w-md w-full sm:w-auto">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input placeholder="Search users..." className="pl-10" />
+        </div>
         <Button
           onClick={handleExport}
           variant="outline"
@@ -410,7 +408,7 @@ const Users = () => {
         </Button>
       </div>
 
-      {/* Stats Cards – clickable */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {statCards.map((stat) => {
           const isPositive = stat.change >= 0;
@@ -482,6 +480,8 @@ const Users = () => {
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Age Range</TableHead>
+                <TableHead>Discipleship Interest</TableHead>{" "}
+                {/* ← NEW COLUMN */}
                 <TableHead>Quiz Score</TableHead>
                 <TableHead>Quiz Result</TableHead>
                 <TableHead>Retake</TableHead>
@@ -510,6 +510,17 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{user.ageRange || "—"}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {user.wantsDiscipleship === true ? (
+                      <Badge className="bg-green-600 hover:bg-green-700 text-white">
+                        Yes
+                      </Badge>
+                    ) : user.wantsDiscipleship === false ? (
+                      <Badge variant="destructive">No</Badge>
+                    ) : (
+                      <Badge variant="secondary">—</Badge>
+                    )}
                   </TableCell>
                   <TableCell>{user.result}</TableCell>
                   <TableCell>{calculateResult(user.result)}</TableCell>

@@ -35,7 +35,10 @@ const PaymentScreen: React.FC = () => {
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
   const [donationAmount, setDonationAmount] = useState<number>(0);
-  const [ageRange, setAgeRange] = useState<string>(""); // ← new state for age range
+  const [ageRange, setAgeRange] = useState<string>(userInfo.ageRange || "");
+  const [wantsDiscipleship, setWantsDiscipleship] = useState<boolean | null>(
+    userInfo.wantsDiscipleship ?? null
+  );
 
   const [suggestedAmount, setSuggestedAmount] = useState(0);
 
@@ -51,7 +54,8 @@ const PaymentScreen: React.FC = () => {
     setName(userInfo.name || "");
     setEmail(userInfo.email || "");
     setPhone(userInfo.phone || "");
-    setAgeRange(userInfo.ageRange || ""); // ← sync if already saved
+    setAgeRange(userInfo.ageRange || "");
+    setWantsDiscipleship(userInfo.wantsDiscipleship ?? null);
   }, [userInfo]);
 
   useEffect(() => {
@@ -134,12 +138,26 @@ const PaymentScreen: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Save user info including ageRange
-    setUserInfo({ name, email, phone, ageRange });
+    // Save all user info (including discipleship interest)
+    setUserInfo({
+      name,
+      email,
+      phone,
+      ageRange,
+      wantsDiscipleship,
+    });
 
+    // We still use getSubmissionPayload() for the responses part,
+    // but override userInfo with the fresh values (including wantsDiscipleship)
     const payload = {
       ...getSubmissionPayload(),
-      userInfo: { name, email, phone, ageRange },
+      userInfo: {
+        name,
+        email,
+        phone,
+        ageRange,
+        wantsDiscipleship,
+      },
     };
 
     try {
@@ -308,21 +326,24 @@ const PaymentScreen: React.FC = () => {
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (123) 456-7890"
+                placeholder="+254 712 345 678"
                 required
               />
             </div>
 
-            {/* New: Age Range Dropdown */}
-            <div>
-              <Label htmlFor="ageRange" className="flex items-center gap-2">
+            {/* Age Range Dropdown */}
+            <div className="relative">
+              <Label
+                htmlFor="ageRange"
+                className="flex items-center gap-2 mb-1.5"
+              >
                 <User size={16} /> Age Range (Optional)
               </Label>
               <select
                 id="ageRange"
                 value={ageRange}
                 onChange={(e) => setAgeRange(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
               >
                 <option value="">Prefer not to say</option>
                 <option value="Under 18">Under 18</option>
@@ -332,12 +353,45 @@ const PaymentScreen: React.FC = () => {
                 <option value="45-54">45-54</option>
                 <option value="55+">55+</option>
               </select>
-
-              {/* Custom chevron (using lucide) */}
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-[42px] h-4 w-4 opacity-50" />
             </div>
 
-            <div className="pt-4">
+            {/* Discipleship Group Interest */}
+            <div>
+              <Label className="flex items-center gap-2 mb-2">
+                <Heart size={16} /> Interested in joining a Discipleship Group?
+              </Label>
+              <div className="flex flex-col sm:flex-row sm:gap-8 gap-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="discipleship"
+                    checked={wantsDiscipleship === true}
+                    onChange={() => setWantsDiscipleship(true)}
+                    className="h-5 w-5 text-heaven-accent border-gray-300 focus:ring-heaven-accent"
+                  />
+                  <span className="text-gray-700">Yes, please contact me</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="discipleship"
+                    checked={wantsDiscipleship === false}
+                    onChange={() => setWantsDiscipleship(false)}
+                    className="h-5 w-5 text-heaven-accent border-gray-300 focus:ring-heaven-accent"
+                  />
+                  <span className="text-gray-700">No, thank you</span>
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Optional — this helps us connect interested people with local
+                discipleship groups.
+              </p>
+            </div>
+
+            {/* Donation */}
+            <div className="pt-2">
               <Label htmlFor="donation" className="flex items-center gap-2">
                 <Heart size={16} /> Support This Ministry (Optional)
               </Label>
@@ -353,14 +407,14 @@ const PaymentScreen: React.FC = () => {
                 min={0}
               />
               <p className="text-xs text-gray-500 mt-1 text-center">
-                Enter any amount in KES or leave as 0 to skip
+                Enter any amount in KES (or leave as 0 to skip)
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 mt-8">
+            <div className="grid grid-cols-1 gap-4 mt-10">
               <Button
                 type="submit"
-                className="w-full bg-heaven-accent hover:bg-yellow-500 text-black"
+                className="w-full bg-heaven-accent hover:bg-yellow-500 text-black font-medium py-6 text-lg"
                 disabled={isProcessing}
               >
                 {isProcessing

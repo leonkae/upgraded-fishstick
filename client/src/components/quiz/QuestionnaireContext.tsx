@@ -31,6 +31,7 @@ interface UserInfo {
   email: string;
   phone: string;
   ageRange?: string;
+  wantsDiscipleship?: boolean | null;
 }
 
 // NEW: Answers now store the selected Option ID (string)
@@ -282,7 +283,10 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     });
 
     return {
-      userInfo: userInfo,
+      userInfo: {
+        ...userInfo,
+        wantsDiscipleship: userInfo.wantsDiscipleship ?? null, // ensure it's either boolean or null
+      },
       responses: responsesPayload,
     };
   };
