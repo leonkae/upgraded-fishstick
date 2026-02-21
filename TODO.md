@@ -4,15 +4,15 @@
 
 ### 🔹 Environment & Tools
 
-- [x] Set up Git repository and version control
+- [X] Set up Git repository and version control
 - [ ] Set up project management board (e.g., Trello, Jira)
-- [x] Define folder structure for frontend and backend
-- [x] Configure environment variable system
+- [X] Define folder structure for frontend and backend
+- [X] Configure environment variable system
 
 ### 🔹 Requirements Review
 
-- [x] Review Scope of Work and SLA
-- [x] Confirm tech stack, APIs, and third-party services
+- [X] Review Scope of Work and SLA
+- [X] Confirm tech stack, APIs, and third-party services
 - [ ] List and request missing content or access from client
 
 ---
@@ -21,14 +21,14 @@
 
 ### 🔹 Core Setup
 
-- [x] Set up Node.js + Express backend
+- [X] Set up Node.js + Express backend
 - [ ] Connect to MongoDB (on Droplet)
-- [x] Create API base structure and routing
-- [x] Add admin authentication system
+- [X] Create API base structure and routing
+- [X] Add admin authentication system
 
 ### 🔹 Questionnaire Logic
 
-- [x] Define schema for questions and answers
+- [X] Define schema for questions and answers
 - [ ] Create endpoints to serve quiz content
 - [ ] Build scoring logic engine
 - [ ] Return category (Heaven, Hell, In-Between)
@@ -59,7 +59,7 @@
 
 ### 🔹 App Setup
 
-- [x] Scaffold Next.js project
+- [X] Scaffold Next.js project
 - [ ] Implement layout and responsive styles
 - [ ] Create route structure for quiz and results
 

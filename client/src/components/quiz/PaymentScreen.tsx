@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { CreditCard, CheckCircle, User, Mail, Phone } from "lucide-react";
+import {
+  CreditCard,
+  CheckCircle,
+  User,
+  Mail,
+  Phone,
+  Heart,
+} from "lucide-react";
 
 const PaymentScreen: React.FC = () => {
   const {
@@ -19,13 +26,16 @@ const PaymentScreen: React.FC = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
+  const [cardNumber, setCardNumber] = useState(""); // kept but not used
+  const [expiry, setExpiry] = useState(""); // kept but not used
+  const [cvc, setCvc] = useState(""); // kept but not used
   const [name, setName] = useState(userInfo.name || "");
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
-  const [paymentAmount, setPaymentAmount] = useState(0); // Changed: Default to 0 to avoid hard-coded fallback
+  const [donationAmount, setDonationAmount] = useState<number>(0); // 0 = skip
+
+  // Keep dynamic suggested amount fetch (now used as suggestion only)
+  const [suggestedAmount, setSuggestedAmount] = useState(0);
 
   useEffect(() => {
     setName(userInfo.name || "");
@@ -33,7 +43,6 @@ const PaymentScreen: React.FC = () => {
     setPhone(userInfo.phone || "");
   }, [userInfo]);
 
-  // New: Fetch dynamic quiz price from settings
   useEffect(() => {
     const fetchPaymentAmount = async () => {
       try {
@@ -50,9 +59,10 @@ const PaymentScreen: React.FC = () => {
         );
         const data = await res.json();
         if (data?.success && data?.data?.quiz?.quizPrice) {
-          setPaymentAmount(data.data.quiz.quizPrice);
+          setSuggestedAmount(data.data.quiz.quizPrice);
+          // We no longer force it — just suggest
         } else {
-          console.warn("No quizPrice found in settings, using 0");
+          console.warn("No quizPrice found in settings");
         }
       } catch (err) {
         console.error("Error fetching settings:", err);
@@ -136,6 +146,7 @@ const PaymentScreen: React.FC = () => {
     };
 
     try {
+      // Always save the response first (so results are available even if skipping donation)
       const res = await fetch("http://localhost:3005/api/v1/responses", {
         method: "POST",
         headers: {
@@ -171,55 +182,59 @@ const PaymentScreen: React.FC = () => {
         }
       }
 
-      const metadata = {
-        response_id: savedResponseId,
-      };
+      // If user entered a positive donation amount → proceed to payment
+      if (donationAmount > 0) {
+        const metadata = {
+          response_id: savedResponseId,
+        };
 
-      const initRes = await fetch(
-        "http://localhost:3005/api/v1/payment/initialize",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            amount: paymentAmount, // New: Use dynamic amount
-            email,
-            metadata,
-          }),
+        const initRes = await fetch(
+          "http://localhost:3005/api/v1/payment/initialize",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount: donationAmount * 100, // convert to kobo/cents
+              email,
+              metadata,
+            }),
+          }
+        );
+
+        if (!initRes.ok) {
+          const errData = await initRes.json().catch(() => ({}));
+          console.error("Paystack initialize failed:", errData);
+          // We don't throw — allow proceeding to results anyway
+        } else {
+          const initData = await initRes.json();
+
+          if (initData && initData.authorization_url) {
+            try {
+              localStorage.setItem(
+                "pending_paystack_reference",
+                initData.reference || initData?.data?.reference || ""
+              );
+            } catch {
+              // ignore
+            }
+
+            window.location.href = initData.authorization_url;
+            return; // redirect to Paystack — don't continue to results yet
+          }
         }
-      );
-
-      if (!initRes.ok) {
-        const errData = await initRes.json().catch(() => ({}));
-        console.error("Paystack initialize failed:", errData);
-        throw new Error("Paystack initialization failed");
       }
 
-      const initData = await initRes.json();
-
-      if (initData && initData.authorization_url) {
-        try {
-          localStorage.setItem(
-            "pending_paystack_reference",
-            initData.reference || initData?.data?.reference || ""
-          );
-        } catch {
-          // ignore
-        }
-
-        window.location.href = initData.authorization_url;
-        return;
-      } else {
-        console.error("Unexpected initialize response:", initData);
-        throw new Error("Unexpected initialize response");
-      }
-    } catch (error) {
-      console.error("Error during submission/payment init:", error);
+      // If no donation or payment init skipped/failed → go directly to results
       setIsProcessing(false);
-      alert(
-        "Something went wrong while saving your answers or initializing payment."
-      );
+      setCurrentStep("result");
+    } catch (error) {
+      console.error("Error during submission:", error);
+      setIsProcessing(false);
+      // Even on error, try to let user see results
+      setCurrentStep("result");
+      alert("We saved your answers. You can now view your results.");
     }
   };
 
@@ -234,11 +249,9 @@ const PaymentScreen: React.FC = () => {
           <div className="mb-6 flex justify-center">
             <CheckCircle size={80} className="text-green-500" />
           </div>
-          <h2 className="text-2xl font-bold mb-4 font-serif">
-            Payment Confirmed!
-          </h2>
+          <h2 className="text-2xl font-bold mb-4 font-serif">Thank You!</h2>
           <p className="text-gray-700 mb-6">
-            Your payment was successful. Preparing your results...
+            Your support is greatly appreciated. Preparing your results...
           </p>
         </motion.div>
       </div>
@@ -253,9 +266,9 @@ const PaymentScreen: React.FC = () => {
         className="bg-white/90 rounded-xl p-8 shadow-lg max-w-md w-full"
       >
         <div className="flex items-center justify-center mb-6">
-          <CreditCard size={28} className="text-heaven-accent mr-2" />
+          <Heart size={28} className="text-heaven-accent mr-2" />
           <h2 className="text-2xl font-bold font-serif">
-            Submit Your Information & Pay
+            Submit Your Information
           </h2>
         </div>
 
@@ -263,8 +276,8 @@ const PaymentScreen: React.FC = () => {
           Please provide your details to receive your personalized assessment
           results.
           <span className="block mt-2 text-sm italic">
-            (You will be redirected to Paystack to complete payment. This is a
-            simulation - no card is charged during dev if Paystack is in test.)
+            Donation is optional — you can proceed directly to results.
+            (Paystack test mode in development — no real charge)
           </span>
         </p>
 
@@ -310,16 +323,40 @@ const PaymentScreen: React.FC = () => {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full mt-6 bg-heaven-accent hover:bg-yellow-500 text-black"
-              disabled={isProcessing || paymentAmount === 0}
-            >
-              {isProcessing
-                ? "Processing..."
-                : `Submit & Pay (KES ${(paymentAmount / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`}{" "}
-              {/* New: Dynamic display */}
-            </Button>
+            {/* Donation amount field */}
+            <div className="pt-4">
+              <Label htmlFor="donation" className="flex items-center gap-2">
+                <Heart size={16} /> Support This Ministry (Optional)
+              </Label>
+              <Input
+                id="donation"
+                type="number"
+                value={donationAmount || ""}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setDonationAmount(isNaN(val) || val < 0 ? 0 : val);
+                }}
+                placeholder={"Enter amount or leave blank"}
+                min={0}
+              />
+              <p className="text-xs text-gray-500 mt-1 text-center">
+                Enter any amount in KES or leave as 0 to skip
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 mt-8">
+              <Button
+                type="submit"
+                className="w-full bg-heaven-accent hover:bg-yellow-500 text-black"
+                disabled={isProcessing}
+              >
+                {isProcessing
+                  ? "Processing..."
+                  : donationAmount > 0
+                    ? `Donate KES ${donationAmount.toLocaleString()} & View Results`
+                    : "Proceed to Results"}
+              </Button>
+            </div>
           </div>
         </form>
       </motion.div>
