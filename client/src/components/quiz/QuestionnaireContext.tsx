@@ -30,6 +30,7 @@ interface UserInfo {
   name: string;
   email: string;
   phone: string;
+  ageRange?: string;
 }
 
 // NEW: Answers now store the selected Option ID (string)

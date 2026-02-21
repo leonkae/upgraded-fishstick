@@ -13,6 +13,7 @@ import {
   Mail,
   Phone,
   Heart,
+  ChevronDown,
 } from "lucide-react";
 
 const PaymentScreen: React.FC = () => {
@@ -22,23 +23,22 @@ const PaymentScreen: React.FC = () => {
     userInfo,
     getSubmissionPayload,
     fetchFinalResult,
-    resetQuestionnaire, // ← Added this
+    resetQuestionnaire,
   } = useQuestionnaire();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [cardNumber, setCardNumber] = useState(""); // kept but not used
-  const [expiry, setExpiry] = useState(""); // kept but not used
-  const [cvc, setCvc] = useState(""); // kept but not used
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvc, setCvc] = useState("");
   const [name, setName] = useState(userInfo.name || "");
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
-  const [donationAmount, setDonationAmount] = useState<number>(0); // 0 = skip
+  const [donationAmount, setDonationAmount] = useState<number>(0);
+  const [ageRange, setAgeRange] = useState<string>(""); // ← new state for age range
 
-  // Suggestion fetch (optional - still here but not forced)
   const [suggestedAmount, setSuggestedAmount] = useState(0);
 
-  // Detect if user came from results page
   const getQueryParam = (key: string) => {
     if (typeof window === "undefined") return null;
     const urlSearch = new URLSearchParams(window.location.search);
@@ -51,6 +51,7 @@ const PaymentScreen: React.FC = () => {
     setName(userInfo.name || "");
     setEmail(userInfo.email || "");
     setPhone(userInfo.phone || "");
+    setAgeRange(userInfo.ageRange || ""); // ← sync if already saved
   }, [userInfo]);
 
   useEffect(() => {
@@ -70,8 +71,6 @@ const PaymentScreen: React.FC = () => {
         const data = await res.json();
         if (data?.success && data?.data?.quiz?.quizPrice) {
           setSuggestedAmount(data.data.quiz.quizPrice);
-        } else {
-          console.warn("No quizPrice found in settings");
         }
       } catch (err) {
         console.error("Error fetching settings:", err);
@@ -98,10 +97,7 @@ const PaymentScreen: React.FC = () => {
         }
 
         const verificationData = await verifyRes.json();
-        const lastResponseId =
-          (typeof window !== "undefined" &&
-            localStorage.getItem("last_response_id")) ||
-          null;
+        const lastResponseId = localStorage.getItem("last_response_id") || null;
 
         await fetchFinalResult(lastResponseId || undefined);
 
@@ -110,14 +106,11 @@ const PaymentScreen: React.FC = () => {
 
         setTimeout(() => {
           setCurrentStep("result");
-
           try {
             const url = new URL(window.location.href);
             url.search = "";
             window.history.replaceState({}, "", url.toString());
-          } catch (e) {
-            // ignore
-          }
+          } catch {}
         }, 1000);
       } catch (err) {
         console.error("Error verifying payment:", err);
@@ -141,19 +134,18 @@ const PaymentScreen: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    setUserInfo({ name, email, phone });
+    // Save user info including ageRange
+    setUserInfo({ name, email, phone, ageRange });
 
     const payload = {
       ...getSubmissionPayload(),
-      userInfo: { name, email, phone },
+      userInfo: { name, email, phone, ageRange },
     };
 
     try {
       const res = await fetch("http://localhost:3005/api/v1/responses", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -166,9 +158,7 @@ const PaymentScreen: React.FC = () => {
       let savedResponse: any = null;
       try {
         savedResponse = await res.json();
-      } catch {
-        // ignore if no json
-      }
+      } catch {}
 
       const savedResponseId =
         savedResponse?.data?._id ||
@@ -177,25 +167,17 @@ const PaymentScreen: React.FC = () => {
         null;
 
       if (savedResponseId) {
-        try {
-          localStorage.setItem("last_response_id", savedResponseId);
-        } catch {
-          // ignore storage errors
-        }
+        localStorage.setItem("last_response_id", savedResponseId);
       }
 
       if (donationAmount > 0) {
-        const metadata = {
-          response_id: savedResponseId,
-        };
+        const metadata = { response_id: savedResponseId };
 
         const initRes = await fetch(
           "http://localhost:3005/api/v1/payment/initialize",
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               amount: donationAmount * 100,
               email,
@@ -205,28 +187,20 @@ const PaymentScreen: React.FC = () => {
         );
 
         if (!initRes.ok) {
-          const errData = await initRes.json().catch(() => ({}));
-          console.error("Paystack initialize failed:", errData);
+          console.error("Paystack init failed:", await initRes.text());
         } else {
           const initData = await initRes.json();
-
-          if (initData && initData.authorization_url) {
-            try {
-              localStorage.setItem(
-                "pending_paystack_reference",
-                initData.reference || initData?.data?.reference || ""
-              );
-            } catch {
-              // ignore
-            }
-
+          if (initData?.authorization_url) {
+            localStorage.setItem(
+              "pending_paystack_reference",
+              initData.reference || initData?.data?.reference || ""
+            );
             window.location.href = initData.authorization_url;
             return;
           }
         }
       }
 
-      // Clean up query param
       try {
         const url = new URL(window.location.href);
         url.searchParams.delete("from");
@@ -235,21 +209,15 @@ const PaymentScreen: React.FC = () => {
 
       setIsProcessing(false);
 
-      // ────────────────────────────────────────────────
-      // Decide next step
-      // ────────────────────────────────────────────────
       if (cameFromResults && donationAmount <= 0) {
-        // Retake requested (from results + no donation) → reset and start from welcome
-        resetQuestionnaire(); // This sets currentStep = "welcome"
+        resetQuestionnaire();
       } else {
-        // Normal flow or after donation → show results
         setCurrentStep("result");
       }
     } catch (error) {
       console.error("Error during submission:", error);
       setIsProcessing(false);
 
-      // Fallback: still try to retake or show results
       if (cameFromResults && donationAmount <= 0) {
         resetQuestionnaire();
       } else {
@@ -343,6 +311,30 @@ const PaymentScreen: React.FC = () => {
                 placeholder="+1 (123) 456-7890"
                 required
               />
+            </div>
+
+            {/* New: Age Range Dropdown */}
+            <div>
+              <Label htmlFor="ageRange" className="flex items-center gap-2">
+                <User size={16} /> Age Range (Optional)
+              </Label>
+              <select
+                id="ageRange"
+                value={ageRange}
+                onChange={(e) => setAgeRange(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Prefer not to say</option>
+                <option value="Under 18">Under 18</option>
+                <option value="18-24">18-24</option>
+                <option value="25-34">25-34</option>
+                <option value="35-44">35-44</option>
+                <option value="45-54">45-54</option>
+                <option value="55+">55+</option>
+              </select>
+
+              {/* Custom chevron (using lucide) */}
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
             </div>
 
             <div className="pt-4">
