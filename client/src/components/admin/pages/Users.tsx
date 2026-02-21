@@ -13,13 +13,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users as UsersIcon, Search, Plus, MoreHorizontal } from "lucide-react";
+import {
+  Users as UsersIcon,
+  Search,
+  Plus,
+  MoreHorizontal,
+  AlertCircle,
+} from "lucide-react";
 
 interface User {
   name: string;
   email: string;
   result: number;
-  time: string;
+  time: string; // ISO string from backend
   ageRange?: string;
 }
 
@@ -30,16 +36,24 @@ const Users = () => {
     activeUsers: 0,
     premiumUsers: 0,
     newToday: 0,
+    retakeDue: 0, // we'll approximate this from recentActivity
   });
   const [changes, setChanges] = useState({
     totalUsers: 0,
     activeUsers: 0,
     premiumUsers: 0,
     newToday: 0,
+    retakeDue: 0,
   });
+
   const [page, setPage] = useState(1);
   const limit = 5;
   const [totalPages, setTotalPages] = useState(1);
+
+  // Filter state
+  const [activeFilter, setActiveFilter] = useState<
+    null | "total" | "active" | "premium" | "newToday" | "retakeDue"
+  >(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,17 +64,21 @@ const Users = () => {
         const json = await res.json();
         if (!json.success) throw new Error(json.message || "API error");
         const data = json.data;
+
         const recentActivity = (data.recentActivity || []).map((r: any) => ({
           ...r,
           time: new Date(r.time),
         }));
 
-        // Helpers for ranges
+        // ────────────────────────────────────────────────
+        // Date range helpers
+        // ────────────────────────────────────────────────
         const startOfDay = (d: Date) => {
           const x = new Date(d);
           x.setHours(0, 0, 0, 0);
           return x;
         };
+
         const daysAgo = (d: Date, days: number) => {
           const x = new Date(d);
           x.setDate(x.getDate() - days);
@@ -91,13 +109,13 @@ const Users = () => {
         const now = new Date();
         const todayStart = startOfDay(now);
         const yesterdayStart = startOfDay(daysAgo(now, 1));
-
-        // Last 7 days: start = startOfDay(now - 6) (so last 7 full days including today)
         const last7Start = startOfDay(daysAgo(now, 6));
         const prev7Start = startOfDay(daysAgo(now, 13));
         const prev7End = last7Start;
 
-        // CURRENT stats
+        // ────────────────────────────────────────────────
+        // Core stats
+        // ────────────────────────────────────────────────
         const currentTotalUsers = data.totalUsers ?? 0;
         const currentActiveUsers = data.activeUsers ?? 0;
         const currentNewToday = data.newToday ?? 0;
@@ -107,7 +125,26 @@ const Users = () => {
           now
         );
 
-        // DERIVED numbers for changes
+        // Approximate retake due count from recent activity only
+        // NOTE: This is NOT accurate — real count requires last quiz per user from DB
+        const MS_PER_DAY = 1000 * 60 * 60 * 24;
+        const RETAKE_DAYS = 91;
+        const retakeDueCount = recentActivity.filter((a: any) => {
+          if (!a.time) return false;
+          const diffDays = Math.floor(
+            (now.getTime() - a.time.getTime()) / MS_PER_DAY
+          );
+          return diffDays > RETAKE_DAYS;
+        }).length;
+
+        // ────────────────────────────────────────────────
+        // Change calculations
+        // ────────────────────────────────────────────────
+        const pctChange = (nowVal: number, prevVal: number) => {
+          if (prevVal === 0) return nowVal === 0 ? 0 : 100;
+          return ((nowVal - prevVal) / prevVal) * 100;
+        };
+
         const newUsersLast7 = uniqueEmailsInRange(
           recentActivity,
           last7Start,
@@ -149,39 +186,33 @@ const Users = () => {
           todayStart
         );
 
-        // Percent change helper
-        const pctChange = (nowVal: number, prevVal: number) => {
-          if (prevVal === 0) return nowVal === 0 ? 0 : 100;
-          return ((nowVal - prevVal) / prevVal) * 100;
-        };
-
-        // Set stats
+        // Set stats & changes
         setStats({
           totalUsers: currentTotalUsers,
           activeUsers: currentActiveUsers,
           premiumUsers: currentPremium,
           newToday: currentNewToday,
+          retakeDue: retakeDueCount,
         });
 
-        // Set changes
         setChanges({
           totalUsers: pctChange(newUsersLast7, newUsersPrev7),
           activeUsers: pctChange(activeLast7, activePrev7),
           premiumUsers: pctChange(premiumLast7, premiumPrev7),
           newToday: pctChange(newTodayCount, newYesterdayCount),
+          retakeDue: 0, // cannot accurately compute change without historical data
         });
 
         // Table data
-        const formattedUsers = (data.recentActivity || []).map((u: any) => ({
+        const formattedUsers = recentActivity.map((u: any) => ({
           name: u.name,
           email: u.email,
           result: u.result,
-          time: u.time,
+          time: u.time instanceof Date ? u.time.toISOString() : u.time,
           ageRange: u.ageRange,
         }));
         setUsers(formattedUsers);
 
-        // Calculate total pages using totalCount from API
         setTotalPages(Math.ceil((data.totalCount || 1) / limit));
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -191,14 +222,15 @@ const Users = () => {
     fetchData();
   }, [page]);
 
-  // Heaven/Hell/In-between calculation
+  // ────────────────────────────────────────────────
+  // Helper functions
+  // ────────────────────────────────────────────────
   const calculateResult = (score: number) => {
     if (score >= 20) return "Heaven";
     if (score >= 10) return "In-Between";
     return "Hell";
   };
 
-  // Determine active/inactive based on last activity (within 7 days)
   const isActive = (time: string) => {
     const now = new Date();
     const last = new Date(time);
@@ -206,8 +238,88 @@ const Users = () => {
     return diffDays <= 7;
   };
 
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+  const RETAKE_DAYS = 91;
+  const WARNING_DAYS_LEFT = 14;
+
+  const getRetakeStatus = (timeStr: string) => {
+    if (!timeStr) {
+      return {
+        text: "Never taken",
+        variant: "destructive" as const,
+        icon: true,
+      };
+    }
+
+    const lastQuiz = new Date(timeStr);
+    const now = new Date();
+    const diffDays = Math.floor(
+      (now.getTime() - lastQuiz.getTime()) / MS_PER_DAY
+    );
+
+    if (diffDays > RETAKE_DAYS) {
+      const overdueBy = diffDays - RETAKE_DAYS;
+      return {
+        text: `Overdue by ${overdueBy} day${overdueBy === 1 ? "" : "s"}`,
+        variant: "destructive" as const,
+        icon: true,
+      };
+    }
+
+    const daysLeft = RETAKE_DAYS - diffDays;
+
+    if (daysLeft <= 0) {
+      return {
+        text: "Retake due today",
+        variant: "destructive" as const,
+        icon: true,
+      };
+    }
+
+    if (daysLeft <= WARNING_DAYS_LEFT) {
+      return {
+        text: `Retake in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`,
+        variant: "secondary" as const,
+        className: "bg-orange-100 text-orange-800 border-orange-300",
+        icon: false,
+      };
+    }
+
+    return {
+      text: `Up to date (${daysLeft} days left)`,
+      variant: "outline" as const,
+      icon: false,
+    };
+  };
+
+  // ────────────────────────────────────────────────
+  // Filter logic
+  // ────────────────────────────────────────────────
+  const displayedUsers = activeFilter
+    ? users.filter((user) => {
+        if (activeFilter === "total") return true;
+        if (activeFilter === "active") return isActive(user.time);
+        if (activeFilter === "premium")
+          return calculateResult(user.result) === "Heaven";
+        if (activeFilter === "newToday") {
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          return new Date(user.time) >= todayStart;
+        }
+        if (activeFilter === "retakeDue") {
+          const status = getRetakeStatus(user.time);
+          return status.variant === "destructive";
+        }
+        return true;
+      })
+    : users;
+
+  // ────────────────────────────────────────────────
+  // Stats cards definition
+  // ────────────────────────────────────────────────
   const statCards = [
     {
+      key: "total",
       title: "Total Users",
       value: stats.totalUsers.toLocaleString(),
       change: changes.totalUsers,
@@ -215,6 +327,7 @@ const Users = () => {
       icon: UsersIcon,
     },
     {
+      key: "active",
       title: "Active Users",
       value: stats.activeUsers.toLocaleString(),
       change: changes.activeUsers,
@@ -222,6 +335,7 @@ const Users = () => {
       icon: UsersIcon,
     },
     {
+      key: "premium",
       title: "Premium Users",
       value: stats.premiumUsers.toLocaleString(),
       change: changes.premiumUsers,
@@ -229,11 +343,21 @@ const Users = () => {
       icon: UsersIcon,
     },
     {
+      key: "newToday",
       title: "New Today",
       value: stats.newToday.toLocaleString(),
       change: changes.newToday,
       period: "today",
       icon: UsersIcon,
+    },
+    {
+      key: "retakeDue",
+      title: "Retake Due",
+      value: stats.retakeDue.toLocaleString(),
+      change: changes.retakeDue,
+      period: "overdue",
+      icon: AlertCircle,
+      color: stats.retakeDue > 0 ? "text-red-600" : "text-gray-600",
     },
   ];
 
@@ -245,9 +369,6 @@ const Users = () => {
           <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
           <p className="text-gray-600 mt-2">Monitor and manage user accounts</p>
         </div>
-        <Button className="bg-purple-700 hover:bg-purple-800 w-fit">
-          <Plus className="w-4 h-4 mr-2" /> Add User
-        </Button>
       </div>
 
       {/* Search */}
@@ -256,17 +377,31 @@ const Users = () => {
         <Input placeholder="Search users..." className="pl-10" />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => {
+      {/* Stats Cards – clickable */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {statCards.map((stat) => {
           const isPositive = stat.change >= 0;
+          const isActiveFilter = activeFilter === stat.key;
+
           return (
-            <Card key={index}>
+            <Card
+              key={stat.key}
+              className={`cursor-pointer transition-all hover:shadow-md ${
+                isActiveFilter ? "ring-2 ring-purple-500 shadow-md" : ""
+              }`}
+              onClick={() =>
+                setActiveFilter(
+                  activeFilter === stat.key ? null : (stat.key as any)
+                )
+              }
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600">
                   {stat.title}
                 </CardTitle>
-                <stat.icon className="h-4 w-4 text-purple-600" />
+                <stat.icon
+                  className={`h-4 w-4 ${stat.color || "text-purple-600"}`}
+                />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
@@ -288,6 +423,25 @@ const Users = () => {
           <CardTitle>Recent Users</CardTitle>
         </CardHeader>
         <CardContent>
+          {activeFilter && (
+            <div className="mb-4 flex items-center justify-between bg-purple-50 p-3 rounded-md">
+              <div className="text-sm font-medium">
+                Showing:{" "}
+                <span className="text-purple-700 font-semibold">
+                  {statCards.find((s) => s.key === activeFilter)?.title ||
+                    activeFilter}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveFilter(null)}
+              >
+                Clear filter
+              </Button>
+            </div>
+          )}
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -297,12 +451,13 @@ const Users = () => {
                 <TableHead>Age Range</TableHead>
                 <TableHead>Quiz Score</TableHead>
                 <TableHead>Quiz Result</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead>Retake</TableHead>
+                <TableHead>Last Quiz</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user, index) => (
+              {displayedUsers.map((user, index) => (
                 <TableRow key={index}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -321,10 +476,26 @@ const Users = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{user.ageRange}</Badge>
+                    <Badge variant="secondary">{user.ageRange || "—"}</Badge>
                   </TableCell>
                   <TableCell>{user.result}</TableCell>
                   <TableCell>{calculateResult(user.result)}</TableCell>
+                  <TableCell>
+                    {(() => {
+                      const status = getRetakeStatus(user.time);
+                      return (
+                        <Badge
+                          variant={status.variant}
+                          className={`flex items-center gap-1 ${status.className || ""}`}
+                        >
+                          {status.icon && (
+                            <AlertCircle className="h-3.5 w-3.5" />
+                          )}
+                          {status.text}
+                        </Badge>
+                      );
+                    })()}
+                  </TableCell>
                   <TableCell>
                     {new Date(user.time).toLocaleDateString()}
                   </TableCell>
@@ -338,10 +509,11 @@ const Users = () => {
             </TableBody>
           </Table>
 
-          {/* Pagination */}
+          {/* Pagination & showing info */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {users.length} of {stats.totalUsers} entries
+              Showing {displayedUsers.length} of {users.length} entries
+              {activeFilter && " (filtered)"}
             </p>
             <div className="flex gap-2">
               <Button
