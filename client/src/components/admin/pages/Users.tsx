@@ -20,6 +20,7 @@ interface User {
   email: string;
   result: number;
   time: string;
+  ageRange?: string;
 }
 
 const Users = () => {
@@ -176,6 +177,7 @@ const Users = () => {
           email: u.email,
           result: u.result,
           time: u.time,
+          ageRange: u.ageRange,
         }));
         setUsers(formattedUsers);
 
@@ -292,6 +294,7 @@ const Users = () => {
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Age Range</TableHead>
                 <TableHead>Quiz Score</TableHead>
                 <TableHead>Quiz Result</TableHead>
                 <TableHead>Joined</TableHead>
@@ -316,6 +319,9 @@ const Users = () => {
                     >
                       {isActive(user.time) ? "Active" : "Inactive"}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{user.ageRange}</Badge>
                   </TableCell>
                   <TableCell>{user.result}</TableCell>
                   <TableCell>{calculateResult(user.result)}</TableCell>

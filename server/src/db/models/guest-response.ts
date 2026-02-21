@@ -5,6 +5,7 @@ interface IGuestResponse extends Document {
     name: string;
     email: string;
     phone: string;
+    ageRange?: string;
   };
   responses: {
     questionId: string;
@@ -23,6 +24,21 @@ const guestResponseSchema = new Schema<IGuestResponse>(
       name: { type: String, required: true },
       email: { type: String, required: true },
       phone: { type: String, required: true },
+      ageRange: {
+        type: String,
+        required: false,
+        enum: [
+          "",
+          "Under 18",
+          "18-24",
+          "25-34",
+          "35-44",
+          "45-54",
+          "55-64",
+          "65+",
+        ],
+        default: "",
+      },
     },
     responses: [
       {
