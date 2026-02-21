@@ -19,6 +19,7 @@ import {
   Plus,
   MoreHorizontal,
   AlertCircle,
+  Download,
 } from "lucide-react";
 
 interface User {
@@ -292,6 +293,27 @@ const Users = () => {
     };
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3005/api/v1/stats/export-users"
+      );
+      if (!response.ok) throw new Error("Export failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `users-export-${new Date().toISOString().split("T")[0]}.csv`;
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Could not download export");
+    }
+  };
+
   // ────────────────────────────────────────────────
   // Filter logic
   // ────────────────────────────────────────────────
@@ -375,6 +397,17 @@ const Users = () => {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         <Input placeholder="Search users..." className="pl-10" />
+      </div>
+
+      <div>
+        <Button
+          onClick={handleExport}
+          variant="outline"
+          className="gap-2 whitespace-nowrap"
+        >
+          <Download className="h-4 w-4" />
+          Export All Users (CSV)
+        </Button>
       </div>
 
       {/* Stats Cards – clickable */}
