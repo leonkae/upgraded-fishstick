@@ -8,6 +8,7 @@ import { responseRouter } from "@/routes/v1/response";
 import { statsRouter } from "@/routes/v1/stats";
 import { settingsRouter } from "@/routes/v1/settings";
 import { paymentRouter } from "@/routes/v1/payment";
+import { teamRouter } from "@/routes/v1/team";
 
 const v1Router = Router();
 
@@ -25,5 +26,6 @@ v1Router.use("/responses", responseRouter);
 v1Router.use("/stats", statsRouter);
 v1Router.use("/settings", settingsRouter);
 v1Router.use("/payment", paymentRouter);
+v1Router.use("/team", teamRouter);
 
 export { v1Router };

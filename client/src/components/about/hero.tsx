@@ -20,7 +20,7 @@ const Hero = () => {
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           {/* Text Content */}
           <div>
-            <h1 className="text-4xl sm:text-5xl text-center lg:text-4xl font-bold mb-6">
+            <h1 className="text-4xl sm:text-5xl text-center lg:text-4xl font-bold mb-6 text-white">
               About The Future of Man
             </h1>
             <p className="text-tertiary-text text-base sm:text-lg mb-8">
@@ -35,7 +35,7 @@ const Hero = () => {
               <div className="flex items-center">
                 <Users className="text-highlight-text w-5 h-5 sm:w-6 sm:h-6 mr-4" />
                 <div>
-                  <h3 className="font-semibold text-base sm:text-lg">
+                  <h3 className="font-semibold text-base sm:text-lg text-white">
                     Global Community
                   </h3>
                   <p className="text-tertiary-text text-sm sm:text-base">
@@ -46,7 +46,7 @@ const Hero = () => {
               <div className="flex items-center">
                 <Star className="text-highlight-text w-5 h-5 sm:w-6 sm:h-6 mr-4" />
                 <div>
-                  <h3 className="font-semibold text-base sm:text-lg">
+                  <h3 className="font-semibold text-base sm:text-lg text-white">
                     Trusted Results
                   </h3>
                   <p className="text-tertiary-text text-sm sm:text-base">

@@ -1,3 +1,5 @@
+// client/src/components/admin/Sidebar.tsx  (or wherever this file lives)
+
 "use client";
 
 import Link from "next/link";
@@ -12,12 +14,14 @@ import {
   BarChart3,
   Menu,
   X,
+  UsersRound, // ← new icon (or choose another from lucide-react)
 } from "lucide-react";
 import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Team", href: "/admin/team", icon: UsersRound }, // ← added here
   { name: "Questions", href: "/admin/questions", icon: HelpCircle },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Payments", href: "/admin/payments", icon: CreditCard },

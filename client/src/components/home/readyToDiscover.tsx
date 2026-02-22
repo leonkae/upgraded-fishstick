@@ -8,7 +8,7 @@ const ReadyToDiscover = () => {
     <section className="bg-background-secondary py-20 px-6 text-center">
       <div className="container mx-auto">
         <div className="bg-gradient-to-b from-background-primary to-background-tertiary md:bg-gradient-to-r md:from-background-primary md:to-background-tertiary p-6 rounded-2xl shadow-lg">
-          <h2 className="text-4xl font-bold mb-6">
+          <h2 className="text-4xl font-bold mb-6 text-white">
             Ready to Discover Your Path?
           </h2>
           <p className="text-tertiary-text mb-8">

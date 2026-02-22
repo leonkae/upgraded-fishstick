@@ -46,6 +46,19 @@ export interface User {
   updatedAt: string;
 }
 
+export interface TeamMember {
+  _id: string;
+  name: string;
+  role: string;
+  description?: string;
+  imageUrl: string;
+  linkedin?: string | null;
+  twitter?: string | null;
+  order?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface AuthData {
   message: string;
   user?: User;

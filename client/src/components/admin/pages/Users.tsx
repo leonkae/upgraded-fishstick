@@ -480,8 +480,8 @@ const Users = () => {
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Age Range</TableHead>
-                <TableHead>Discipleship Interest</TableHead>{" "}
-                {/* ← NEW COLUMN */}
+                <TableHead>Discipleship Interest</TableHead>
+
                 <TableHead>Quiz Score</TableHead>
                 <TableHead>Quiz Result</TableHead>
                 <TableHead>Retake</TableHead>

@@ -9,7 +9,7 @@ const Hero = () => {
     <section id="hero" className="bg-background-primary pt-32 pb-20 px-6">
       <div className="container mx-auto flex flex-col md:flex-row items-center gap-12">
         <div className="flex-1">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
             Where Will Your <span className="text-highlight-text">Choices</span>{" "}
             Lead You?
           </h1>

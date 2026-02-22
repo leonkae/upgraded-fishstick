@@ -7,7 +7,7 @@ const Testimonials = () => {
   return (
     <section id="testimonials" className="bg-background-secondary py-20 px-6">
       <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12">
+        <h2 className="text-4xl font-bold text-center mb-12 text-white">
           What Others Are Saying
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
