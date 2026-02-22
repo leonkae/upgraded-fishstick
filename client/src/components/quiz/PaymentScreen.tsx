@@ -42,6 +42,10 @@ const PaymentScreen: React.FC = () => {
 
   const [suggestedAmount, setSuggestedAmount] = useState(0);
 
+  // ────────────────────────────────────────────────
+  //   (All your existing logic — fetch, verify, submit — remains unchanged)
+  // ────────────────────────────────────────────────
+
   const getQueryParam = (key: string) => {
     if (typeof window === "undefined") return null;
     const urlSearch = new URLSearchParams(window.location.search);
@@ -138,7 +142,6 @@ const PaymentScreen: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Save all user info (including discipleship interest)
     setUserInfo({
       name,
       email,
@@ -147,8 +150,6 @@ const PaymentScreen: React.FC = () => {
       wantsDiscipleship,
     });
 
-    // We still use getSubmissionPayload() for the responses part,
-    // but override userInfo with the fresh values (including wantsDiscipleship)
     const payload = {
       ...getSubmissionPayload(),
       userInfo: {
@@ -248,17 +249,19 @@ const PaymentScreen: React.FC = () => {
 
   if (isCompleted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 heaven-gradient">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-950 via-indigo-950 to-purple-900 p-6">
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.88, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-white/90 rounded-xl p-8 shadow-lg max-w-md w-full text-center"
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-10 shadow-2xl max-w-lg w-full text-center border border-white/10"
         >
-          <div className="mb-6 flex justify-center">
-            <CheckCircle size={80} className="text-green-500" />
+          <div className="mb-8 flex justify-center">
+            <CheckCircle size={96} className="text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-bold mb-4 font-serif">Thank You!</h2>
-          <p className="text-gray-700 mb-6">
+          <h2 className="text-3xl font-bold mb-5 text-white font-serif tracking-tight">
+            Thank You!
+          </h2>
+          <p className="text-gray-300 text-lg">
             Your support is greatly appreciated. Preparing your results...
           </p>
         </motion.div>
@@ -267,170 +270,218 @@ const PaymentScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 heaven-gradient">
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="bg-white/90 rounded-xl p-8 shadow-lg max-w-md w-full"
-      >
-        <div className="flex items-center justify-center mb-6">
-          <Heart size={28} className="text-heaven-accent mr-2" />
-          <h2 className="text-2xl font-bold font-serif">
-            Submit Your Information
-          </h2>
-        </div>
-
-        <p className="text-gray-700 mb-6 text-center">
-          Please provide your details to receive your personalized assessment
-          results.
-          <span className="block mt-2 text-sm italic">
-            Donation is optional — you can proceed directly. (Paystack test mode
-            in development — no real charge)
-          </span>
-        </p>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name" className="flex items-center gap-2">
-                <User size={16} /> Full Name
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail size={16} /> Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="john@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="phone" className="flex items-center gap-2">
-                <Phone size={16} /> Phone Number
-              </Label>
-              <Input
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+254 712 345 678"
-                required
-              />
-            </div>
-
-            {/* Age Range Dropdown */}
-            <div className="relative">
-              <Label
-                htmlFor="ageRange"
-                className="flex items-center gap-2 mb-1.5"
-              >
-                <User size={16} /> Age Range (Optional)
-              </Label>
-              <select
-                id="ageRange"
-                value={ageRange}
-                onChange={(e) => setAgeRange(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-              >
-                <option value="">Prefer not to say</option>
-                <option value="Under 18">Under 18</option>
-                <option value="18-24">18-24</option>
-                <option value="25-34">25-34</option>
-                <option value="35-44">35-44</option>
-                <option value="45-54">45-54</option>
-                <option value="55+">55+</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-[42px] h-4 w-4 opacity-50" />
-            </div>
-
-            {/* Discipleship Group Interest */}
-            <div>
-              <Label className="flex items-center gap-2 mb-2">
-                <Heart size={16} /> Interested in joining a Discipleship Group?
-              </Label>
-              <div className="flex flex-col sm:flex-row sm:gap-8 gap-4">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="discipleship"
-                    checked={wantsDiscipleship === true}
-                    onChange={() => setWantsDiscipleship(true)}
-                    className="h-5 w-5 text-heaven-accent border-gray-300 focus:ring-heaven-accent"
-                  />
-                  <span className="text-gray-700">Yes, please contact me</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="discipleship"
-                    checked={wantsDiscipleship === false}
-                    onChange={() => setWantsDiscipleship(false)}
-                    className="h-5 w-5 text-heaven-accent border-gray-300 focus:ring-heaven-accent"
-                  />
-                  <span className="text-gray-700">No, thank you</span>
-                </label>
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-indigo-950 to-purple-900 flex items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-6xl">
+        <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-2xl shadow-2xl border border-purple-700/30 bg-gradient-to-br from-purple-900/80 to-indigo-950/80 backdrop-blur-sm">
+          {/* LEFT - FORM */}
+          <div className="p-8 lg:p-12 order-2 md:order-1">
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="flex items-center gap-3 mb-8">
+                <Heart className="h-8 w-8 text-orange-400" />
+                <h2 className="text-3xl font-bold text-white font-serif tracking-tight">
+                  Complete Your Journey
+                </h2>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Optional — this helps us connect interested people with local
-                discipleship groups.
-              </p>
-            </div>
 
-            {/* Donation */}
-            <div className="pt-2">
-              <Label htmlFor="donation" className="flex items-center gap-2">
-                <Heart size={16} /> Support This Ministry (Optional)
-              </Label>
-              <Input
-                id="donation"
-                type="number"
-                value={donationAmount || ""}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  setDonationAmount(isNaN(val) || val < 0 ? 0 : val);
-                }}
-                placeholder="Enter amount or leave blank"
-                min={0}
-              />
-              <p className="text-xs text-gray-500 mt-1 text-center">
-                Enter any amount in KES (or leave as 0 to skip)
+              <p className="text-gray-300 mb-8 leading-relaxed">
+                Share your details to receive your personalized spiritual
+                assessment. A generous donation is optional — every gift helps
+                spread the message.
+                <span className="block mt-2 text-sm text-purple-300/80 italic">
+                  (Test mode — no real charges will occur)
+                </span>
               </p>
-            </div>
 
-            <div className="grid grid-cols-1 gap-4 mt-10">
-              <Button
-                type="submit"
-                className="w-full bg-heaven-accent hover:bg-yellow-500 text-black font-medium py-6 text-lg"
-                disabled={isProcessing}
-              >
-                {isProcessing
-                  ? "Processing..."
-                  : cameFromResults
-                    ? donationAmount > 0
-                      ? `Donate KES ${donationAmount.toLocaleString()} & Retake Quiz`
-                      : "Retake Quiz"
-                    : donationAmount > 0
-                      ? `Donate KES ${donationAmount.toLocaleString()} & View Results`
-                      : "Proceed to Results"}
-              </Button>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Name */}
+                <div>
+                  <Label
+                    htmlFor="name"
+                    className="text-gray-200 flex items-center gap-2 mb-1.5"
+                  >
+                    <User size={18} /> Full Name
+                  </Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="John Doe"
+                    required
+                    className="bg-purple-950/40 border-purple-700/50 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-orange-500/30 h-12"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <Label
+                    htmlFor="email"
+                    className="text-gray-200 flex items-center gap-2 mb-1.5"
+                  >
+                    <Mail size={18} /> Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="john@example.com"
+                    required
+                    className="bg-purple-950/40 border-purple-700/50 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-orange-500/30 h-12"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <Label
+                    htmlFor="phone"
+                    className="text-gray-200 flex items-center gap-2 mb-1.5"
+                  >
+                    <Phone size={18} /> Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+254 712 345 678"
+                    required
+                    className="bg-purple-950/40 border-purple-700/50 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-orange-500/30 h-12"
+                  />
+                </div>
+
+                {/* Age Range */}
+                <div className="relative">
+                  <Label
+                    htmlFor="ageRange"
+                    className="text-gray-200 flex items-center gap-2 mb-1.5"
+                  >
+                    <User size={18} /> Age Range (Optional)
+                  </Label>
+                  <select
+                    id="ageRange"
+                    value={ageRange}
+                    onChange={(e) => setAgeRange(e.target.value)}
+                    className="flex h-12 w-full rounded-md border border-purple-700/50 bg-purple-950/40 px-4 py-2 text-white text-sm focus:border-orange-400 focus:ring-orange-500/30 appearance-none"
+                  >
+                    <option value="">Prefer not to say</option>
+                    <option value="Under 18">Under 18</option>
+                    <option value="18-24">18-24</option>
+                    <option value="25-34">25-34</option>
+                    <option value="35-44">35-44</option>
+                    <option value="45-54">45-54</option>
+                    <option value="55+">55+</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-[42px] h-5 w-5 text-gray-400" />
+                </div>
+
+                {/* Discipleship Interest */}
+                <div>
+                  <Label className="text-gray-200 flex items-center gap-2 mb-3">
+                    <Heart size={18} /> Interested in Discipleship?
+                  </Label>
+                  <div className="flex flex-col sm:flex-row sm:gap-10 gap-6">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="radio"
+                        name="discipleship"
+                        checked={wantsDiscipleship === true}
+                        onChange={() => setWantsDiscipleship(true)}
+                        className="h-5 w-5 accent-orange-500"
+                      />
+                      <span className="text-gray-200 group-hover:text-orange-300 transition-colors">
+                        Yes, please contact me
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="radio"
+                        name="discipleship"
+                        checked={wantsDiscipleship === false}
+                        onChange={() => setWantsDiscipleship(false)}
+                        className="h-5 w-5 accent-orange-500"
+                      />
+                      <span className="text-gray-200 group-hover:text-orange-300 transition-colors">
+                        No, thank you
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Donation */}
+                <div className="pt-4">
+                  <Label
+                    htmlFor="donation"
+                    className="text-gray-200 flex items-center gap-2 mb-1.5"
+                  >
+                    <Heart size={18} /> Support This Ministry (Optional)
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                      KES
+                    </span>
+                    <Input
+                      id="donation"
+                      type="number"
+                      value={donationAmount || ""}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setDonationAmount(isNaN(val) || val < 0 ? 0 : val);
+                      }}
+                      placeholder="Any amount or leave blank"
+                      min={0}
+                      className="bg-purple-950/40 border-purple-700/50 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-orange-500/30 h-12 pl-14"
+                    />
+                  </div>
+                  <p className="text-xs text-purple-300/70 mt-2 text-center">
+                    Your generosity helps reach more souls
+                  </p>
+                </div>
+
+                {/* MAIN ACTION BUTTON – restored to original orange */}
+                <Button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full mt-10 h-14 text-lg font-semibold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg shadow-orange-900/40 transition-all duration-300"
+                >
+                  {isProcessing
+                    ? "Processing..."
+                    : cameFromResults
+                      ? donationAmount > 0
+                        ? `Donate KES ${donationAmount.toLocaleString()} & Retake`
+                        : "Retake Quiz"
+                      : donationAmount > 0
+                        ? `Donate KES ${donationAmount.toLocaleString()} & View Results`
+                        : "View Your Results"}
+                </Button>
+              </form>
+            </motion.div>
+          </div>
+
+          {/* RIGHT - IMAGE / ILLUSTRATION */}
+          <div className="hidden md:block relative overflow-hidden order-1 md:order-2 bg-gradient-to-br from-purple-800/30 to-indigo-900/40">
+            <div className="absolute inset-0 bg-gradient-to-t from-purple-950/70 via-transparent to-purple-950/30 z-10" />
+            <img
+              src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+              alt="Spiritual journey illustration"
+              className="object-cover w-full h-full scale-105 transform transition-transform duration-700 hover:scale-110"
+            />
+            <div className="absolute inset-0 flex items-center justify-center z-20 px-10 text-center">
+              <div className="text-white max-w-md">
+                <h3 className="text-3xl font-bold font-serif mb-4 drop-shadow-lg">
+                  Discover Your Spiritual Path
+                </h3>
+                <p className="text-lg text-purple-100/90 drop-shadow-md">
+                  Receive personalized insights and take the next step in your
+                  walk with God.
+                </p>
+              </div>
             </div>
           </div>
-        </form>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 };
