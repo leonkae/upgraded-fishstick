@@ -17,11 +17,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Default metadata as fallback
+// Default metadata fallback
 const defaultMetadata = {
   title: "The Future of Man",
   description:
     "A fun and introspective quiz to help you discover your destiny: Heaven, Hell, or In-Between.",
+  image: "https://images.pexels.com/photos/3776808/pexels-photo-3776808.jpeg", // 👉 Place your diverse under-50 image here
 };
 
 export default function RootLayout({
@@ -29,66 +30,105 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // State to store dynamic metadata
   const [dynamicMetadata, setDynamicMetadata] = useState({
     title: defaultMetadata.title,
     description: defaultMetadata.description,
+    image: defaultMetadata.image,
   });
 
-  // Fetch settings from API
+  // Fetch settings from backend
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const res = await axios.get("http://localhost:3005/api/v1/settings");
-        console.log("Backend response:", res.data.data); // Debug log
+
         if (res.data?.success && res.data?.data) {
           setDynamicMetadata((prev) => ({
             ...prev,
             title: res.data.data.appName ?? prev.title,
             description: res.data.data.appDescription ?? prev.description,
+            image: res.data.data.shareImage ?? prev.image,
           }));
         }
       } catch (err) {
-        console.log("No existing settings found, using defaults.", err);
-        // Keep defaultMetadata as fallback
+        console.log("Using default metadata.", err);
       }
     };
+
     fetchSettings();
   }, []);
 
-  // Update <head> metadata dynamically
+  // Dynamically update <head>
   useEffect(() => {
-    // Update document title
     document.title = dynamicMetadata.title;
 
-    // Update meta description
-    let descriptionMeta = document.querySelector('meta[name="description"]');
-    if (!descriptionMeta) {
-      descriptionMeta = document.createElement("meta");
-      descriptionMeta.setAttribute("name", "description");
-      document.head.appendChild(descriptionMeta);
-    }
-    descriptionMeta.setAttribute("content", dynamicMetadata.description);
+    const updateMetaTag = (
+      selector: string,
+      attribute: string,
+      value: string
+    ) => {
+      let element = document.querySelector(selector);
 
-    // Update Open Graph title
-    let ogTitleMeta = document.querySelector('meta[property="og:title"]');
-    if (!ogTitleMeta) {
-      ogTitleMeta = document.createElement("meta");
-      ogTitleMeta.setAttribute("property", "og:title");
-      document.head.appendChild(ogTitleMeta);
-    }
-    ogTitleMeta.setAttribute("content", dynamicMetadata.title);
+      if (!element) {
+        element = document.createElement("meta");
 
-    // Update Open Graph description
-    let ogDescriptionMeta = document.querySelector(
-      'meta[property="og:description"]'
+        if (selector.includes("property")) {
+          element.setAttribute("property", attribute);
+        } else {
+          element.setAttribute("name", attribute);
+        }
+
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute("content", value);
+    };
+
+    // Standard description
+    updateMetaTag(
+      'meta[name="description"]',
+      "description",
+      dynamicMetadata.description
     );
-    if (!ogDescriptionMeta) {
-      ogDescriptionMeta = document.createElement("meta");
-      ogDescriptionMeta.setAttribute("property", "og:description");
-      document.head.appendChild(ogDescriptionMeta);
-    }
-    ogDescriptionMeta.setAttribute("content", dynamicMetadata.description);
+
+    // Open Graph
+    updateMetaTag(
+      'meta[property="og:title"]',
+      "og:title",
+      dynamicMetadata.title
+    );
+    updateMetaTag(
+      'meta[property="og:description"]',
+      "og:description",
+      dynamicMetadata.description
+    );
+    updateMetaTag(
+      'meta[property="og:image"]',
+      "og:image",
+      dynamicMetadata.image
+    );
+
+    // Twitter
+    updateMetaTag(
+      'meta[name="twitter:card"]',
+      "twitter:card",
+      "summary_large_image"
+    );
+    updateMetaTag(
+      'meta[name="twitter:title"]',
+      "twitter:title",
+      dynamicMetadata.title
+    );
+    updateMetaTag(
+      'meta[name="twitter:description"]',
+      "twitter:description",
+      dynamicMetadata.description
+    );
+    updateMetaTag(
+      'meta[name="twitter:image"]',
+      "twitter:image",
+      dynamicMetadata.image
+    );
   }, [dynamicMetadata]);
 
   return (
@@ -96,13 +136,25 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        {/* Initial metadata as placeholders for SSR/SSG */}
+
+        {/* Fallback metadata for SSR */}
         <title>{defaultMetadata.title}</title>
         <meta name="description" content={defaultMetadata.description} />
         <meta property="og:title" content={defaultMetadata.title} />
         <meta property="og:description" content={defaultMetadata.description} />
+        <meta property="og:image" content={defaultMetadata.image} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={defaultMetadata.title} />
+        <meta
+          name="twitter:description"
+          content={defaultMetadata.description}
+        />
+        <meta name="twitter:image" content={defaultMetadata.image} />
+
         <link rel="icon" href="/favicon.ico" />
       </head>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen`}
       >
