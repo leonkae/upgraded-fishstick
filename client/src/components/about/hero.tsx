@@ -39,7 +39,7 @@ const Hero = () => {
                     Global Community
                   </h3>
                   <p className="text-tertiary-text text-sm sm:text-base">
-                    100,000+ quiz takers from 50+ countries
+                    Join all the Quiz takers.
                   </p>
                 </div>
               </div>
