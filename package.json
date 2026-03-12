@@ -55,6 +55,8 @@
     "mongodb": "^6.20.0",
     "node-fetch": "^3.3.2",
     "paystack": "^2.0.1",
-    "react-paystack": "^6.0.0"
+    "react-paystack": "^6.0.0",
+    "strip": "^3.0.0",
+    "stripe": "^20.4.1"
   }
 }

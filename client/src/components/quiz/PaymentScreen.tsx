@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useQuestionnaire } from "./QuestionnaireContext";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,9 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.yourdomain.com";
+
 const PaymentScreen: React.FC = () => {
   const {
     setCurrentStep,
@@ -28,9 +30,6 @@ const PaymentScreen: React.FC = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
   const [name, setName] = useState(userInfo.name || "");
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
@@ -39,12 +38,43 @@ const PaymentScreen: React.FC = () => {
   const [wantsDiscipleship, setWantsDiscipleship] = useState<boolean | null>(
     userInfo.wantsDiscipleship ?? null
   );
-
+  const [currency, setCurrency] = useState<string>("KES");
+  const [originalSuggestedKES, setOriginalSuggestedKES] = useState(0);
   const [suggestedAmount, setSuggestedAmount] = useState(0);
+  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({
+    KES: 1,
+  });
 
-  // ────────────────────────────────────────────────
-  //   (All your existing logic — fetch, verify, submit — remains unchanged)
-  // ────────────────────────────────────────────────
+  const supportedCurrencies = [
+    "KES",
+    "USD",
+    "EUR",
+    "GBP",
+    "CAD",
+    "AUD",
+    "JPY",
+    "CHF",
+    "SEK",
+    "NOK",
+    "DKK",
+    "AED",
+    "HKD",
+    "SGD",
+    "NZD",
+    "BRL",
+    "MXN",
+    "PLN",
+    "CZK",
+    "ILS",
+    "INR",
+    "KRW",
+    "THB",
+    "MYR",
+    "PHP",
+    "TRY",
+    "ZAR",
+    "NGN",
+  ];
 
   const getQueryParam = (key: string) => {
     if (typeof window === "undefined") return null;
@@ -62,23 +92,23 @@ const PaymentScreen: React.FC = () => {
     setWantsDiscipleship(userInfo.wantsDiscipleship ?? null);
   }, [userInfo]);
 
+  // Fetch quiz price in KES
   useEffect(() => {
     const fetchPaymentAmount = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:3005/api/v1/settings?_=" + Date.now(),
-          {
-            cache: "no-store",
-            headers: {
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              Pragma: "no-cache",
-              Expires: "0",
-            },
-          }
-        );
+        const res = await fetch(`${API_BASE}/api/v1/settings?_=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        });
         const data = await res.json();
         if (data?.success && data?.data?.quiz?.quizPrice) {
-          setSuggestedAmount(data.data.quiz.quizPrice);
+          const kesPrice = data.data.quiz.quizPrice;
+          setOriginalSuggestedKES(kesPrice);
+          setSuggestedAmount(kesPrice);
         }
       } catch (err) {
         console.error("Error fetching settings:", err);
@@ -87,15 +117,110 @@ const PaymentScreen: React.FC = () => {
     fetchPaymentAmount();
   }, []);
 
+  // Fetch exchange rates – using Frankfurter as primary source
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        // Primary: Frankfurter (reliable, no key, ECB-based rates)
+        const symbols = supportedCurrencies
+          .filter((c) => c !== "KES")
+          .join(",");
+        const frankfurterRes = await fetch(
+          `https://api.frankfurter.dev/latest?from=KES&to=${symbols}`
+        );
+
+        if (!frankfurterRes.ok) {
+          throw new Error(
+            `Frankfurter responded with ${frankfurterRes.status}`
+          );
+        }
+
+        const frankfurterData = await frankfurterRes.json();
+
+        if (frankfurterData?.rates) {
+          setExchangeRates({ KES: 1, ...frankfurterData.rates });
+          console.log("Exchange rates loaded from Frankfurter");
+          return; // success → exit early
+        }
+      } catch (err) {
+        console.warn("Frankfurter fetch failed:", err);
+
+        // Fallback 1: old exchangerate.host
+        try {
+          const symbols = supportedCurrencies
+            .filter((c) => c !== "KES")
+            .join(",");
+          const oldRes = await fetch(
+            `https://api.exchangerate.host/latest?base=KES&symbols=${symbols}`
+          );
+          const oldData = await oldRes.json();
+          if (oldData?.rates) {
+            setExchangeRates({ KES: 1, ...oldData.rates });
+            console.log(
+              "Exchange rates loaded from exchangerate.host (fallback)"
+            );
+            return;
+          }
+        } catch (fallbackErr) {
+          console.warn("exchangerate.host fallback also failed:", fallbackErr);
+        }
+
+        // Ultimate fallback: hardcoded rates
+        console.warn("Using hardcoded fallback exchange rates");
+        setExchangeRates({
+          KES: 1,
+          USD: 0.0077,
+          EUR: 0.0071,
+          GBP: 0.006,
+          CAD: 0.0104,
+          AUD: 0.0117,
+          JPY: 1.13,
+          CHF: 0.0068,
+          SEK: 0.08,
+          NOK: 0.081,
+          DKK: 0.053,
+          AED: 0.028,
+          HKD: 0.06,
+          SGD: 0.0103,
+          NZD: 0.0125,
+          BRL: 0.038,
+          MXN: 0.13,
+          PLN: 0.03,
+          CZK: 0.178,
+          ILS: 0.027,
+          INR: 0.64,
+          KRW: 10.16,
+          THB: 0.272,
+          MYR: 0.036,
+          PHP: 0.43,
+          TRY: 0.245,
+          ZAR: 0.144,
+          NGN: 12.3,
+        });
+      }
+    };
+
+    fetchRates();
+    const interval = setInterval(fetchRates, 60 * 60 * 1000); // hourly
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (originalSuggestedKES > 0 && exchangeRates[currency]) {
+      const converted = originalSuggestedKES * exchangeRates[currency];
+      setSuggestedAmount(Number(converted.toFixed(2)));
+    }
+  }, [currency, exchangeRates, originalSuggestedKES]);
+
+  // Payment verification on callback
   useEffect(() => {
     const verifyReference = async (ref: string) => {
       try {
         setIsProcessing(true);
         const verifyRes = await fetch(
-          `http://localhost:3005/api/v1/payment/verify/${encodeURIComponent(ref)}`,
+          `${API_BASE}/api/v1/payment/verify/${encodeURIComponent(ref)}`,
           { method: "GET" }
         );
-
         if (!verifyRes.ok) {
           const err = await verifyRes.json().catch(() => ({}));
           console.error("Payment verification failed:", err);
@@ -103,15 +228,11 @@ const PaymentScreen: React.FC = () => {
           alert("Payment verification failed. Please contact support.");
           return;
         }
-
         const verificationData = await verifyRes.json();
         const lastResponseId = localStorage.getItem("last_response_id") || null;
-
         await fetchFinalResult(lastResponseId || undefined);
-
         setIsProcessing(false);
         setIsCompleted(true);
-
         setTimeout(() => {
           setCurrentStep("result");
           try {
@@ -162,7 +283,7 @@ const PaymentScreen: React.FC = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3005/api/v1/responses", {
+      const res = await fetch(`${API_BASE}/api/v1/responses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -178,7 +299,6 @@ const PaymentScreen: React.FC = () => {
       try {
         savedResponse = await res.json();
       } catch {}
-
       const savedResponseId =
         savedResponse?.data?._id ||
         savedResponse?._id ||
@@ -190,33 +310,51 @@ const PaymentScreen: React.FC = () => {
       }
 
       if (donationAmount > 0) {
-        const metadata = { response_id: savedResponseId };
+        let finalAmount = donationAmount;
+        let finalCurrency = currency.toUpperCase();
 
-        const initRes = await fetch(
-          "http://localhost:3005/api/v1/payment/initialize",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              amount: donationAmount * 100,
-              email,
-              metadata,
-            }),
+        // Convert non-KES/non-USD to KES
+        if (finalCurrency !== "KES") {
+          const rate = exchangeRates[finalCurrency];
+          if (!rate || rate <= 0) {
+            console.warn(
+              `No valid rate for ${finalCurrency} — using original amount in KES`
+            );
+            // Optionally show a nicer message instead of alert
+            // alert(`Could not convert ${currency}. Charged in KES.`);
+          } else {
+            finalAmount = Number((donationAmount / rate).toFixed(2));
           }
-        );
+          finalCurrency = "KES"; // always charge in KES
+        }
+
+        const initRes = await fetch(`${API_BASE}/api/v1/payment/initialize`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: Math.round(finalAmount * 100),
+            email,
+            currency: finalCurrency,
+            metadata: { response_id: savedResponseId },
+          }),
+        });
 
         if (!initRes.ok) {
-          console.error("Paystack init failed:", await initRes.text());
-        } else {
-          const initData = await initRes.json();
-          if (initData?.authorization_url) {
-            localStorage.setItem(
-              "pending_paystack_reference",
-              initData.reference || initData?.data?.reference || ""
-            );
-            window.location.href = initData.authorization_url;
-            return;
-          }
+          console.error(
+            "Payment init failed:",
+            await initRes.text().catch(() => "")
+          );
+          throw new Error("Payment initialization failed");
+        }
+
+        const initData = await initRes.json();
+        const authUrl = initData.authorization_url;
+        const ref = initData.reference || initData?.data?.reference || "";
+
+        if (authUrl) {
+          localStorage.setItem("pending_paystack_reference", ref);
+          window.location.href = authUrl;
+          return;
         }
       }
 
@@ -236,14 +374,12 @@ const PaymentScreen: React.FC = () => {
     } catch (error) {
       console.error("Error during submission:", error);
       setIsProcessing(false);
-
+      alert("Something went wrong, but you can still retake or view results.");
       if (cameFromResults && donationAmount <= 0) {
         resetQuestionnaire();
       } else {
         setCurrentStep("result");
       }
-
-      alert("Something went wrong, but you can still retake or view results.");
     }
   };
 
@@ -286,16 +422,15 @@ const PaymentScreen: React.FC = () => {
                   Complete Your Journey
                 </h2>
               </div>
-
               <p className="text-gray-300 mb-8 leading-relaxed">
                 Share your details to receive your personalized spiritual
-                assessment. A generous donation is optional — every gift helps
+                assessment. A generous donation is optional, every gift helps
                 spread the message.
                 <span className="block mt-2 text-sm text-purple-300/80 italic">
-                  (Test mode — no real charges will occur)
+                  (Your data is safe with us and will never be shared without
+                  your consent.)
                 </span>
               </p>
-
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Name */}
                 <div>
@@ -352,6 +487,29 @@ const PaymentScreen: React.FC = () => {
                   />
                 </div>
 
+                {/* Currency */}
+                <div className="relative">
+                  <Label
+                    htmlFor="currency"
+                    className="text-gray-200 flex items-center gap-2 mb-1.5"
+                  >
+                    <CreditCard size={18} /> Currency
+                  </Label>
+                  <select
+                    id="currency"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="flex h-12 w-full rounded-md border border-purple-700/50 bg-purple-950/40 px-4 py-2 text-white text-sm focus:border-orange-400 focus:ring-orange-500/30 appearance-none"
+                  >
+                    {supportedCurrencies.map((cur) => (
+                      <option key={cur} value={cur}>
+                        {cur}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top={[42px]} h-5 w-5 text-gray-400" />
+                </div>
+
                 {/* Age Range */}
                 <div className="relative">
                   <Label
@@ -377,7 +535,7 @@ const PaymentScreen: React.FC = () => {
                   <ChevronDown className="pointer-events-none absolute right-4 top-[42px] h-5 w-5 text-gray-400" />
                 </div>
 
-                {/* Discipleship Interest */}
+                {/* Discipleship */}
                 <div>
                   <Label className="text-gray-200 flex items-center gap-2 mb-3">
                     <Heart size={18} /> Interested in Discipleship?
@@ -420,7 +578,7 @@ const PaymentScreen: React.FC = () => {
                   </Label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      KES
+                      {currency}
                     </span>
                     <Input
                       id="donation"
@@ -430,17 +588,29 @@ const PaymentScreen: React.FC = () => {
                         const val = Number(e.target.value);
                         setDonationAmount(isNaN(val) || val < 0 ? 0 : val);
                       }}
-                      placeholder="Any amount or leave blank"
+                      placeholder="Enter any amount you'd like to contribute"
                       min={0}
                       className="bg-purple-950/40 border-purple-700/50 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-orange-500/30 h-12 pl-14"
                     />
                   </div>
+
+                  {donationAmount > 0 &&
+                    !"KES".includes(currency) &&
+                    exchangeRates[currency] > 0 && (
+                      <p className="text-xs text-amber-300 mt-2 text-center">
+                        ≈{" "}
+                        {Math.round(
+                          donationAmount / exchangeRates[currency]
+                        ).toLocaleString()}{" "}
+                        KES (live rate • charged in KES)
+                      </p>
+                    )}
+
                   <p className="text-xs text-purple-300/70 mt-2 text-center">
                     Your generosity helps reach more souls
                   </p>
                 </div>
 
-                {/* MAIN ACTION BUTTON – restored to original orange */}
                 <Button
                   type="submit"
                   disabled={isProcessing}
@@ -450,17 +620,17 @@ const PaymentScreen: React.FC = () => {
                     ? "Processing..."
                     : cameFromResults
                       ? donationAmount > 0
-                        ? `Donate KES ${donationAmount.toLocaleString()} & Retake`
+                        ? `Donate ${currency} ${donationAmount.toLocaleString()} & Retake`
                         : "Retake Quiz"
                       : donationAmount > 0
-                        ? `Donate KES ${donationAmount.toLocaleString()} & View Results`
+                        ? `Donate ${currency} ${donationAmount.toLocaleString()} & View Results`
                         : "View Your Results"}
                 </Button>
               </form>
             </motion.div>
           </div>
 
-          {/* RIGHT - IMAGE / ILLUSTRATION */}
+          {/* RIGHT - IMAGE */}
           <div className="hidden md:block relative overflow-hidden order-1 md:order-2 bg-gradient-to-br from-purple-800/30 to-indigo-900/40">
             <div className="absolute inset-0 bg-gradient-to-t from-purple-950/70 via-transparent to-purple-950/30 z-10" />
             <img
