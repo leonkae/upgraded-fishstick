@@ -3,11 +3,7 @@ import { Cloud, Scale, Flame } from "lucide-react";
 
 const DiscoverYourPath = () => {
   return (
-    <section
-      id="paths"
-      className="bg-background-secondary py-20"
-      style={{ border: "3px solid #8B5CF6" }}
-    >
+    <section id="paths" className="bg-background-secondary py-20">
       <div className="container mx-auto text-center">
         <h2 className="text-4xl font-bold  mb-4 text-white">
           Discover Your Path

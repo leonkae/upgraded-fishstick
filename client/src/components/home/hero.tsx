@@ -6,11 +6,7 @@ import { Play, Users } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section
-      id="hero"
-      className="bg-background-primary pt-30 pb-20"
-      style={{ border: "3px solid #8B5CF6" }}
-    >
+    <section id="hero" className="bg-background-primary pt-30 pb-20">
       {/* Optional subtle background texture/overlay */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(139,92,246,0.15),transparent_40%)]" />

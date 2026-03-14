@@ -4,11 +4,7 @@ import { HelpCircle, BarChart3, Share } from "lucide-react";
 
 const HowItWorks = () => {
   return (
-    <section
-      id="how-it-works"
-      className="bg-background-secondary py-20"
-      style={{ border: "3px solid #8B5CF6" }}
-    >
+    <section id="how-it-works" className="bg-background-secondary py-20">
       <div className="container mx-auto text-center">
         <h2 className="text-4xl font-bold  mb-4 text-white">How It Works</h2>
         <p className="text-tertiary-text mb-12 max-w-2xl mx-auto">

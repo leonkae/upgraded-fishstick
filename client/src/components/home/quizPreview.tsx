@@ -18,11 +18,7 @@ const QuizPreview = () => {
   ];
 
   return (
-    <section
-      id="quiz-preview"
-      className="bg-background-primary py-20"
-      style={{ border: "3px solid #8B5CF6" }}
-    >
+    <section id="quiz-preview" className="bg-background-primary py-20">
       <div className="container mx-auto max-w-2xl">
         <div className="bg-background-accent rounded-3xl p-8">
           <div className="flex items-center justify-between mb-8">
