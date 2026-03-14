@@ -68,7 +68,7 @@ export const Team = () => {
   }
 
   return (
-    <section id="team" className="bg-background-secondary py-16 px-4 sm:px-6">
+    <section id="team" className="bg-background-secondary py-16 sm:px-6">
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">

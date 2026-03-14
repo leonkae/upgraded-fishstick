@@ -40,16 +40,13 @@ const FAQ = () => {
   };
 
   return (
-    <section
-      id="faq"
-      className="bg-background-tertiary pt-24 pb-16 px-4 sm:px-6"
-    >
+    <section id="faq" className="bg-background-tertiary pt-24 pb-16 sm:px-6">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold  mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold  mb-4 text-white">
             Frequently Asked Questions
           </h2>
-          <p className="text-tertiary-text text-base sm:text-lg">
+          <p className="text-tertiary-text text-base text-white sm:text-lg ">
             Everything you need to know about The Future of Man quiz
           </p>
         </div>
@@ -64,7 +61,7 @@ const FAQ = () => {
                 onClick={() => toggleFAQ(index)}
                 className="w-full flex justify-between items-center"
               >
-                <h3 className="text-lg sm:text-xl font-semibold text-left">
+                <h3 className="text-lg sm:text-xl font-semibold text-left text-white">
                   {faq.question}
                 </h3>
                 {openIndex === index ? (
@@ -83,10 +80,10 @@ const FAQ = () => {
         </div>
 
         <div className="mt-12 bg-background-secondary rounded-2xl p-6 sm:p-8 text-center">
-          <h3 className="text-xl sm:text-2xl font-bold  mb-4">
+          <h3 className="text-xl sm:text-2xl font-bold  mb-4 text-white">
             Still have questions?
           </h3>
-          <p className="text-tertiary-text mb-6 text-sm sm:text-base">
+          <p className="text-tertiary-text mb-6 text-sm sm:text-base text-white">
             We're here to help! Reach out to our support team for assistance.
           </p>
           <Link

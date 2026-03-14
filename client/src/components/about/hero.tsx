@@ -12,10 +12,7 @@ import {
 
 const Hero = () => {
   return (
-    <section
-      id="about"
-      className="bg-background-primary pt-32 pb-20 px-4 sm:px-6"
-    >
+    <section id="about" className="bg-background-primary pt-32 pb-20  sm:px-6">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           {/* Text Content */}
