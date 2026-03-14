@@ -23,10 +23,7 @@ const Header = () => {
   };
 
   return (
-    <header
-      className="fixed top-0 z-50 w-full bg-background-primary text-0ite py-4 shadow-md"
-      style={{ border: "3px solid #8B5CF6" }}
-    >
+    <header className="fixed top-0 z-50 w-full bg-background-primary text-0ite py-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link
