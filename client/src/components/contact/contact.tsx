@@ -95,7 +95,7 @@ const Contact = () => {
   return (
     <section
       id="contact"
-      className="bg-background-secondary pt-32 pb-20 px-4 sm:px-6 animate-fade-in"
+      className="bg-background-secondary pt-32 pb-20  sm:px-6 animate-fade-in"
     >
       <div className="container mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
