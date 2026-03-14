@@ -5,7 +5,10 @@ import { Play } from "lucide-react";
 
 const ReadyToDiscover = () => {
   return (
-    <section className="bg-background-secondary py-20 px-6 text-center">
+    <section
+      className="bg-background-secondary py-20 text-center"
+      style={{ border: "3px solid #8B5CF6" }}
+    >
       <div className="container mx-auto">
         <div className="bg-gradient-to-b from-background-primary to-background-tertiary md:bg-gradient-to-r md:from-background-primary md:to-background-tertiary p-6 rounded-2xl shadow-lg">
           <h2 className="text-4xl font-bold mb-6 text-white">

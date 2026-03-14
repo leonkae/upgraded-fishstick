@@ -5,7 +5,11 @@ import { Star } from "lucide-react";
 
 const Testimonials = () => {
   return (
-    <section id="testimonials" className="bg-background-secondary py-20 px-6">
+    <section
+      id="testimonials"
+      className="bg-background-secondary py-20"
+      style={{ border: "3px solid #8B5CF6" }}
+    >
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center mb-12 text-white">
           What Others Are Saying

@@ -23,7 +23,10 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 z-50 w-full bg-background-primary text-0ite px-6 py-4 shadow-md">
+    <header
+      className="fixed top-0 z-50 w-full bg-background-primary text-0ite py-4 shadow-md"
+      style={{ border: "3px solid #8B5CF6" }}
+    >
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link
@@ -32,7 +35,9 @@ const Header = () => {
           className="flex items-center gap-2"
         >
           <Star className="text-highlight-text" size={20} />
-          <span className="text-xl font-bold">The Future of Man</span>
+          <span className="text-xl font-bold text-white">
+            The Future of Man
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
