@@ -538,7 +538,8 @@ const PaymentScreen: React.FC = () => {
                 {/* Discipleship */}
                 <div>
                   <Label className="text-gray-200 flex items-center gap-2 mb-3">
-                    <Heart size={18} /> Interested in Discipleship?
+                    <Heart size={18} /> Are you interested in joining a
+                    discipleship program ?
                   </Label>
                   <div className="flex flex-col sm:flex-row sm:gap-10 gap-6">
                     <label className="flex items-center gap-3 cursor-pointer group">
@@ -574,7 +575,8 @@ const PaymentScreen: React.FC = () => {
                     htmlFor="donation"
                     className="text-gray-200 flex items-center gap-2 mb-1.5"
                   >
-                    <Heart size={18} /> Support This Ministry (Optional)
+                    <Heart size={18} /> Do you mind supporting this ministry to
+                    reach many others ? (Optional)
                   </Label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
