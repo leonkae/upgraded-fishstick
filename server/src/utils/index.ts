@@ -103,12 +103,16 @@ export const setCookie = (
   res.cookie(name, value, options);
 };
 
+// src/utils/index.ts
 export const clearCookie = (
   res: Response,
   name: string,
   options: CookieOptions = COOKIE_OPTIONS
 ) => {
-  const clearOptions = { ...options };
-  delete clearOptions.maxAge;
-  res.clearCookie(name, clearOptions);
+  res.clearCookie(name, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/", // Important
+  });
 };
