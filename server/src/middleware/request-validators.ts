@@ -1,3 +1,5 @@
+// src/middleware/request-validators.ts
+
 import { NextFunction, Request, Response } from "express";
 import { body, validationResult } from "express-validator";
 import { PASSWORD_OPTIONS } from "@/constants";
@@ -20,7 +22,11 @@ const passwordValidator = [
 ];
 
 export const emailValidator = [
-  body("email").isEmail().withMessage("Email is invalid."),
+  body("email")
+    .trim()
+    .normalizeEmail()
+    .isEmail()
+    .withMessage("Email is invalid."),
 ];
 
 export const registrationValidator = [
@@ -28,7 +34,7 @@ export const registrationValidator = [
     .isString()
     .notEmpty()
     .withMessage(
-      (value, { path, req }) =>
+      (value, { path }) =>
         `${path === "firstName" ? "First Name" : "Last Name"} is required.`
     ),
   ...emailValidator,
@@ -37,9 +43,15 @@ export const registrationValidator = [
   ...passwordValidator,
 ];
 
+// FIXED & IMPROVED LOGIN VALIDATOR
 export const loginValidator = [
-  ...emailValidator,
-  body("password").notEmpty().withMessage("Password is required."),
+  body("email")
+    .trim()
+    .normalizeEmail()
+    .isEmail()
+    .withMessage("Please enter a valid email address."),
+
+  body("password").trim().notEmpty().withMessage("Password is required."),
 ];
 
 export const passwordResetValidator = [...emailValidator, ...passwordValidator];
@@ -50,9 +62,15 @@ export const validateRequest = (
   next: NextFunction
 ) => {
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
+    console.error("❌ VALIDATION FAILED for", req.path);
+    console.error("Received body:", JSON.stringify(req.body, null, 2));
+    console.error("Validation errors:", errors.array());
+
     throw new RequestValidationError(errors.array());
   }
 
+  console.log("✅ Validation PASSED for", req.path);
   next();
 };

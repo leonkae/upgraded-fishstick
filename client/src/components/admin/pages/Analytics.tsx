@@ -1,3 +1,5 @@
+// src/components/admin/pages/Analytics.tsx
+
 "use client";
 
 import React, { useEffect, useState } from "react";

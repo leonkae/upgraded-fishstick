@@ -1,3 +1,4 @@
+// src/app/(protected)/admin/questions/page.tsx
 import { Questions } from "@/components/admin/pages/Questions";
 
 const QuestionsPage = () => {

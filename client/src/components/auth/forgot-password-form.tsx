@@ -1,3 +1,4 @@
+// src/components/auth/forgot-password-form.tsx
 "use client";
 
 import { startTransition, useActionState, useEffect } from "react";
@@ -27,7 +28,7 @@ const ForgotPasswordForm = () => {
     null
   );
 
-  const form = useForm({
+  const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
@@ -56,23 +57,41 @@ const ForgotPasswordForm = () => {
   return (
     <AuthFormWrapper form="forgot-password">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-7">
+          {/* Instruction Text */}
+          <p className="text-sm sm:text-base text-gray-600">
+            Enter your email address and we’ll send you a link to reset your
+            password.
+          </p>
+
+          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
+              <FormItem className="space-y-2">
+                <FormLabel className="text-sm font-medium text-black">
+                  Email address
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your email" {...field} />
+                  <Input
+                    placeholder="john@wick.com"
+                    {...field}
+                    className="h-12 w-full rounded-lg px-4 bg-white border border-gray-300 text-black placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "..." : "Send Reset Link"}
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-medium rounded-lg"
+            disabled={pending}
+          >
+            {pending ? "Sending link..." : "Send Reset Link"}
           </Button>
         </form>
       </Form>

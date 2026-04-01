@@ -1,3 +1,4 @@
+// src/components/admin/draggable-question.tsx
 "use client";
 
 import React from "react";

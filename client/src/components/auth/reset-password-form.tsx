@@ -1,3 +1,4 @@
+// src/components/auth/reset-password-form.tsx
 "use client";
 
 import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";

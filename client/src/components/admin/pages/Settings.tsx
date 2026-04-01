@@ -1,3 +1,4 @@
+// src/components/admin/pages/Settings.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";

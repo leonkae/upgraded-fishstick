@@ -1,13 +1,15 @@
+// src/controllers/auth.ts
 import { Request, Response } from "express";
 import { compare } from "bcrypt";
 import crypto from "crypto";
 
 import { clearCookie, generateJWT, respond, setCookie } from "@/utils";
 import { BadRequestError } from "@/errors/bad-request";
+import { AuthError } from "@/errors/auth";
 import { AUTH_COOKIE_NAME, FRONTEND_URL } from "@/constants";
 import { Email } from "@/providers/Email";
 import { Token, User } from "@/db/models";
-
+import { IJWTPayload } from "@/types";
 export const register = async (req: Request, res: Response) => {
   // TODO: Use a timebound token (JWT) instead of a static token
   // generate a verification token
@@ -87,41 +89,99 @@ export const verifyEmail = async (req: Request, res: Response) => {
   });
 };
 
+// FIXED LOGIN FUNCTION - Compatible with your current User model
 export const login = async (req: Request, res: Response) => {
-  const user = await User.findOne({
-    email: req.body.email,
-  });
+  console.log("=== LOGIN CONTROLLER STARTED ===");
+  console.log("Body received:", JSON.stringify(req.body, null, 2));
 
-  if (!user) {
-    throw new BadRequestError("Invalid credentials");
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      throw new BadRequestError("Email and password are required");
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+password" // in case you have select: false on password in schema
+    );
+
+    console.log("User found:", !!user);
+    if (user) {
+      console.log("→ Role:", user.role);
+      console.log("→ Email in DB:", user.email);
+    }
+
+    if (!user) {
+      throw new BadRequestError("Invalid credentials");
+    }
+
+    const passwordsMatch = await compare(password, user.password);
+
+    if (!passwordsMatch) {
+      console.log("❌ Password does not match for user:", normalizedEmail);
+      throw new BadRequestError("Invalid credentials");
+    }
+
+    // ==================== FIXED JWT PAYLOAD ====================
+    const jwtPayload: IJWTPayload = {
+      user: {
+        _id: user._id.toString(),
+        role: user.role || "user", // Make sure role is included
+        email: user.email,
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+      },
+    };
+
+    const token = await generateJWT(jwtPayload, true); // true = compressed
+
+    setCookie(res, AUTH_COOKIE_NAME!, token);
+
+    // Remove sensitive data before sending to client
+    const { password: _, __v, ...safeUserData } = user.toObject();
+
+    console.log("✅ Login successful for:", normalizedEmail);
+    console.log("→ User role in token:", jwtPayload.user.role);
+
+    respond(res, {
+      message: "Login successful",
+      user: safeUserData,
+    });
+  } catch (error: any) {
+    console.error("❌ Login controller error:", error.message || error);
+    throw error;
   }
-
-  const passwordsMatch = await compare(req.body.password, user.password);
-
-  if (!passwordsMatch) {
-    throw new BadRequestError("Invalid credentials");
-  }
-
-  const token = await generateJWT({ _id: user._id as unknown as string });
-
-  setCookie(res, AUTH_COOKIE_NAME!, token);
-
-  const { password, __v, ...userData } = user.toObject();
-
-  respond(res, {
-    message: "Login successful",
-    user: userData,
-  });
 };
 
+// src/controllers/auth.ts → currentUser function
+
 export const currentUser = async (req: Request, res: Response) => {
-  const user = await User.findById(req.userID);
+  try {
+    if (!req.userID) {
+      throw new AuthError("Authentication required");
+    }
 
-  const { password, __v, ...userData } = user!.toObject();
+    const user = await User.findById(req.userID).select("-password -__v");
 
-  respond(res, {
-    user: userData,
-  });
+    if (!user) {
+      throw new AuthError("User not found");
+    }
+
+    respond(res, {
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        username: user.username,
+        role: user.role, // ← Make sure role is included
+        name: `${user.firstName} ${user.lastName}`.trim(),
+      },
+    });
+  } catch (error: any) {
+    throw error;
+  }
 };
 
 export const logout = async (req: Request, res: Response) => {

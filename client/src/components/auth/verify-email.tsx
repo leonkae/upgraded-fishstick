@@ -1,3 +1,4 @@
+// src/components/auth/verify-email.tsx
 "use client";
 
 import { verifyEmail } from "@/services/auth";

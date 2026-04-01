@@ -1,3 +1,4 @@
+// src/app/(protected)/admin/team/page.tsx
 import AdminTeamPage from "@/components/admin/pages/Team";
 
 const TeamPage = () => {

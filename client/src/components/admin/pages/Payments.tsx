@@ -1,3 +1,4 @@
+// src/components/admin/pages/Payments.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";

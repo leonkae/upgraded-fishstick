@@ -1,57 +1,56 @@
+// src/app/(protected)/layout.tsx
 "use client";
-import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
-import { useAuth } from "@/store/auth";
-import { getUserSession } from "@/lib/session";
-import { Sidebar } from "../../components/admin/sidebar";
-import { Topbar } from "../../components/admin/topbar";
 
-const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-  const { user, setUser, setAuthError } = useAuth();
-  const [loading, setLoading] = useState(true);
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Only send request if user is not already set
-    // This prevents unnecessary requests when navigating between pages
-    if (!user) {
-      const getUser = async () => {
-        setLoading(true);
-        const session = await getUserSession();
-        if ("error" in session) {
-          // setAuthError("You must be logged in to access this page.");
-          setLoading(false);
-          // redirect("/auth/login");
-        } else if (session.user) {
-          // Set user in store
-          setUser(session.user);
-          setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:3005/api/v1/auth/me", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          router.replace("/auth/login");
+          return;
         }
-      };
-      getUser();
-    } else {
-      setLoading(false);
-    }
-  }, []);
 
-  return (
-    <>
-      {loading ? (
-        <div className="flex items-center justify-center h-screen">
-          <p>Loading...</p>
-        </div>
-      ) : (
-        <div className="flex min-h-screen bg-muted overflow-hidden">
-          <Sidebar />
-          {/* Main content */}
-          <div className="flex-1 flex flex-col overflow-x-hidden">
-            <main className="flex-1 p-8 max-w-full overflow-x-hidden">
-              {children}
-            </main>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
+        const data = await res.json();
+        const role = data?.user?.role || data?.data?.user?.role;
 
-export default ProtectedLayout;
+        if (role !== "admin") {
+          alert("You don't have admin privileges");
+          router.replace("/");
+          return;
+        }
+      } catch (err) {
+        router.replace("/auth/login");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading admin panel...</p>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}

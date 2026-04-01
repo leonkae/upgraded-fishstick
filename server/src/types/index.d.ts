@@ -29,10 +29,17 @@ export interface IUser {
 }
 
 export interface IJWTUser {
-  _id: IUser["_id"];
+  _id: string;
+  role: string;
+  email?: string;
+  name?: string;
 }
 
 // TJWTPayload which extends JWTPayload to include user
 export interface IJWTPayload extends JwtPayload {
   user: IJWTUser;
+  _id?: string;
+  role?: string;
+  email?: string;
+  name?: string;
 }
