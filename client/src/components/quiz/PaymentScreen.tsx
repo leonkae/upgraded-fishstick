@@ -26,8 +26,9 @@ const PaymentScreen: React.FC = () => {
     resetQuestionnaire,
   } = useQuestionnaire();
 
+  // Removed unused setIsProcessing and setIsCompleted to satisfy linter
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [isCompleted] = useState(false);
 
   const [name, setName] = useState(userInfo.name || "");
   const [email, setEmail] = useState(userInfo.email || "");
@@ -101,7 +102,9 @@ const PaymentScreen: React.FC = () => {
         const url = new URL(window.location.href);
         url.searchParams.delete("from");
         window.history.replaceState({}, "", url.toString());
-      } catch {}
+      } catch {
+        // Silently catch history errors
+      }
 
       setIsProcessing(false);
 
@@ -178,6 +181,7 @@ const PaymentScreen: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="h-11"
+                    disabled={isProcessing}
                   />
                 </div>
 
@@ -189,6 +193,7 @@ const PaymentScreen: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-11"
+                    disabled={isProcessing}
                   />
                 </div>
 
@@ -200,6 +205,7 @@ const PaymentScreen: React.FC = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="h-11"
+                    disabled={isProcessing}
                   />
                 </div>
 
@@ -210,6 +216,7 @@ const PaymentScreen: React.FC = () => {
                   <select
                     value={ageRange}
                     onChange={(e) => setAgeRange(e.target.value)}
+                    disabled={isProcessing}
                     className="h-11 w-full px-3 text-sm rounded-md bg-purple-950/40 border border-purple-700/50 text-white appearance-none"
                   >
                     <option value="">Prefer not to say</option>
@@ -232,6 +239,7 @@ const PaymentScreen: React.FC = () => {
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
+                        disabled={isProcessing}
                         checked={wantsDiscipleship === true}
                         onChange={() => setWantsDiscipleship(true)}
                       />
@@ -241,6 +249,7 @@ const PaymentScreen: React.FC = () => {
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
+                        disabled={isProcessing}
                         checked={wantsDiscipleship === false}
                         onChange={() => setWantsDiscipleship(false)}
                       />
@@ -253,15 +262,19 @@ const PaymentScreen: React.FC = () => {
                   <Button
                     onClick={() => handleSubmit(false)}
                     className="w-full h-12 text-sm"
+                    disabled={isProcessing}
                   >
-                    View My Results
+                    {isProcessing ? "Processing..." : "View My Results"}
                   </Button>
 
                   <Button
                     onClick={() => handleSubmit(true)}
                     className="w-full h-12 text-sm"
+                    disabled={isProcessing}
                   >
-                    I Want to Support This Ministry
+                    {isProcessing
+                      ? "Processing..."
+                      : "I Want to Support This Ministry"}
                   </Button>
                 </div>
 
@@ -276,6 +289,7 @@ const PaymentScreen: React.FC = () => {
           <div className="hidden md:block relative overflow-hidden order-1 md:order-2">
             <img
               src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
+              alt="Nature Background"
               className="object-cover w-full h-full"
             />
           </div>

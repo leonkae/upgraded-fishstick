@@ -41,9 +41,7 @@ const Contact = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   const validateForm = (): FormErrors => {
-    // newErrors is used to collect validation errors
-    const newErrors: FormErrors = {}; // Initialize an empty object for errors
-    // Check each field and add an error message if validation fails
+    const newErrors: FormErrors = {};
     if (!formData.firstName.trim())
       newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
@@ -56,29 +54,23 @@ const Contact = () => {
     return newErrors;
   };
 
-  // handleChange updates form data and clears any existing error for the field being changed
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    // Using spread operator to update formData
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear the error for the field being changed
     setErrors({ ...errors, [e.target.name]: undefined });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // Prevent default form submission behavior
     e.preventDefault();
-    // Validate the form and get any errors
     const validationErrors = validateForm();
-    // If there are validation errors, set them in state and return early
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    // If no errors, proceed with form submission logic
+
     console.log("Form submitted:", formData);
 
     setMessage("Thank you for your message! We'll get back to you soon.");
@@ -105,8 +97,8 @@ const Contact = () => {
               Get in Touch
             </h2>
             <p className="text-tertiary-text text-base sm:text-lg mb-8">
-              Have questions about the quiz? Want to share your experience? We'd
-              love to hear from you!
+              Have questions about the quiz? Want to share your experience?
+              We&apos;d love to hear from you!
             </p>
 
             <div className="space-y-6">
@@ -123,7 +115,7 @@ const Contact = () => {
               <div className="flex items-center text-tertiary-text justify-center lg:justify-start">
                 <MapPin className="text-highlight-text w-6 h-6 sm:w-8 sm:h-8 mr-4" />
                 <span className="text-sm sm:text-base">
-                  123 Faith Street, Heaven's Gate, CA 90210
+                  123 Faith Street, Heaven&apos;s Gate, CA 90210
                 </span>
               </div>
             </div>

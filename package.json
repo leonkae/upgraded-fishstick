@@ -53,6 +53,7 @@
     "csv-stringify": "^6.6.0",
     "dotenv": "^17.2.2",
     "errors": "^0.3.0",
+    "lucide-react": "^1.7.0",
     "mongodb": "^6.20.0",
     "node-fetch": "^3.3.2",
     "paystack": "^2.0.1",

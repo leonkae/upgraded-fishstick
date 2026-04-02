@@ -1,9 +1,9 @@
-// src/components/auth/forgot-password-form.tsx
 "use client";
 
-import { startTransition, useActionState, useEffect } from "react";
+import { useState } from "react"; // Switched from useActionState to useState
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation"; // Use useRouter instead of redirect for client-side
 
 import { forgotPasswordSchema } from "@/schemas/forms";
 import {
@@ -17,16 +17,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ForgotPasswordFormData } from "@/types";
-import { forgotPassword } from "@/services/auth";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
 import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
 
 const ForgotPasswordForm = () => {
-  const [state, forgotPasswordAction, pending] = useActionState(
-    forgotPassword,
-    null
-  );
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -35,36 +31,43 @@ const ForgotPasswordForm = () => {
     },
   });
 
-  const onSubmit = (values: ForgotPasswordFormData) => {
-    startTransition(() => {
-      forgotPasswordAction(values);
-    });
+  const onSubmit = async (values: ForgotPasswordFormData) => {
+    setIsPending(true);
+    try {
+      // Direct API call - Replace with your actual backend URL if it's not localhost
+      const response = await fetch(
+        "http://localhost:3005/api/v1/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Something went wrong");
+      }
+
+      toast.success(data.message || "Reset link sent!", { duration: 8000 });
+      router.push("/auth/login");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsPending(false);
+    }
   };
-
-  useEffect(() => {
-    if (state === null) return;
-
-    if ("message" in state) {
-      toast.success(state.message, { duration: 8000 });
-      redirect("/auth/login");
-    }
-
-    if ("error" in state) {
-      toast.error(state.error);
-    }
-  }, [state]);
 
   return (
     <AuthFormWrapper form="forgot-password">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-7">
-          {/* Instruction Text */}
           <p className="text-sm sm:text-base text-gray-600">
-            Enter your email address and we’ll send you a link to reset your
-            password.
+            Enter your email address and we&apos;ll send you a link to reset
+            your password.
           </p>
 
-          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
@@ -85,13 +88,12 @@ const ForgotPasswordForm = () => {
             )}
           />
 
-          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full h-12 text-base font-medium rounded-lg"
-            disabled={pending}
+            disabled={isPending}
           >
-            {pending ? "Sending link..." : "Send Reset Link"}
+            {isPending ? "Sending link..." : "Send Reset Link"}
           </Button>
         </form>
       </Form>
