@@ -1,14 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export", // <--- ADD THIS LINE
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // ✅ THIS IS THE KEY
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // ✅ ALSO IMPORTANT
   },
-  // If your images are from Unsplash/Pexels, add this to skip optimization errors
   images: {
     unoptimized: true,
   },
