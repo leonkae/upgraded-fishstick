@@ -9,7 +9,7 @@
     "dev:server": "npm run dev --workspace=server",
     "format": "prettier --write \"client/**/*.{js,ts,tsx,json,css,md}\" \"server/**/*.{js,ts,json,md}\"",
     "format:check": "prettier --check \"client/**/*.{js,ts,tsx,json,css,md}\" \"server/**/*.{js,ts,json,md}\"",
-    "prepare": "husky"
+    "prepare": ""
   },
   "repository": {
     "type": "git",
