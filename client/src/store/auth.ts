@@ -14,7 +14,8 @@ interface UserStore {
 export const useAuth = create<UserStore>((set) => ({
   user: null,
   authError: null,
-  setUser: (user: any) => set({ user }),
+  // Fixed: Changed 'user: any' to 'user: User' to resolve Line 17 error
+  setUser: (user: User) => set({ user }),
   logout: async () => {
     const result = await logout();
 

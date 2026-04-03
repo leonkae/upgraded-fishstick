@@ -81,7 +81,6 @@ const QuestionScreen: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="bg-white rounded-3xl p-8 shadow-lg"
           >
-            {/* Header */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center">
@@ -96,7 +95,6 @@ const QuestionScreen: React.FC = () => {
               </span>
             </div>
 
-            {/* Progress bar */}
             <div className="w-full mb-8">
               <div className="progress-bar bg-gray-200">
                 <div
@@ -106,12 +104,10 @@ const QuestionScreen: React.FC = () => {
               </div>
             </div>
 
-            {/* Question */}
             <h2 className="text-2xl font-bold mb-8 text-gray-900 font-serif">
               {currentQuestion.text}
             </h2>
 
-            {/* Options */}
             <RadioGroup
               // The value is the selected option's ID
               value={selectedOption}
@@ -138,7 +134,6 @@ const QuestionScreen: React.FC = () => {
               ))}
             </RadioGroup>
 
-            {/* Navigation */}
             <div className="flex justify-between">
               <Button
                 variant="ghost"

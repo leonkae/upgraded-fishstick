@@ -91,7 +91,6 @@ const Contact = () => {
     >
       <div className="container mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
-          {/* Contact Info */}
           <div className="text-center lg:text-left">
             <h2 className="text-3xl sm:text-4xl font-bold text-primary-text mb-4">
               Get in Touch
@@ -143,7 +142,6 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* Contact Form */}
           <div className="bg-background-accent rounded-2xl p-6 sm:p-8 animate-slide-up">
             <h3 className="text-xl sm:text-2xl font-semibold text-secondary-text mb-6">
               Send Us a Message

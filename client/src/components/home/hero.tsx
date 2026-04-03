@@ -38,13 +38,11 @@ const Hero = () => {
 
   return (
     <section id="hero" className="bg-background-primary pt-30 pb-20">
-      {/* Background glow */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(139,92,246,0.15),transparent_40%)]" />
       </div>
 
       <div className="container mx-auto relative z-10 flex flex-col lg:flex-row items-center gap-10 md:gap-16">
-        {/* LEFT */}
         <div className="flex-1 text-center lg:text-left max-w-2xl">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-6 leading-tight">
             <span className="block text-white">Your Choices Shape</span>
@@ -81,7 +79,6 @@ const Hero = () => {
             </Link>
           </div>
 
-          {/* Social proof */}
           <div className="flex items-center justify-center lg:justify-start gap-4 md:gap-6 text-gray-400">
             <div className="flex -space-x-3">
               <Image
@@ -119,11 +116,10 @@ const Hero = () => {
             </div>
           </div>
         </div>
-
-        {/* RIGHT */}
+        =
         <div className="flex-1 relative max-w-md lg:max-w-none">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-purple-900/40 border border-purple-700/30">
-            {/* VIDEO */}
+            =
             <video
               ref={videoRef}
               src="/hero-video.mp4"
@@ -137,8 +133,7 @@ const Hero = () => {
                 isLoaded ? "opacity-100" : "opacity-0 blur-sm"
               }`}
             />
-
-            {/* FALLBACK IMAGE */}
+            =
             {!isLoaded && (
               <Image
                 src="/hero.jpg"
@@ -147,14 +142,9 @@ const Hero = () => {
                 className="object-cover"
               />
             )}
-
-            {/* CINEMATIC OVERLAYS */}
             <div className="absolute inset-0 bg-black/50 z-10" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 z-10" />
-
-            {/* CONTROLS */}
             <div className="absolute z-20 bottom-6 right-6 flex gap-3">
-              {/* Play/Pause */}
               <button
                 onClick={togglePlay}
                 className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
@@ -162,7 +152,6 @@ const Hero = () => {
                 {isPlaying ? <Pause size={20} /> : <Play size={20} />}
               </button>
 
-              {/* Volume */}
               <button
                 onClick={toggleMute}
                 className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
@@ -170,15 +159,11 @@ const Hero = () => {
                 {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
             </div>
-
-            {/* BADGE */}
             <div className="absolute top-6 left-6 z-20">
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm md:text-base font-bold px-5 py-2 rounded-full shadow-lg">
                 Instant Revelation Awaits
               </div>
             </div>
-
-            {/* TEXT */}
             <div className="absolute bottom-6 left-6 right-6 z-20 text-center">
               <p className="text-white/90 text-sm md:text-base font-medium drop-shadow-lg">
                 Where two or three are gathered !

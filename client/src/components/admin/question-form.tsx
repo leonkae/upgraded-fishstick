@@ -1,4 +1,3 @@
-// src/components/admin/question-form.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,22 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X, Plus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
 interface Option {
   id: number | string;
   text: string;
   score: number;
   _id?: string;
+  label?: string; // Added to handle backend variety
+}
+
+interface QuestionData {
+  _id?: string;
+  text: string;
+  options: Option[];
 }
 
 interface QuestionFormProps {
-  question?: {
-    _id?: string;
-    text: string;
-    options: Option[];
-  };
-  onSave: (question: any) => void;
+  question?: QuestionData;
+  onSave: (question: QuestionData) => void;
   onCancel: () => void;
 }
 
@@ -31,16 +32,19 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   onSave,
   onCancel,
 }) => {
+  const [text, setText] = useState("");
+  const [options, setOptions] = useState<Option[]>([]);
+
   useEffect(() => {
     console.log("QuestionForm: Incoming question prop:", question);
     if (question) {
       console.log("QuestionForm: Incoming question options:", question.options);
       setText(question.text || "");
       const mappedOptions =
-        (question.options as any[])?.map((o) => {
+        question.options?.map((o) => {
           const option = {
             id: o.id || o._id || crypto.randomUUID(),
-            text: o.text ?? "",
+            text: o.text ?? o.label ?? "",
             score: o.score ?? 0,
           };
           console.log("QuestionForm: Mapped option:", option);
@@ -60,31 +64,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       setOptions(defaultOptions);
     }
   }, [question]);
-
-  const [text, setText] = useState(question?.text || "");
-  const [options, setOptions] = useState<Option[]>(
-    question?.options && question.options.length > 0
-      ? question.options.map((o) => {
-          const option = {
-            id: o.id || crypto.randomUUID(),
-            text: o.text ?? "", // Rely on text
-            score: o.score ?? 0,
-          };
-          console.log("QuestionForm: Initial state mapped option:", option);
-          return option;
-        })
-      : [
-          { id: crypto.randomUUID(), text: "", score: 10 },
-          { id: crypto.randomUUID(), text: "", score: 7 },
-          { id: crypto.randomUUID(), text: "", score: 5 },
-          { id: crypto.randomUUID(), text: "", score: 2 },
-          { id: crypto.randomUUID(), text: "", score: 0 },
-        ]
-  );
-
-  useEffect(() => {
-    console.log("QuestionForm: Options state after setOptions:", options);
-  }, [options]);
 
   const updateOption = (
     index: number,
@@ -138,16 +117,19 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       if (!res.ok) throw new Error("Failed to save question");
 
       const saved = await res.json();
-      const responseData = saved.question || saved.data?.question || saved.data;
+      // Define structure for raw API response to avoid 'any'
+      const responseData = (saved.question ||
+        saved.data?.question ||
+        saved.data) as QuestionData;
       console.log("QuestionForm: API response:", responseData);
 
-      const normalized = {
+      const normalized: QuestionData = {
         _id: responseData._id,
         text: responseData.text,
-        options: (responseData.options || []).map((o: any) => {
+        options: (responseData.options || []).map((o: Option) => {
           const option = {
             id: o._id || crypto.randomUUID(),
-            text: o.label ?? o.text ?? "", // Handle both label and text
+            text: o.label ?? o.text ?? "",
             score: o.score ?? 0,
           };
           console.log("QuestionForm: Normalized response option:", option);
@@ -166,10 +148,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           { id: crypto.randomUUID(), text: "", score: 2 },
           { id: crypto.randomUUID(), text: "", score: 0 },
         ];
-        console.log(
-          "QuestionForm: Resetting to default options:",
-          defaultOptions
-        );
         setOptions(defaultOptions);
       }
     } catch (err) {
@@ -203,11 +181,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
             </label>
             <div className="space-y-3">
               {options.map((option, index) => {
-                // Debug: Log option before rendering
-                console.log("QuestionForm: Rendering option:", {
-                  index,
-                  option,
-                });
                 return (
                   <div key={option.id} className="flex gap-2 items-center">
                     <div className="flex items-center gap-2 flex-1">

@@ -7,7 +7,7 @@ export default function WhatsAppWidget() {
     <FloatingWhatsApp
       phoneNumber="254114427790"
       accountName="The Future of Man"
-      avatar="/images/logo.png"
+      avatar="/logo.jpg"
       statusMessage="Online • Quick replies"
       chatMessage={`Hi! 👋 Ready to explore the future?\nAsk me anything...`}
       notification

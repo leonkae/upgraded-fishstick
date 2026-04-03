@@ -13,7 +13,7 @@ const ResultScreen: React.FC = () => {
     calculateScore,
     resetQuestionnaire,
     userInfo,
-    setCurrentStep, // ← ensure this is exposed in your QuestionnaireContext
+    setCurrentStep,
   } = useQuestionnaire();
 
   const [score, setScore] = useState<number>(0);
@@ -23,7 +23,7 @@ const ResultScreen: React.FC = () => {
     const compute = () => {
       if (finalResult && Array.isArray(finalResult.responses)) {
         const earned = finalResult.responses.reduce(
-          (acc: number, r: any) => acc + (Number(r.score) || 0),
+          (acc: number, r) => acc + (Number(r.score) || 0),
           0
         );
 
@@ -98,7 +98,11 @@ const ResultScreen: React.FC = () => {
                   className="px-3 py-2 rounded-md flex items-start bg-heaven-secondary/70 text-gray-800"
                 >
                   <ArrowRight size={16} className="mr-2 mt-1 flex-shrink-0" />
-                  <span>{recommendation}</span>
+                  <span>
+                    {typeof recommendation === "string"
+                      ? recommendation
+                      : "No recommendation available"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -114,8 +118,8 @@ const ResultScreen: React.FC = () => {
             leading to Heaven nor on the BROAD WAY headed to Hell. However, as
             long as you are alive, you have time and chance to work diligently
             and make your call and election sure. In eternity there is no middle
-            ground. You've got to be either hot or cold. Otherwise, you will end
-            up outside with the sorcerers, sexually immoral, murderers,
+            ground. You&apos;ve got to be either hot or cold. Otherwise, you
+            will end up outside with the sorcerers, sexually immoral, murderers,
             idolaters and those who practice and love lies.
           </p>
 
@@ -135,7 +139,11 @@ const ResultScreen: React.FC = () => {
                   className="px-3 py-2 rounded-md flex items-start bg-amber-100 text-gray-800"
                 >
                   <ArrowRight size={16} className="mr-2 mt-1 flex-shrink-0" />
-                  <span>{recommendation}</span>
+                  <span>
+                    {typeof recommendation === "string"
+                      ? recommendation
+                      : "No recommendation available"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -164,7 +172,11 @@ const ResultScreen: React.FC = () => {
                   className="px-3 py-2 rounded-md flex items-start bg-amber-100 text-gray-800"
                 >
                   <ArrowRight size={16} className="mr-2 mt-1 flex-shrink-0" />
-                  <span>{recommendation}</span>
+                  <span>
+                    {typeof recommendation === "string"
+                      ? recommendation
+                      : "No recommendation available"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -252,13 +264,13 @@ const ResultScreen: React.FC = () => {
             </p>
             <p className="mb-3">
               Let no one deceive you that all religions in the world ultimately
-              point to the same Living God. No they don't. By your faith in
+              point to the same Living God. No they don&apos;t. By your faith in
               Christ Jesus you are justified. You must recognize that you are a
-              sinner that needs God's forgiveness, acknowledge your sins and
-              confess and forsake the sinful life and turn back to obeying God.
-              Destination of either Heaven or Hell is entirely your choice. It
-              is with your heart that you believe and confess with your mouth to
-              be saved.
+              sinner that needs God&apos;s forgiveness, acknowledge your sins
+              and confess and forsake the sinful life and turn back to obeying
+              God. Destination of either Heaven or Hell is entirely your choice.
+              It is with your heart that you believe and confess with your mouth
+              to be saved.
             </p>
             <p>
               If you continue living the way you are, you will end up in HELL.
@@ -305,7 +317,11 @@ const ResultScreen: React.FC = () => {
                   className="px-3 py-2 rounded-md flex items-start bg-rose-100 text-gray-800"
                 >
                   <ArrowRight size={16} className="mr-2 mt-1 flex-shrink-0" />
-                  <span>{recommendation}</span>
+                  <span>
+                    {typeof recommendation === "string"
+                      ? recommendation
+                      : "No recommendation available"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -367,7 +383,6 @@ const ResultScreen: React.FC = () => {
         .then(() => console.log("Shared successfully"))
         .catch((err) => console.log("Share canceled or failed", err));
     } else {
-      // Fallback: copy link to clipboard
       navigator.clipboard
         .writeText(window.location.href)
         .then(() => {
@@ -385,7 +400,6 @@ const ResultScreen: React.FC = () => {
   };
 
   const handleDonate = () => {
-    // Add ?from=results so PaymentScreen knows the origin
     const url = new URL(window.location.href);
     url.searchParams.set("from", "results");
     window.history.replaceState({}, "", url.toString());

@@ -1,4 +1,3 @@
-// QuestionnaireContext.tsx
 "use client";
 import {
   saveQuizProgress,
@@ -25,6 +24,28 @@ export interface Question {
   }[];
 }
 
+// Interfaces for Raw API Responses to replace 'any'
+interface RawOption {
+  _id: string;
+  label: string;
+  score: number;
+}
+
+interface RawQuestion {
+  _id: string;
+  text: string;
+  options: RawOption[];
+}
+
+interface ApiResponse {
+  success?: boolean;
+  quiz?: RawQuestion[];
+  data?: {
+    quiz?: RawQuestion[];
+    data?: FinalResult[];
+  };
+}
+
 // Define user info interface
 interface UserInfo {
   name: string;
@@ -34,26 +55,21 @@ interface UserInfo {
   wantsDiscipleship?: boolean | null;
 }
 
-// NEW: Answers now store the selected Option ID (string)
-// Record<Question ID, Option ID>
 type AnswersRecord = Record<string, string>;
 
-// Define the type for a single response object the server expects
 interface ServerResponse {
   questionId: string;
   questionText: string;
-  score: number; // Must be a number!
-  optionId: string; // Must be present
-  selectedOption: string; // Must be present
+  score: number;
+  optionId: string;
+  selectedOption: string;
 }
 
-// Define the full payload type the server expects
 interface ServerPayload {
   userInfo: UserInfo;
   responses: ServerResponse[];
 }
 
-// Final result shape the backend returns (loosely typed)
 interface FinalResult {
   _id?: string;
   userInfo?: UserInfo;
@@ -67,10 +83,9 @@ interface FinalResult {
   }>;
   createdAt?: string;
   updatedAt?: string;
-  [k: string]: any;
+  [k: string]: unknown; // Changed from 'any' to 'unknown' to fix Line 86 error
 }
 
-// Define context type
 interface QuestionnaireContextType {
   questions: Question[];
   currentQuestionIndex: number;
@@ -85,15 +100,12 @@ interface QuestionnaireContextType {
   setCurrentStep: (step: "welcome" | "question" | "payment" | "result") => void;
   calculateScore: () => number;
   resetQuestionnaire: () => void;
-
   getSubmissionPayload: () => ServerPayload;
   addQuestion: (question: Omit<Question, "id">) => void;
   updateQuestion: (id: string, question: Omit<Question, "id">) => void;
   deleteQuestion: (id: string) => void;
   reorderQuestions: (fromIndex: number, toIndex: number) => void;
   setQuestions: (questions: Question[]) => void;
-
-  // NEW: finalResult and helper to fetch it
   finalResult: FinalResult | null;
   fetchFinalResult: (responseId?: string) => Promise<FinalResult | null>;
 }
@@ -120,10 +132,8 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     phone: "",
   });
 
-  // finalResult holds the authoritative server copy of the saved submission
   const [finalResult, setFinalResult] = useState<FinalResult | null>(null);
 
-  // SINGLE initialization effect: load saved quiz progress (no duplicate effects)
   useEffect(() => {
     const saved = loadQuizProgress();
     if (saved) {
@@ -178,38 +188,33 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     });
   }, [answers, currentQuestionIndex, currentStep, userInfo, questionsState]);
 
-  // Fetch quiz questions on mount
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const res = await fetch("http://localhost:3005/api/v1/quiz");
-        const data = await res.json();
+        const data: ApiResponse = await res.json();
 
-        console.log("Fetched quiz data:", data);
-
-        let questionsArray: any[] = [];
+        let questionsArray: RawQuestion[] = [];
 
         if (data.success && Array.isArray(data.quiz)) {
           questionsArray = data.quiz;
         } else if (Array.isArray(data)) {
-          questionsArray = data;
+          questionsArray = data as unknown as RawQuestion[];
         } else if (data.data && Array.isArray(data.data.quiz)) {
           questionsArray = data.data.quiz;
         }
 
         if (questionsArray.length > 0) {
-          const mapped = questionsArray.map((q: any) => ({
+          const mapped = questionsArray.map((q: RawQuestion) => ({
             id: q._id,
             text: q.text,
-            options: q.options.map((opt: any) => ({
+            options: q.options.map((opt: RawOption) => ({
               id: opt._id,
               text: opt.label,
               value: opt.score,
             })),
           }));
           setQuestionsState(mapped);
-        } else {
-          console.error("No questions found in response:", data);
         }
       } catch (error) {
         console.error("Failed to fetch questions:", error);
@@ -219,15 +224,12 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     fetchQuestions();
   }, []);
 
-  // setAnswer (stores Option ID string)
   const setAnswer = (questionId: string, optionId: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
-  // calculateScore (derives score from Option ID string)
   const calculateScore = () => {
     const totalPossibleScore = questionsState.reduce((acc, q) => {
-      // assume each question's max option value is 10 if not present
       const maxOption = q.options.reduce(
         (m, o) => (o.value > m ? o.value : m),
         0
@@ -256,22 +258,10 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
 
     Object.entries(answers).forEach(([questionId, optionId]) => {
       const question = questionsState.find((q) => q.id === questionId);
-
-      if (!question) {
-        console.warn(
-          `Skipping submission for Question ID ${questionId}: not found in state.`
-        );
-        return;
-      }
+      if (!question) return;
 
       const selectedOption = question.options.find((o) => o.id === optionId);
-
-      if (!selectedOption) {
-        console.warn(
-          `Skipping submission for Question ID ${questionId}: Option ID ${optionId} not found.`
-        );
-        return;
-      }
+      if (!selectedOption) return;
 
       responsesPayload.push({
         questionId: question.id,
@@ -285,7 +275,7 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     return {
       userInfo: {
         ...userInfo,
-        wantsDiscipleship: userInfo.wantsDiscipleship ?? null, // ensure it's either boolean or null
+        wantsDiscipleship: userInfo.wantsDiscipleship ?? null,
       },
       responses: responsesPayload,
     };
@@ -355,34 +345,28 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
     setQuestionsState(newQuestions);
   };
 
-  // Fetch final result by response id (or fallback to list endpoint)
   const fetchFinalResult = async (
     responseId?: string
   ): Promise<FinalResult | null> => {
     try {
       if (responseId) {
-        // try single response endpoint
         const singleRes = await fetch(
           `http://localhost:3005/api/v1/responses/${encodeURIComponent(responseId)}`
         );
         if (singleRes.ok) {
           const parsed = await singleRes.json();
-          // many backends wrap in { success: true, data: ... }
-          const candidate = parsed?.data || parsed;
+          const candidate = (parsed?.data || parsed) as FinalResult;
           setFinalResult(candidate);
           return candidate;
         }
       }
 
-      // fallback: fetch responses list and try to find by id or take the latest
       const listRes = await fetch("http://localhost:3005/api/v1/responses");
-      if (!listRes.ok) {
-        console.error("Failed to fetch responses list");
-        return null;
-      }
+      if (!listRes.ok) return null;
+
       const listJson = await listRes.json();
-      // your backend returns shape: { success: true, data: { message: '', data: [ ... ] } }
-      const arr =
+
+      const arr: FinalResult[] =
         listJson?.data?.data && Array.isArray(listJson.data.data)
           ? listJson.data.data
           : Array.isArray(listJson)
@@ -393,10 +377,9 @@ export const QuestionnaireProvider: React.FC<{ children: ReactNode }> = ({
 
       let found = null;
       if (responseId) {
-        found = arr.find((r: any) => r._id === responseId);
+        found = arr.find((r: FinalResult) => r._id === responseId);
       }
       if (!found) {
-        // take first entry (most recent) if any
         found = arr[0] || null;
       }
       if (found) {

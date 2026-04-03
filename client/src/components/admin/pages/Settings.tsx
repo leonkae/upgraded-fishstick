@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
+type SettingValue = string | number | boolean | string[] | number[];
+
 const Settings = () => {
   // State for database settings (fetched from API)
   const [dbSettings, setDbSettings] = useState({
@@ -19,7 +21,7 @@ const Settings = () => {
     timeLimit: 10,
     randomize: true,
     showResults: true,
-    quizPrice: 0, // Changed: Default to 0 to avoid hard-coded fallback
+    quizPrice: 0,
     stripeKey: "",
     minDonation: 1,
     suggestedAmounts: "5, 10, 20",
@@ -32,7 +34,7 @@ const Settings = () => {
 
   // State for the currently edited field
   const [editedField, setEditedField] = useState<string | null>(null);
-  const [editedValue, setEditedValue] = useState<any>("");
+  const [editedValue, setEditedValue] = useState<SettingValue>("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -51,7 +53,7 @@ const Settings = () => {
             },
           }
         );
-        console.log("Backend response:", res.data.data); // Debug log
+        console.log("Backend response:", res.data.data);
         if (res.data?.success && res.data?.data) {
           const { general, quiz, payment, notifications } = res.data.data;
           setDbSettings((prev) => ({
@@ -63,7 +65,7 @@ const Settings = () => {
             timeLimit: quiz?.timeLimit ?? prev.timeLimit,
             randomize: quiz?.randomize ?? prev.randomize,
             showResults: quiz?.showResults ?? prev.showResults,
-            quizPrice: quiz?.quizPrice ?? prev.quizPrice, // New: Fetch quiz price
+            quizPrice: quiz?.quizPrice ?? prev.quizPrice,
             stripeKey: payment?.stripeKey ?? prev.stripeKey,
             minDonation: payment?.minDonation ?? prev.minDonation,
             suggestedAmounts: Array.isArray(payment?.suggestedAmounts)
@@ -87,13 +89,13 @@ const Settings = () => {
   }, []);
 
   // Handle field selection for editing
-  const handleEditField = (key: string, currentValue: any) => {
+  const handleEditField = (key: string, currentValue: SettingValue) => {
     setEditedField(key);
     setEditedValue(currentValue);
   };
 
   // Handle input changes for the edited field
-  const handleChange = (value: any) => {
+  const handleChange = (value: SettingValue) => {
     setEditedValue(value);
   };
 
@@ -108,12 +110,12 @@ const Settings = () => {
       setSaving(true);
       setMessage("");
 
-      let payload: any = {};
-      let fieldValue = editedValue;
+      let payload = {}; // This one is acceptable as it's a dynamic API payload
+      let fieldValue: SettingValue = editedValue;
 
       // Handle specific field transformations
       if (editedField === "suggestedAmounts") {
-        const suggestedAmountsString = fieldValue ?? "5, 10, 20";
+        const suggestedAmountsString = (fieldValue as string) ?? "5, 10, 20";
         const suggestedAmountsArray = suggestedAmountsString
           .split(",")
           .map((n: string) => Number(n.trim()))
@@ -125,7 +127,7 @@ const Settings = () => {
       } else if (
         ["questionsCount", "timeLimit", "minDonation", "quizPrice"].includes(
           editedField
-        ) // New: Include quizPrice for numeric conversion
+        )
       ) {
         fieldValue = Number(fieldValue);
       }
@@ -145,10 +147,7 @@ const Settings = () => {
           "randomize",
           "showResults",
           "quizPrice",
-        ].includes(
-          // New: Include quizPrice in quiz fields
-          editedField
-        )
+        ].includes(editedField)
       ) {
         payload = {
           quiz: {
@@ -183,9 +182,7 @@ const Settings = () => {
 
       if (res.data?.success) {
         setMessage("Setting saved successfully!");
-        // Update dbSettings with the new value
         setDbSettings((prev) => ({ ...prev, [editedField]: fieldValue }));
-        // Reset editing state
         setEditedField(null);
         setEditedValue("");
       } else {
@@ -231,7 +228,6 @@ const Settings = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* General Settings */}
         <Card>
           <CardHeader>
             <CardTitle>General Settings</CardTitle>
@@ -243,7 +239,7 @@ const Settings = () => {
               { key: "adminEmail", label: "Admin Email", type: "email" },
             ].map(({ key, label, type }) => (
               <div key={key}>
-                <Label htmlFor={key}>{label}</Label>
+                <Label htmlFor={String(key)}>{String(label)}</Label>
                 <div className="flex items-center space-x-2">
                   <Input
                     id={key}
@@ -251,7 +247,7 @@ const Settings = () => {
                     placeholder={
                       dbSettings[key as keyof typeof dbSettings] as string
                     }
-                    value={editedField === key ? editedValue : ""}
+                    value={editedField === key ? (editedValue as string) : ""}
                     onChange={(e) => handleChange(e.target.value)}
                     disabled={editedField !== null && editedField !== key}
                   />
@@ -288,8 +284,6 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Quiz Settings */}
         <Card>
           <CardHeader>
             <CardTitle>Quiz Settings</CardTitle>
@@ -307,14 +301,13 @@ const Settings = () => {
                 type: "number",
               },
               {
-                // New: Quiz price field
                 key: "quizPrice",
                 label: "Quiz Price (in cents, e.g., 100000 for KES 1,000.00)",
                 type: "number",
               },
             ].map(({ key, label, type }) => (
               <div key={key}>
-                <Label htmlFor={key}>{label}</Label>
+                <Label htmlFor={String(key)}>{String(label)}</Label>
                 <div className="flex items-center space-x-2">
                   <Input
                     id={key}
@@ -322,7 +315,7 @@ const Settings = () => {
                     placeholder={dbSettings[
                       key as keyof typeof dbSettings
                     ].toString()}
-                    value={editedField === key ? editedValue : ""}
+                    value={editedField === key ? (editedValue as string) : ""}
                     onChange={(e) => handleChange(e.target.value)}
                     disabled={editedField !== null && editedField !== key}
                   />
@@ -346,14 +339,16 @@ const Settings = () => {
               { key: "showResults", label: "Show Results Immediately" },
             ].map(({ key, label }) => (
               <div key={key} className="flex items-center justify-between">
-                <Label htmlFor={key}>{label}</Label>
+                <Label htmlFor={String(key)}>{String(label)}</Label>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id={key}
                     checked={
                       editedField === key
-                        ? editedValue
-                        : dbSettings[key as keyof typeof dbSettings]
+                        ? (editedValue as boolean)
+                        : (dbSettings[
+                            key as keyof typeof dbSettings
+                          ] as boolean)
                     }
                     onCheckedChange={(val) => {
                       handleEditField(key, val);
@@ -394,8 +389,7 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Payment Settings */}
+        =
         <Card>
           <CardHeader>
             <CardTitle>Payment Settings</CardTitle>
@@ -419,7 +413,7 @@ const Settings = () => {
               },
             ].map(({ key, label, type }) => (
               <div key={key}>
-                <Label htmlFor={key}>{label}</Label>
+                <Label htmlFor={String(key)}>{String(label)}</Label>
                 <div className="flex items-center space-x-2">
                   <Input
                     id={key}
@@ -427,7 +421,7 @@ const Settings = () => {
                     placeholder={dbSettings[
                       key as keyof typeof dbSettings
                     ].toString()}
-                    value={editedField === key ? editedValue : ""}
+                    value={editedField === key ? (editedValue as string) : ""}
                     onChange={(e) => handleChange(e.target.value)}
                     disabled={editedField !== null && editedField !== key}
                   />
@@ -453,7 +447,7 @@ const Settings = () => {
                   id="enablePayments"
                   checked={
                     editedField === "enablePayments"
-                      ? editedValue
+                      ? (editedValue as boolean)
                       : dbSettings.enablePayments
                   }
                   onCheckedChange={(val) => {
@@ -493,8 +487,6 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Notification Settings */}
         <Card>
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
@@ -507,14 +499,16 @@ const Settings = () => {
               ["weeklyReports", "Weekly Reports"],
             ].map(([key, label]) => (
               <div key={key} className="flex items-center justify-between">
-                <Label htmlFor={key}>{label}</Label>
+                <Label htmlFor={String(key)}>{String(label)}</Label>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id={key}
                     checked={
                       editedField === key
-                        ? editedValue
-                        : dbSettings[key as keyof typeof dbSettings]
+                        ? (editedValue as boolean)
+                        : (dbSettings[
+                            key as keyof typeof dbSettings
+                          ] as boolean)
                     }
                     onCheckedChange={(val) => {
                       handleEditField(key, val);

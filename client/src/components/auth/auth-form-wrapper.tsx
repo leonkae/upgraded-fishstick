@@ -36,24 +36,15 @@ const AuthFormWrapper = ({ form, children }: AuthFormWrapperProps) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
-      {/* Main Container */}
       <div className="w-full max-w-xl sm:max-w-2xl">
-        {/* Card */}
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-10">
-          {/* Header */}
           <div className="text-center mb-8 space-y-3">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-black">
-              {config.title}
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base max-w-md mx-auto">
-              {config.description}
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-black"></h1>
+            <p className="text-gray-600 text-sm sm:text-base max-w-md mx-auto"></p>
           </div>
 
-          {/* Form Content */}
           <div className="w-full">{children}</div>
 
-          {/* Footer */}
           {config["footer-link"] && (
             <div className="text-center mt-8">
               <p className="text-sm text-gray-600">

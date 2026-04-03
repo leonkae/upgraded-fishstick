@@ -46,7 +46,7 @@ const FAQ = () => {
           <h2 className="text-3xl sm:text-4xl font-bold  mb-4 text-white">
             Frequently Asked Questions
           </h2>
-          <p className="text-tertiary-text text-base text-white sm:text-lg ">
+          <p className="text-tertiary-text text-base sm:text-lg ">
             Everything you need to know about The Future of Man quiz
           </p>
         </div>
@@ -83,8 +83,9 @@ const FAQ = () => {
           <h3 className="text-xl sm:text-2xl font-bold  mb-4 text-white">
             Still have questions?
           </h3>
-          <p className="text-tertiary-text mb-6 text-sm sm:text-base text-white">
-            We're here to help! Reach out to our support team for assistance.
+          <p className="mb-6 text-sm sm:text-base text-white">
+            We&apos;re here to help! Reach out to our support team for
+            assistance.
           </p>
           <Link
             href="/contact"

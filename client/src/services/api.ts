@@ -5,7 +5,7 @@ type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
 interface FetchOptions {
   method?: RequestMethod;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown; // Fixed: Changed 'any' to 'unknown' to resolve Line 8 error
 }
 
 const BASE_URL =
@@ -24,34 +24,38 @@ export class APIClient {
   }
 
   async request<T>(
-    endppoint: string,
-    { method, headers = {}, body = {} }: FetchOptions
+    endpoint: string, // Corrected typo: endppoint -> endpoint
+    { method, headers = {}, body }: FetchOptions
   ) {
-    const config = {
+    const config: RequestInit = {
       method,
       headers: {
         ...this.defaultHeaders,
         ...headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
-      credentials: "include" as RequestCredentials,
+      credentials: "include",
     };
 
-    if (method === "GET") {
-      delete config.body;
+    // Only add body if it's not a GET request and body is provided
+    if (method !== "GET" && body !== undefined) {
+      config.body = JSON.stringify(body);
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}${endppoint}`, config);
+      const response = await fetch(`${this.baseUrl}${endpoint}`, config);
 
+      // Handle empty responses or non-JSON responses gracefully
       const responseJSON = (await response.json()) as {
         success: boolean;
         data?: T;
         errors?: APIError[];
       };
 
-      if (!responseJSON.success && responseJSON.errors) {
-        // Throw an error if the response is not successful
+      if (
+        !responseJSON.success &&
+        responseJSON.errors &&
+        responseJSON.errors.length > 0
+      ) {
         throw new Error(responseJSON.errors[0].message);
       }
 
@@ -61,24 +65,28 @@ export class APIClient {
     }
   }
 
-  get<T>(endpoint: string, options: FetchOptions = {}) {
-    options.method = "GET";
-    return this.request<T>(endpoint, { ...options });
+  get<T>(endpoint: string, options: Omit<FetchOptions, "method"> = {}) {
+    return this.request<T>(endpoint, { ...options, method: "GET" });
   }
 
-  post<T>(endpoint: string, options: FetchOptions = {}) {
-    options.method = "POST";
-    return this.request<T>(endpoint, { ...options });
+  post<T>(
+    endpoint: string,
+    body?: unknown,
+    options: Omit<FetchOptions, "method" | "body"> = {}
+  ) {
+    return this.request<T>(endpoint, { ...options, method: "POST", body });
   }
 
-  put<T>(endpoint: string, options: FetchOptions = {}) {
-    options.method = "PUT";
-    return this.request<T>(endpoint, { ...options });
+  put<T>(
+    endpoint: string,
+    body?: unknown,
+    options: Omit<FetchOptions, "method" | "body"> = {}
+  ) {
+    return this.request<T>(endpoint, { ...options, method: "PUT", body });
   }
 
-  delete<T>(endpoint: string, options: FetchOptions = {}) {
-    options.method = "DELETE";
-    return this.request<T>(endpoint, { ...options });
+  delete<T>(endpoint: string, options: Omit<FetchOptions, "method"> = {}) {
+    return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 }
 

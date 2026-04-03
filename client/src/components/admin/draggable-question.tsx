@@ -1,4 +1,3 @@
-// src/components/admin/draggable-question.tsx
 "use client";
 
 import React from "react";
@@ -12,7 +11,7 @@ interface DraggableQuestionProps {
   question: Question;
   index: number;
   onEdit: (question: Question) => void;
-  onDelete: (id: string) => Promise<void>; // Change to string and Promise<void>
+  onDelete: (id: string) => Promise<void>;
   onDragStart: (e: React.DragEvent, index: number) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, dropIndex: number) => void;
@@ -40,9 +39,15 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       </TableCell>
       <TableCell>
         <div>
-          <p className="font-medium">{question.text}</p>
+          <p className="font-medium">
+            {typeof question.text === "string"
+              ? question.text
+              : JSON.stringify(question.text)}
+          </p>
+
           <p className="text-sm text-gray-500">
-            {question.options.length} answer options
+            {Array.isArray(question.options) ? question.options.length : 0}{" "}
+            answer options
           </p>
         </div>
       </TableCell>

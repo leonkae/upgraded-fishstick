@@ -51,7 +51,9 @@ const QuizPreview = () => {
                   className="flex items-center gap-3 p-4 border border-tertiary-text rounded-xl cursor-pointer  hover:bg-tertiary-text"
                 >
                   <input type="radio" name="answer" className="w-4 h-4" />
-                  <span className="text-secondary-text">{answer}</span>
+                  <span className="text-secondary-text">
+                    {String(answer ?? "")}
+                  </span>
                 </label>
               ))}
             </div>

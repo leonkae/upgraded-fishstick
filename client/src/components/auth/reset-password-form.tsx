@@ -1,4 +1,3 @@
-// src/components/auth/reset-password-form.tsx
 "use client";
 
 import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
@@ -18,18 +17,17 @@ import { resetPassword } from "@/services/auth";
 import { useAuth } from "@/store/auth";
 import { ResetPasswordFormData } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // Changed redirect to useRouter
 import { startTransition, useActionState, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 const ResetPasswordForm = () => {
-  // Get the token from the URL
+  const router = useRouter();
   const searchParams = useSearchParams();
-  // Get the setAuthError function from the auth store
   const { setAuthError } = useAuth();
-  // State to hold the token and email
-  const [token, setToken] = useState<string | null>(null);
+
+  // Removed 'token' state as it was unused; kept email for validation
   const [email, setEmail] = useState<string | null>(null);
 
   const [state, restedPasswordAction, pending] = useActionState(
@@ -38,24 +36,25 @@ const ResetPasswordForm = () => {
   );
 
   useEffect(() => {
-    // If the token or email is not present in the URL, redirect to the login page with an error
-    if (!searchParams.get("token") || !searchParams.get("email")) {
+    const tokenParam = searchParams.get("token");
+    const emailParam = searchParams.get("email");
+
+    if (!tokenParam || !emailParam) {
       setAuthError("Invalid token or email");
-      redirect("/auth/login");
+      router.replace("/auth/login");
+      return;
     }
 
-    // Set the token and email in the state
-    setToken(searchParams.get("token"));
-    setEmail(searchParams.get("email"));
+    setEmail(emailParam);
 
-    // Clear the token and email from the URL without triggering a rerender
+    // Clear the token and email from the URL
     const url = new URL(window.location.href);
     url.searchParams.delete("token");
     url.searchParams.delete("email");
     window.history.replaceState({}, document.title, url.toString());
-  }, [searchParams]);
+  }, [searchParams, setAuthError, router]); // Added setAuthError and router to dependencies
 
-  const form = useForm({
+  const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: searchParams.get("email") || "",
@@ -66,7 +65,6 @@ const ResetPasswordForm = () => {
   });
 
   const onSubmit = async (values: ResetPasswordFormData) => {
-    // Check if the entered email matches the one that was in the URL
     if (values.email !== email) {
       toast.error("You cannot change the email address");
       return;
@@ -82,13 +80,13 @@ const ResetPasswordForm = () => {
 
     if ("message" in state) {
       toast.success(state.message, { duration: 8000 });
-      redirect("/auth/login");
+      router.push("/auth/login");
     }
 
     if ("error" in state) {
       toast.error(state.error);
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <AuthFormWrapper form="reset-password">
@@ -146,7 +144,7 @@ const ResetPasswordForm = () => {
             )}
           />
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "..." : "Reset Password"}
+            {pending ? "Resetting..." : "Reset Password"}
           </Button>
         </form>
       </Form>

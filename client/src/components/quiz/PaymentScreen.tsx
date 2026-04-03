@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   CheckCircle,
   User,
@@ -15,7 +17,7 @@ import {
 } from "lucide-react";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.yourdomain.com";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3005"; // ← Change this!
 
 const PaymentScreen: React.FC = () => {
   const {
@@ -26,23 +28,28 @@ const PaymentScreen: React.FC = () => {
     resetQuestionnaire,
   } = useQuestionnaire();
 
-  // Removed unused setIsProcessing and setIsCompleted to satisfy linter
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted] = useState(false);
+  const router = useRouter();
 
   const [name, setName] = useState(userInfo.name || "");
   const [email, setEmail] = useState(userInfo.email || "");
   const [phone, setPhone] = useState(userInfo.phone || "");
-  const [ageRange, setAgeRange] = useState<string>(userInfo.ageRange || "");
+  const [ageRange, setAgeRange] = useState(userInfo.ageRange || "");
   const [wantsDiscipleship, setWantsDiscipleship] = useState<boolean | null>(
     userInfo.wantsDiscipleship ?? null
   );
 
-  const cameFromResults =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("from") === "results"
-      : false;
+  // Fixed: Avoid accessing window during SSR/prerender
+  const [cameFromResults, setCameFromResults] = useState(false);
 
+  useEffect(() => {
+    // Safe client-side check
+    const fromParam = new URLSearchParams(window.location.search).get("from");
+    setCameFromResults(fromParam === "results");
+  }, []);
+
+  // Sync form with context when userInfo changes
   useEffect(() => {
     setName(userInfo.name || "");
     setEmail(userInfo.email || "");
@@ -52,7 +59,7 @@ const PaymentScreen: React.FC = () => {
   }, [userInfo]);
 
   const handleSubmit = async (withDonation: boolean) => {
-    if (!name || !email || !phone) {
+    if (!name.trim() || !email.trim() || !phone.trim()) {
       alert("Please fill in your name, email, and phone number.");
       return;
     }
@@ -60,9 +67,9 @@ const PaymentScreen: React.FC = () => {
     setIsProcessing(true);
 
     setUserInfo({
-      name,
-      email,
-      phone,
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
       ageRange,
       wantsDiscipleship,
     });
@@ -70,9 +77,9 @@ const PaymentScreen: React.FC = () => {
     const payload = {
       ...getSubmissionPayload(),
       userInfo: {
-        name,
-        email,
-        phone,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
         ageRange,
         wantsDiscipleship,
       },
@@ -85,7 +92,12 @@ const PaymentScreen: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to save submission");
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "Unknown error");
+        throw new Error(
+          `Failed to save submission: ${res.status} ${errorText}`
+        );
+      }
 
       const savedResponse = await res.json().catch(() => ({}));
       const savedResponseId =
@@ -98,20 +110,19 @@ const PaymentScreen: React.FC = () => {
         localStorage.setItem("last_response_id", savedResponseId);
       }
 
+      // Clean URL
       try {
         const url = new URL(window.location.href);
         url.searchParams.delete("from");
         window.history.replaceState({}, "", url.toString());
-      } catch {
-        // Silently catch history errors
+      } catch (e) {
+        console.warn("Failed to clean URL params", e);
       }
 
       setIsProcessing(false);
 
-      if (withDonation) {
-        const params = new URLSearchParams({
-          responseId: savedResponseId || "",
-        });
+      if (withDonation && savedResponseId) {
+        const params = new URLSearchParams({ responseId: savedResponseId });
         window.location.href = `/donation-details?${params.toString()}`;
       } else {
         if (cameFromResults) {
@@ -121,12 +132,17 @@ const PaymentScreen: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error("Error during submission:", error);
+      console.error("Submission error:", error);
       setIsProcessing(false);
-      alert("Something went wrong. Please try again.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
     }
   };
 
+  // Thank you screen (currently unused since isCompleted is always false)
   if (isCompleted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-950 via-indigo-950 to-purple-900 p-4">
@@ -149,7 +165,7 @@ const PaymentScreen: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-950 via-indigo-950 to-purple-900 flex items-center justify-center p-4 md:p-6">
       <div className="w-full max-w-6xl">
         <div className="grid md:grid-cols-2 overflow-hidden rounded-2xl shadow-2xl border border-purple-700/30 bg-gradient-to-br from-purple-900/80 to-indigo-950/80 backdrop-blur-sm">
-          {/* LEFT */}
+          {/* Form Side */}
           <div className="p-5 sm:p-6 lg:p-8 order-2 md:order-1">
             <motion.div
               initial={{ y: 30, opacity: 0 }}
@@ -173,6 +189,7 @@ const PaymentScreen: React.FC = () => {
               </p>
 
               <div className="space-y-5">
+                {/* Name */}
                 <div>
                   <Label className="text-gray-200 flex items-center gap-2 mb-1">
                     <User size={16} /> Full Name
@@ -182,9 +199,11 @@ const PaymentScreen: React.FC = () => {
                     onChange={(e) => setName(e.target.value)}
                     className="h-11"
                     disabled={isProcessing}
+                    placeholder="John Doe"
                   />
                 </div>
 
+                {/* Email */}
                 <div>
                   <Label className="text-gray-200 flex items-center gap-2 mb-1">
                     <Mail size={16} /> Email Address
@@ -192,11 +211,14 @@ const PaymentScreen: React.FC = () => {
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    type="email"
                     className="h-11"
                     disabled={isProcessing}
+                    placeholder="you@example.com"
                   />
                 </div>
 
+                {/* Phone */}
                 <div>
                   <Label className="text-gray-200 flex items-center gap-2 mb-1">
                     <Phone size={16} /> Phone Number
@@ -206,9 +228,11 @@ const PaymentScreen: React.FC = () => {
                     onChange={(e) => setPhone(e.target.value)}
                     className="h-11"
                     disabled={isProcessing}
+                    placeholder="+254 712 345 678"
                   />
                 </div>
 
+                {/* Age Range */}
                 <div className="relative">
                   <Label className="text-gray-200 flex items-center gap-2 mb-1">
                     <User size={16} /> Age Range (Optional)
@@ -217,7 +241,7 @@ const PaymentScreen: React.FC = () => {
                     value={ageRange}
                     onChange={(e) => setAgeRange(e.target.value)}
                     disabled={isProcessing}
-                    className="h-11 w-full px-3 text-sm rounded-md bg-purple-950/40 border border-purple-700/50 text-white appearance-none"
+                    className="h-11 w-full px-3 text-sm rounded-md bg-purple-950/40 border border-purple-700/50 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="">Prefer not to say</option>
                     <option value="Under 18">Under 18</option>
@@ -227,15 +251,16 @@ const PaymentScreen: React.FC = () => {
                     <option value="45-54">45-54</option>
                     <option value="55+">55+</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-[36px] h-4 w-4 text-gray-400" />
+                  <ChevronDown className="absolute right-3 top-9 h-4 w-4 text-gray-400 pointer-events-none" />
                 </div>
 
+                {/* Discipleship */}
                 <div>
                   <Label className="text-gray-200 flex items-center gap-2 mb-2">
                     <Heart size={16} /> Are you interested in joining a
                     discipleship program?
                   </Label>
-                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                  <div className="flex flex-col sm:flex-row gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
@@ -245,7 +270,6 @@ const PaymentScreen: React.FC = () => {
                       />
                       <span className="text-gray-200 text-sm">Yes</span>
                     </label>
-
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
@@ -268,7 +292,7 @@ const PaymentScreen: React.FC = () => {
                   </Button>
 
                   <Button
-                    onClick={() => handleSubmit(true)}
+                    onClick={() => router.push("/donation-details")}
                     className="w-full h-12 text-sm"
                     disabled={isProcessing}
                   >
@@ -285,12 +309,14 @@ const PaymentScreen: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* RIGHT */}
+          {/* Image Side */}
           <div className="hidden md:block relative overflow-hidden order-1 md:order-2">
-            <img
-              src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
-              alt="Nature Background"
-              className="object-cover w-full h-full"
+            <Image
+              src="/logo.jpg" // Make sure this file exists in public/
+              alt="Spiritual Journey Background"
+              fill
+              className="object-cover"
+              priority
             />
           </div>
         </div>

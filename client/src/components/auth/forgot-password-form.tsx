@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react"; // Switched from useActionState to useState
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation"; // Use useRouter instead of redirect for client-side
+import { useRouter } from "next/navigation";
 
 import { forgotPasswordSchema } from "@/schemas/forms";
 import {
@@ -34,7 +34,6 @@ const ForgotPasswordForm = () => {
   const onSubmit = async (values: ForgotPasswordFormData) => {
     setIsPending(true);
     try {
-      // Direct API call - Replace with your actual backend URL if it's not localhost
       const response = await fetch(
         "http://localhost:3005/api/v1/auth/forgot-password",
         {
@@ -52,8 +51,10 @@ const ForgotPasswordForm = () => {
 
       toast.success(data.message || "Reset link sent!", { duration: 8000 });
       router.push("/auth/login");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(errorMessage);
     } finally {
       setIsPending(false);
     }

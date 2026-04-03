@@ -11,3 +11,7 @@
 // };
 
 // export default RegisterPage;
+
+export default function Placeholder() {
+  return null; // Or <div>Under Construction</div>
+}

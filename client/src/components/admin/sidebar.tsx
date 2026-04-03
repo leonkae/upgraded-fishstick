@@ -38,7 +38,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile toggle button */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 p-2 bg-purple-700 text-white rounded-full shadow-lg"
         onClick={toggleSidebar}
@@ -82,7 +81,6 @@ const Sidebar = () => {
         </nav>
       </aside>
 
-      {/* Overlay for mobile when sidebar is open */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"

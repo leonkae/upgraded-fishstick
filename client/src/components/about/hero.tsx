@@ -15,7 +15,6 @@ const Hero = () => {
     <section id="about" className="bg-background-primary pt-32 pb-20  sm:px-6">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-          {/* Text Content */}
           <div>
             <h1 className="text-4xl sm:text-5xl text-center lg:text-4xl font-bold mb-6 text-white">
               About The Future of Man
@@ -62,7 +61,6 @@ const Hero = () => {
             </Link>
           </div>
 
-          {/* Core Values */}
           <div className="relative">
             <div className="bg-background-accent rounded-2xl p-4 sm:p-6 shadow-lg">
               <h3 className="text-lg sm:text-xl font-semibold text-secondary-text mb-4">

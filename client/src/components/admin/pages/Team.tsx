@@ -1,7 +1,8 @@
-// app/admin/pages/Team.tsx     or    app/(admin)/team/page.tsx  — your choice
+// app/(admin)/team/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { TeamMember } from "@/types";
 
 export default function AdminTeamPage() {
@@ -23,10 +24,15 @@ export default function AdminTeamPage() {
 
   const fetchMembers = async () => {
     setLoading(true);
-    const res = await fetch("http://localhost:3005/api/v1/team");
-    const data = await res.json();
-    setMembers(data.members ?? []);
-    setLoading(false);
+    try {
+      const res = await fetch("http://localhost:3005/api/v1/team");
+      const data = await res.json();
+      setMembers(data.members ?? []);
+    } catch (error) {
+      console.error("Failed to fetch team members:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,13 +83,11 @@ export default function AdminTeamPage() {
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">Manage Team Members</h1>
 
-      {/* Form */}
       <form
         onSubmit={handleSubmit}
         className="mb-12 p-6 border rounded-xl bg-gray-50 shadow-sm"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Name */}
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">Full Name</label>
             <input
@@ -98,7 +102,6 @@ export default function AdminTeamPage() {
             />
           </div>
 
-          {/* Role */}
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">Role / Title</label>
             <input
@@ -113,7 +116,6 @@ export default function AdminTeamPage() {
             />
           </div>
 
-          {/* Image URL */}
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">Image URL</label>
             <input
@@ -128,7 +130,6 @@ export default function AdminTeamPage() {
             />
           </div>
 
-          {/* LinkedIn */}
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">
               LinkedIn URL (optional)
@@ -144,7 +145,6 @@ export default function AdminTeamPage() {
             />
           </div>
 
-          {/* Twitter / X */}
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">
               Twitter / X URL (optional)
@@ -160,7 +160,6 @@ export default function AdminTeamPage() {
             />
           </div>
 
-          {/* Description - full width */}
           <div className="flex flex-col md:col-span-2">
             <label className="text-sm font-medium mb-1">
               Short bio / description
@@ -177,7 +176,6 @@ export default function AdminTeamPage() {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="mt-4 flex gap-3 justify-end">
           <button
             type="submit"
@@ -190,7 +188,14 @@ export default function AdminTeamPage() {
             <button
               type="button"
               onClick={() => {
-                setFormData({});
+                setFormData({
+                  name: "",
+                  role: "",
+                  description: "",
+                  imageUrl: "",
+                  linkedin: "",
+                  twitter: "",
+                });
                 setEditingId(null);
               }}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg transition"
@@ -201,15 +206,18 @@ export default function AdminTeamPage() {
         </div>
       </form>
 
-      {/* List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member) => (
           <div key={member._id} className="border rounded-lg p-4 shadow-sm">
-            <img
-              src={member.imageUrl}
-              alt={member.name}
-              className="w-24 h-24 rounded-full mx-auto mb-3 object-cover"
-            />
+            <div className="relative w-24 h-24 mx-auto mb-3">
+              <Image
+                src={member.imageUrl}
+                alt={member.name}
+                fill
+                className="rounded-full object-cover"
+                sizes="96px"
+              />
+            </div>
             <h3 className="font-bold text-center">{member.name}</h3>
             <p className="text-center text-blue-600">{member.role}</p>
             <p className="text-sm text-gray-600 mt-2">{member.description}</p>

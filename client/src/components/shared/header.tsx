@@ -25,7 +25,6 @@ const Header = () => {
   return (
     <header className="fixed top-0 z-50 w-full bg-background-primary text-0ite py-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Logo */}
         <Link
           href="/"
           onClick={handleLinkClick}
@@ -37,7 +36,6 @@ const Header = () => {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
@@ -53,7 +51,6 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
         <Link
           href="/quiz"
           className="hidden md:inline-block bg-background-button text-button-text px-6 py-2 rounded-full font-semibold hover:bg-background-button-hover hover:text-button-text-hover transition-colors"
@@ -61,7 +58,6 @@ const Header = () => {
           Take the Quiz
         </Link>
 
-        {/* Mobile Menu Toggle */}
         <button
           className="md:hidden text-white"
           onClick={() => setMenuOpen((prev) => !prev)}
@@ -71,7 +67,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
       {menuOpen && (
         <div className="md:hidden mt-4 px-6 space-y-4 pb-4">
           {navLinks.map((link) => (

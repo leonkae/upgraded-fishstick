@@ -57,7 +57,7 @@ const LoginForm = () => {
     if ("error" in state) {
       toast.error(state.error);
     }
-  }, [state, router]); // ← router added here
+  }, [state, router, setUser]); // Added setUser here // ← router added here
 
   useEffect(() => {
     if (authError) {

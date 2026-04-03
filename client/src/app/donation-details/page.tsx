@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Copy, Phone, Building2 } from "lucide-react";
 
 export default function DonationDetailsPage() {
-  const searchParams = useSearchParams();
-  const responseId = searchParams.get("responseId");
+  // const searchParams = useSearchParams();
+  // const responseId = searchParams.get("responseId");
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -23,12 +23,10 @@ export default function DonationDetailsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/10 backdrop-blur-xl rounded-xl p-5 md:p-6 border border-white/10 shadow-2xl relative"
         >
-          {/* Banner */}
           <div className="absolute -top-2 right-4 bg-emerald-500 text-white text-[10px] px-3 py-1 rounded-full">
             Thank You for Your Support!
           </div>
 
-          {/* Header */}
           <div className="mb-3">
             <h1 className="text-xl md:text-2xl font-bold font-serif tracking-tight">
               Support The Fireplace Code
@@ -44,7 +42,6 @@ export default function DonationDetailsPage() {
             this step anytime.
           </p>
 
-          {/* M-PESA */}
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
               <Phone className="h-5 w-5 text-green-400" />
@@ -83,7 +80,6 @@ export default function DonationDetailsPage() {
             </p>
           </div>
 
-          {/* Bank */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Building2 className="h-5 w-5 text-blue-400" />
@@ -132,7 +128,6 @@ export default function DonationDetailsPage() {
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={() => window.history.back()}

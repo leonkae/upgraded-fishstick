@@ -1,4 +1,3 @@
-// src/components/admin/pages/Questions.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
-  TableCell,
+  // Removed TableCell here as it was unused
   TableHead,
   TableHeader,
   TableRow,
@@ -17,6 +16,19 @@ import { Plus, Search } from "lucide-react";
 import { QuestionForm } from "@/components/admin/question-form";
 import { Question } from "@/components/quiz/QuestionnaireContext";
 import { DraggableQuestion } from "@/components/admin/draggable-question";
+
+// Define the shape of the raw API data
+interface ApiOption {
+  _id: { toString: () => string };
+  label: string;
+  score: number;
+}
+
+interface ApiQuestion {
+  _id: { toString: () => string };
+  text: string;
+  options: ApiOption[];
+}
 
 const Questions = () => {
   const [loading, setLoading] = useState(true);
@@ -34,18 +46,20 @@ const Questions = () => {
       const res = await fetch("http://localhost:3005/api/v1/quiz");
       if (!res.ok) throw new Error("Failed to fetch questions");
       const data = await res.json();
-      const questions = (data?.data?.quiz || []).map((q: any) => ({
-        id: q._id.toString(), // Convert ObjectId to string
+
+      // Replaced 'any' with the ApiQuestion interface
+      const questionsData = (data?.data?.quiz || []).map((q: ApiQuestion) => ({
+        id: q._id.toString(),
         text: q.text,
-        options: q.options.map((o: any) => ({
-          id: o._id.toString(), // Convert option _id to string
-          text: o.label, // Map label to text
-          value: o.score, // Map score to value
+        options: q.options.map((o: ApiOption) => ({
+          id: o._id.toString(),
+          text: o.label,
+          value: o.score,
         })),
       }));
-      setQuestions(questions);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
+      setQuestions(questionsData);
+    } catch (err) {
+      console.error("Error fetching questions:", err);
       setError("Failed to load questions. Please try again.");
     } finally {
       setLoading(false);
@@ -74,27 +88,23 @@ const Questions = () => {
         });
         if (!res.ok) {
           const errorData = await res.json();
-          console.error(
-            "Delete failed with status:",
-            res.status,
-            "Response:",
-            errorData
-          );
           throw new Error(
             errorData.message || `Failed to delete question: ${res.status}`
           );
         }
-        console.log("Question deleted successfully");
         await fetchQuestions();
-      } catch (error: any) {
-        console.error("Error deleting question:", error);
+      } catch (err) {
+        console.error("Error deleting question:", err);
         setError(
-          error.message || "Failed to delete question. Please try again."
+          err instanceof Error
+            ? err.message
+            : "Failed to delete question. Please try again."
         );
       }
     }
   };
 
+  // ... Rest of your drag and drop logic (kept exactly the same)
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
@@ -118,8 +128,8 @@ const Questions = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ questions: newQuestions.map((q) => q.id) }),
         });
-      } catch (error) {
-        console.error("Error updating question order:", error);
+      } catch (err) {
+        console.error("Error updating question order:", err);
         setError("Failed to update question order. Please try again.");
         await fetchQuestions();
       }
@@ -127,9 +137,7 @@ const Questions = () => {
     setDraggedIndex(null);
   };
 
-  if (loading) {
-    return <div>Loading questions...</div>;
-  }
+  if (loading) return <div>Loading questions...</div>;
 
   if (error) {
     return (

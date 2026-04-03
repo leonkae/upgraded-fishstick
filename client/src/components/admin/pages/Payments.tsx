@@ -1,4 +1,3 @@
-// src/components/admin/pages/Payments.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -12,126 +11,118 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, TrendingUp, CreditCard, Users } from "lucide-react";
+import {
+  DollarSign,
+  TrendingUp,
+  CreditCard,
+  Users,
+  LucideIcon,
+} from "lucide-react";
 
-type PaymentRecord = {
+// --- Types & Interfaces ---
+interface PaymentMetadata {
+  email?: string;
+  method?: string;
+  channel?: string;
+  [key: string]: unknown;
+}
+
+interface PaymentError {
+  message: string;
+}
+
+interface PaymentRecord {
   reference: string;
   email: string;
-  amount: number | string; // Paystack returns amount (kobo) as number; be defensive
-  metadata?: any;
+  amount: number | string;
+  metadata?: PaymentMetadata;
   timestamp?: string;
-};
+}
 
+interface Transaction {
+  id: string;
+  user: string;
+  amount: string;
+  method: string;
+  status: string;
+  date: string;
+}
+
+interface StatItem {
+  title: string;
+  value: string;
+  change: string;
+  icon: LucideIcon;
+}
+
+// --- Helper Functions ---
 const formatAmount = (raw: number | string) => {
   const n = typeof raw === "string" ? Number(raw) : raw;
-  if (Number.isNaN(n) || n == null) return "-";
-  // If amount looks like kobo (>= 100), divide by 100. Otherwise treat as full units.
-  const units = Math.abs(n) >= 100 ? n / 100 : n;
-  return `KES ${units.toFixed(2)}`;
-};
-
-const getApiBase = () => {
-  // Allow overriding with NEXT_PUBLIC_API_BASE in production; fallback to relative path
-  if (
-    typeof process !== "undefined" &&
-    (process as any).env?.NEXT_PUBLIC_API_BASE
-  ) {
-    return (process as any).env.NEXT_PUBLIC_API_BASE.replace(/\/$/, "");
-  }
-
-  if (typeof window !== "undefined" && (window as any).__NEXT_PUBLIC_API_BASE) {
-    return (window as any).__NEXT_PUBLIC_API_BASE.replace(/\/$/, "");
-  }
-
-  return ""; // relative
+  if (Number.isNaN(n) || n == null) return "KES 0.00";
+  // If your API sends cents/kobo, keep the /100. If it sends full KES, remove it.
+  const units = n / 100;
+  return `KES ${units.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 };
 
 export const Payments: React.FC = () => {
-  const [stats, setStats] = useState<Array<any>>([]);
-  const [transactions, setTransactions] = useState<Array<any>>([]);
+  const [stats, setStats] = useState<StatItem[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // FIXED: State moved inside component and properly typed
+  const [error, setError] = useState<string | PaymentError | null>(null);
 
   useEffect(() => {
+    setIsMounted(true);
     let mounted = true;
 
     const fetchPayments = async () => {
       setLoading(true);
       setError(null);
       try {
-        const API_BASE = getApiBase();
-        // try common server paths. The app's backend might expose /api/payment/all or /api/v1/payment/all
-        const candidates = [
-          `http://localhost:3005/api/v1/payment/all`, // PRIMARY EXPECTED ROUTE
-          `http://localhost:3005/api/v1/payment/all`,
-          `http://localhost:3005/api/v1/payment/all`,
-          `http://localhost:3005/api/v1/payment/all`,
-        ];
+        const url = `http://localhost:3005/api/v1/payment/all`;
+        const res = await fetch(url, { cache: "no-store" });
 
-        let data: { payments?: PaymentRecord[] } | null = null;
-        let lastErr: any = null;
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
-        for (const url of candidates) {
-          try {
-            const res = await fetch(url, { cache: "no-store" });
-            if (!res.ok) {
-              lastErr = new Error(`HTTP ${res.status} from ${url}`);
-              continue;
-            }
+        const json = await res.json();
 
-            const json = await res.json();
-            if (json && Array.isArray(json.payments)) {
-              data = json;
-              break;
-            }
-
-            // Some implementations might return payments directly
-            if (json && Array.isArray(json)) {
-              data = { payments: json };
-              break;
-            }
-
-            lastErr = new Error(`Unexpected response shape from ${url}`);
-          } catch (err) {
-            lastErr = err;
-            continue;
-          }
-        }
-
-        if (!data) throw lastErr || new Error("No payment endpoint found");
+        // Defensive check for data structure
+        const rawPayments: PaymentRecord[] = Array.isArray(json.payments)
+          ? json.payments
+          : Array.isArray(json)
+            ? json
+            : [];
 
         if (!mounted) return;
 
-        const payments = data.payments || [];
-
-        // Normalize transactions for the table
-        const txs = payments.map((p) => ({
-          id:
-            p.reference ??
-            p.reference ??
-            `ref-${Math.random().toString(36).slice(2, 9)}`,
-          user: p.email ?? p.metadata?.email ?? "Unknown",
+        // Map transactions
+        const txs: Transaction[] = rawPayments.map((p) => ({
+          id: p.reference ?? `ref-${Math.random().toString(36).slice(2, 9)}`,
+          user: p.email ?? p.metadata?.email ?? "Unknown User",
           amount: formatAmount(p.amount),
-          method: p.metadata?.method ?? p.metadata?.channel ?? "Unknown",
+          method: p.metadata?.method ?? p.metadata?.channel ?? "Other",
           status: "Completed",
-          date: p.timestamp ? new Date(p.timestamp).toLocaleString() : "-",
+          date: p.timestamp ? new Date(p.timestamp).toLocaleString() : "N/A",
         }));
 
         setTransactions(txs);
 
-        const totalKobo = payments.reduce((s, p) => {
+        // Calculate Stats
+        const totalRaw = rawPayments.reduce((s, p) => {
           const val =
             typeof p.amount === "string" ? Number(p.amount) : p.amount;
           return s + (Number.isFinite(val) ? Number(val) : 0);
         }, 0);
 
-        const totalRevenue = totalKobo / 100;
-        const avgDonation = payments.length
-          ? totalRevenue / payments.length
+        const totalRevenue = totalRaw / 100;
+        const avgDonation = rawPayments.length
+          ? totalRevenue / rawPayments.length
           : 0;
         const uniqueUsers = new Set(
-          payments.map((p) =>
-            (p.email ?? p.metadata?.email ?? "").toLowerCase()
+          rawPayments.map((p) =>
+            (p.email ?? p.metadata?.email ?? "anon").toLowerCase()
           )
         ).size;
 
@@ -150,7 +141,7 @@ export const Payments: React.FC = () => {
           },
           {
             title: "Total Transactions",
-            value: String(payments.length),
+            value: String(rawPayments.length),
             change: "Live",
             icon: CreditCard,
           },
@@ -161,27 +152,53 @@ export const Payments: React.FC = () => {
             icon: Users,
           },
         ]);
-      } catch (err: any) {
-        console.error(err);
-        if (mounted) setError(String(err.message ?? err));
+      } catch (err) {
+        // FIXED: Proper typing instead of `any`
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch payment data. Please check if the backend is running.";
+
+        if (mounted) {
+          setError(errorMessage);
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchPayments();
-
     return () => {
       mounted = false;
     };
   }, []);
 
-  if (loading) return <p>Loading payments…</p>;
-  if (error)
-    return <p className="text-red-600">Error loading payments: {error}</p>;
+  // Hydration guard
+  if (!isMounted) return null;
+
+  if (loading) {
+    return (
+      <div className="p-8 text-center animate-pulse text-gray-500">
+        Loading payment data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-600 border border-red-200 rounded-lg bg-red-50 m-4">
+        <p className="font-bold">Unable to load payments</p>
+        <p className="text-sm">
+          {typeof error === "string" ? error : error?.message}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
         <p className="text-gray-600 mt-2">
@@ -189,26 +206,25 @@ export const Payments: React.FC = () => {
         </p>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  {stat.title}
-                </CardTitle>
-                {Icon ? <Icon className="h-4 w-4 text-green-600" /> : null}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-green-600 mt-1">{stat.change}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {stats.map((stat, index) => (
+          <Card key={index}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">
+                {stat.title}
+              </CardTitle>
+              <stat.icon className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-green-600 mt-1">{stat.change}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
+      {/* Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
@@ -228,27 +244,34 @@ export const Payments: React.FC = () => {
             <TableBody>
               {transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6">
-                    No transactions yet
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-10 text-gray-400"
+                  >
+                    No transactions found.
                   </TableCell>
                 </TableRow>
               ) : (
                 transactions.map((t) => (
                   <TableRow key={t.id}>
-                    <TableCell className="font-mono text-sm">{t.id}</TableCell>
-                    <TableCell>{t.user}</TableCell>
-                    <TableCell className="font-medium">{t.amount}</TableCell>
-                    <TableCell>{t.method}</TableCell>
+                    <TableCell className="font-mono text-xs text-purple-600">
+                      {t.id}
+                    </TableCell>
+                    <TableCell className="text-sm">{t.user}</TableCell>
+                    <TableCell className="font-semibold text-gray-900">
+                      {t.amount}
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500 uppercase">
+                      {t.method}
+                    </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          t.status === "Completed" ? "default" : "secondary"
-                        }
-                      >
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none">
                         {t.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{t.date}</TableCell>
+                    <TableCell className="text-sm text-gray-500">
+                      {t.date}
+                    </TableCell>
                   </TableRow>
                 ))
               )}

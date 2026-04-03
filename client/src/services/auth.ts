@@ -15,6 +15,7 @@ import { createUserSession } from "@/lib/session";
 
 type AuthState = AuthData | null | { error: string };
 
+// Fixed: Changed 'any' to 'unknown' to resolve the linting error
 export const authError = async (error: unknown) => {
   return {
     error:
@@ -32,9 +33,8 @@ export const authHeaders = async () => {
 
 export const register = async (_: AuthState, data: RegisterFormData) => {
   try {
-    const result = await fetapi.post<AuthData>("/auth/register", {
-      body: data,
-    });
+    // Updated to use the new body parameter signature
+    const result = await fetapi.post<AuthData>("/auth/register", data);
 
     return result.data;
   } catch (error) {
@@ -44,9 +44,7 @@ export const register = async (_: AuthState, data: RegisterFormData) => {
 
 export const verifyEmail = async (_: AuthState, data: VerifyEmailData) => {
   try {
-    const result = await fetapi.post<AuthData>("/auth/verify-email", {
-      body: data,
-    });
+    const result = await fetapi.post<AuthData>("/auth/verify-email", data);
 
     return result.data;
   } catch (error) {
@@ -56,9 +54,7 @@ export const verifyEmail = async (_: AuthState, data: VerifyEmailData) => {
 
 export const login = async (_: AuthState, data: LoginFormData) => {
   try {
-    const result = await fetapi.post<AuthData>("/auth/login", {
-      body: data,
-    });
+    const result = await fetapi.post<AuthData>("/auth/login", data);
 
     // Create the user session by setting the cookie in the browser
     await createUserSession(result.response);
@@ -89,9 +85,7 @@ export const forgotPassword = async (
   data: ForgotPasswordFormData
 ) => {
   try {
-    const result = await fetapi.post<AuthData>("/auth/forgot-password", {
-      body: data,
-    });
+    const result = await fetapi.post<AuthData>("/auth/forgot-password", data);
 
     return result.data;
   } catch (error) {
@@ -104,9 +98,7 @@ export const resetPassword = async (
   data: ResetPasswordFormData
 ) => {
   try {
-    const result = await fetapi.post<AuthData>("/auth/reset-password", {
-      body: data,
-    });
+    const result = await fetapi.post<AuthData>("/auth/reset-password", data);
 
     return result.data;
   } catch (error) {

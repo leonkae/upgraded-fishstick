@@ -1,42 +1,45 @@
-// src/components/auth/verify-email.tsx
 "use client";
 
 import { verifyEmail } from "@/services/auth";
-import { redirect, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
 const VerifyEmail = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") || null;
-  const email = searchParams.get("email") || null;
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
 
   const [state, verifyEmailAction, pending] = useActionState(verifyEmail, null);
 
   useEffect(() => {
+    // 1. Handle Initial Execution
     if (state === null) {
       if (!token || !email) {
         toast.error("Invalid token or email.");
-        redirect("/auth/login");
+        router.replace("/auth/login");
+        return;
       }
 
       startTransition(() => {
         verifyEmailAction({ token, email });
       });
-
       return;
     }
 
+    // 2. Handle Success
     if ("message" in state) {
       toast.success(state.message, { duration: 8000 });
-      redirect("/auth/login");
+      router.replace("/auth/login");
     }
 
+    // 3. Handle Error
     if ("error" in state) {
       toast.error(state.error);
-      redirect("/auth/login");
+      router.replace("/auth/login");
     }
-  }, [state]);
+  }, [state, token, email, verifyEmailAction, router]); // Added all missing dependencies
 
   return (
     <>

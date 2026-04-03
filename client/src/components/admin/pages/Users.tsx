@@ -1,4 +1,3 @@
-// src/components/admin/pages/Users.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -17,7 +16,6 @@ import {
 import {
   Users as UsersIcon,
   Search,
-  Plus,
   MoreHorizontal,
   AlertCircle,
   Download,
@@ -29,7 +27,16 @@ interface User {
   result: number;
   time: string; // ISO string from backend
   ageRange?: string;
-  wantsDiscipleship?: boolean | null; // ← added this field
+  wantsDiscipleship?: boolean | null;
+}
+
+interface RawActivityData {
+  name: string;
+  email: string;
+  result: number;
+  time: string | Date;
+  ageRange?: string;
+  wantsDiscipleship?: boolean | null;
 }
 
 const Users = () => {
@@ -68,10 +75,12 @@ const Users = () => {
         if (!json.success) throw new Error(json.message || "API error");
         const data = json.data;
 
-        const recentActivity = (data.recentActivity || []).map((r: any) => ({
-          ...r,
-          time: new Date(r.time),
-        }));
+        const recentActivity = (data.recentActivity || []).map(
+          (r: RawActivityData) => ({
+            ...r,
+            time: new Date(r.time),
+          })
+        );
 
         // ────────────────────────────────────────────────
         // Date range helpers
@@ -91,7 +100,11 @@ const Users = () => {
         const inRange = (t: Date, start: Date, end: Date) =>
           t >= start && t < end;
 
-        const uniqueEmailsInRange = (arr: any[], start: Date, end: Date) => {
+        const uniqueEmailsInRange = (
+          arr: { email: string; time: Date }[],
+          start: Date,
+          end: Date
+        ) => {
           const set = new Set<string>();
           for (const a of arr) {
             if (inRange(a.time, start, end)) set.add(a.email);
@@ -99,10 +112,17 @@ const Users = () => {
           return set.size;
         };
 
-        const countEntriesInRange = (arr: any[], start: Date, end: Date) =>
-          arr.reduce((c, a) => (inRange(a.time, start, end) ? c + 1 : c), 0);
+        const countEntriesInRange = (
+          arr: { time: Date }[],
+          start: Date,
+          end: Date
+        ) => arr.reduce((c, a) => (inRange(a.time, start, end) ? c + 1 : c), 0);
 
-        const countHeavenInRange = (arr: any[], start: Date, end: Date) =>
+        const countHeavenInRange = (
+          arr: { result: number; time: Date }[],
+          start: Date,
+          end: Date
+        ) =>
           arr.reduce(
             (c, a) =>
               inRange(a.time, start, end) && a.result >= 20 ? c + 1 : c,
@@ -130,7 +150,7 @@ const Users = () => {
 
         const MS_PER_DAY = 1000 * 60 * 60 * 24;
         const RETAKE_DAYS = 91;
-        const retakeDueCount = recentActivity.filter((a: any) => {
+        const retakeDueCount = recentActivity.filter((a: { time: Date }) => {
           if (!a.time) return false;
           const diffDays = Math.floor(
             (now.getTime() - a.time.getTime()) / MS_PER_DAY
@@ -203,14 +223,14 @@ const Users = () => {
           retakeDue: 0,
         });
 
-        // Table data – now mapping wantsDiscipleship too
-        const formattedUsers = recentActivity.map((u: any) => ({
+        // Table data
+        const formattedUsers = recentActivity.map((u: RawActivityData) => ({
           name: u.name,
           email: u.email,
           result: u.result,
           time: u.time instanceof Date ? u.time.toISOString() : u.time,
           ageRange: u.ageRange,
-          wantsDiscipleship: u.wantsDiscipleship, // ← added this line
+          wantsDiscipleship: u.wantsDiscipleship,
         }));
         setUsers(formattedUsers);
 
@@ -336,10 +356,17 @@ const Users = () => {
       })
     : users;
 
-  // ────────────────────────────────────────────────
-  // Stats cards definition
-  // ────────────────────────────────────────────────
-  const statCards = [
+  type FilterType = "total" | "active" | "premium" | "newToday" | "retakeDue";
+
+  const statCards: {
+    key: FilterType;
+    title: string;
+    value: string;
+    change: number;
+    period: string;
+    icon: typeof UsersIcon;
+    color?: string;
+  }[] = [
     {
       key: "total",
       title: "Total Users",
@@ -385,7 +412,6 @@ const Users = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
@@ -393,7 +419,6 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Search + Export */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative max-w-md w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -409,7 +434,6 @@ const Users = () => {
         </Button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {statCards.map((stat) => {
           const isPositive = stat.change >= 0;
@@ -422,9 +446,7 @@ const Users = () => {
                 isActiveFilter ? "ring-2 ring-purple-500 shadow-md" : ""
               }`}
               onClick={() =>
-                setActiveFilter(
-                  activeFilter === stat.key ? null : (stat.key as any)
-                )
+                setActiveFilter(activeFilter === stat.key ? null : stat.key)
               }
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -449,7 +471,6 @@ const Users = () => {
         })}
       </div>
 
-      {/* Users Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Users</CardTitle>
@@ -498,7 +519,9 @@ const Users = () => {
                       <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                         👤
                       </div>
-                      <span className="font-medium">{user.name}</span>
+                      <span className="font-medium">
+                        {String(user.name || "Unknown User")}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -554,7 +577,6 @@ const Users = () => {
             </TableBody>
           </Table>
 
-          {/* Pagination & showing info */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
               Showing {displayedUsers.length} of {users.length} entries

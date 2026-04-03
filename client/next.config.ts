@@ -2,13 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ THIS IS THE KEY
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true, // ✅ ALSO IMPORTANT
+    ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
+    domains: ["images.unsplash.com", "avatars.githubusercontent.com"],
   },
 };
 
