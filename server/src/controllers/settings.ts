@@ -7,10 +7,21 @@ export const getSettings = async (
 ): Promise<void> => {
   try {
     const settings = await Setting.findOne();
+
+    // Instead of 404, return default values to keep the frontend happy
     if (!settings) {
-      res.status(404).json({ success: false, message: "Settings not found" });
+      res.json({
+        success: true,
+        data: {
+          appName: "The Future of Man",
+          appDescription: "A fun and introspective quiz.",
+          shareImage:
+            "https://images.pexels.com/photos/3776808/pexels-photo-3776808.jpeg",
+        },
+      });
       return;
     }
+
     res.json({ success: true, data: settings });
   } catch (error: any) {
     console.error("Error fetching settings:", error);
